@@ -23,6 +23,19 @@ if __name__ == "__main__":
         ui.img_label1.setPixmap( QPixmap.fromImage(img1.qImg))
         ui.img_label2.setPixmap( QPixmap.fromImage(img2.qImg))
 
+    # determine whether the match meets the distance limit
+    def is_meet_dis(kp1_pt,kp2_pt):
+        if not ui.Limit_Button.isChecked():
+            return True
+        else:
+            limit_dis = ui.Distance_Limit.value()
+            dis = np.linalg.norm(kp1_pt - kp2_pt)
+            if dis > limit_dis:
+                return False
+            else:
+                return True
+
+
     # direction -1 for left button, 1 for right button, 0 for check current image
     def change_image(direction):
         img1_idx = (img1.idx + direction) % img_num
@@ -58,10 +71,16 @@ if __name__ == "__main__":
             kp2 = img2.kps[m[0].trainIdx]
             kp1_pt = np.array( kp1.pt )
             kp2_pt = np.array( kp2.pt )
-            cv2.arrowedLine(img1_out,(int(kp1_pt[0]),int(kp1_pt[1])),(int(kp2_pt[0]),int(kp2_pt[1])),(0,0,255),1)
-            cv2.arrowedLine(img2_out,(int(kp1_pt[0]),int(kp1_pt[1])),(int(kp2_pt[0]),int(kp2_pt[1])),(0,0,255),1)
+            if is_meet_dis(kp1_pt,kp2_pt):
+                cv2.arrowedLine(img1_out,(int(kp1_pt[0]),int(kp1_pt[1])),(int(kp2_pt[0]),int(kp2_pt[1])),(0,0,255),1)
+                cv2.arrowedLine(img2_out,(int(kp1_pt[0]),int(kp1_pt[1])),(int(kp2_pt[0]),int(kp2_pt[1])),(0,0,255),1)
         img1.draw_img(img1_out)
         img2.draw_img(img2_out)
+    
+    # trigger this function when limit distance is changed
+    def change_limit_distance():
+        if ui.Limit_Button.isChecked():
+            change_image(0)
         
     def button_fun():
         ui.Right_Button.clicked.connect(lambda: change_image(1))
@@ -69,6 +88,8 @@ if __name__ == "__main__":
         ui.SIFT_Button.clicked.connect(lambda: change_image(0))
         ui.BF_Flow_Button.clicked.connect(lambda: change_image(0))
         ui.BF_Line_Button.clicked.connect(lambda: change_image(0))
+        ui.Limit_Button.clicked.connect(lambda: change_image(0))
+        ui.Distance_Limit.valueChanged.connect(change_limit_distance)
     
     # load image
     def load_img(img_name_arr):
