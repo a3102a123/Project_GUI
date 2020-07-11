@@ -35,6 +35,13 @@ if __name__ == "__main__":
             else:
                 return True
 
+    # determine whether the match meets the ration test
+    def is_meet_ration(m1,m2):
+        ratio = ui.Ratio_Test_Display.value()
+        if m1.distance < m2.distance * ratio:
+            return True
+        else:
+            return False
 
     # direction -1 for left button, 1 for right button, 0 for check current image
     def change_image(direction):
@@ -71,9 +78,12 @@ if __name__ == "__main__":
             kp2 = img2.kps[m[0].trainIdx]
             kp1_pt = np.array( kp1.pt )
             kp2_pt = np.array( kp2.pt )
-            if is_meet_dis(kp1_pt,kp2_pt):
-                cv2.arrowedLine(img1_out,(int(kp1_pt[0]),int(kp1_pt[1])),(int(kp2_pt[0]),int(kp2_pt[1])),(0,0,255),1)
-                cv2.arrowedLine(img2_out,(int(kp1_pt[0]),int(kp1_pt[1])),(int(kp2_pt[0]),int(kp2_pt[1])),(0,0,255),1)
+            if not is_meet_dis(kp1_pt,kp2_pt):
+                continue
+            if not is_meet_ration(m[0],m[1]):
+                continue
+            cv2.arrowedLine(img1_out,(int(kp1_pt[0]),int(kp1_pt[1])),(int(kp2_pt[0]),int(kp2_pt[1])),(0,0,255),1)
+            cv2.arrowedLine(img2_out,(int(kp1_pt[0]),int(kp1_pt[1])),(int(kp2_pt[0]),int(kp2_pt[1])),(0,0,255),1)
         img1.draw_img(img1_out)
         img2.draw_img(img2_out)
     
@@ -81,6 +91,14 @@ if __name__ == "__main__":
     def change_limit_distance():
         if ui.Limit_Button.isChecked():
             change_image(0)
+    
+    # trigger this function when ration test is changed
+    def change_ratio_test():
+        # display changed number
+        value = float(ui.Ratio_Test.value())
+        max_value = float(ui.Ratio_Test.maximum())
+        ui.Ratio_Test_Display.display(value / max_value)
+        change_image(0)
         
     def button_fun():
         ui.Right_Button.clicked.connect(lambda: change_image(1))
@@ -90,7 +108,8 @@ if __name__ == "__main__":
         ui.BF_Line_Button.clicked.connect(lambda: change_image(0))
         ui.Limit_Button.clicked.connect(lambda: change_image(0))
         ui.Distance_Limit.valueChanged.connect(change_limit_distance)
-    
+        ui.Ratio_Test.valueChanged.connect(change_ratio_test)
+
     # load image
     def load_img(img_name_arr):
         img_name_arr[:] = os.listdir(img_dir_path)

@@ -78,6 +78,9 @@ class Ui_Dialog(object):
         font.setPointSize(14)
         self.Limit_Button.setFont(font)
         self.Limit_Button.setObjectName("Limit_Button")
+        self.textBrowser_4 = QtWidgets.QTextBrowser(Dialog)
+        self.textBrowser_4.setGeometry(QtCore.QRect(1450, 440, 191, 41))
+        self.textBrowser_4.setObjectName("textBrowser_4")
         self.widget = QtWidgets.QWidget(Dialog)
         self.widget.setGeometry(QtCore.QRect(1451, 131, 191, 31))
         self.widget.setObjectName("widget")
@@ -96,6 +99,44 @@ class Ui_Dialog(object):
         self.BF_Line_Button.setFont(font)
         self.BF_Line_Button.setObjectName("BF_Line_Button")
         self.horizontalLayout.addWidget(self.BF_Line_Button)
+        self.widget1 = QtWidgets.QWidget(Dialog)
+        self.widget1.setGeometry(QtCore.QRect(1440, 490, 212, 48))
+        self.widget1.setObjectName("widget1")
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.widget1)
+        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.verticalLayout = QtWidgets.QVBoxLayout()
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.Ratio_Test = QtWidgets.QSlider(self.widget1)
+        self.Ratio_Test.setMaximum(10)
+        self.Ratio_Test.setProperty("value", 10)
+        self.Ratio_Test.setOrientation(QtCore.Qt.Horizontal)
+        self.Ratio_Test.setObjectName("Ratio_Test")
+        self.verticalLayout.addWidget(self.Ratio_Test)
+        self.label = QtWidgets.QLabel(self.widget1)
+        self.label.setObjectName("label")
+        self.verticalLayout.addWidget(self.label)
+        self.horizontalLayout_2.addLayout(self.verticalLayout)
+        self.Ratio_Test_Display = QtWidgets.QLCDNumber(self.widget1)
+        font = QtGui.QFont()
+        font.setFamily("AR CENA")
+        font.setPointSize(14)
+        font.setBold(False)
+        font.setItalic(False)
+        font.setWeight(50)
+        self.Ratio_Test_Display.setFont(font)
+        self.Ratio_Test_Display.setAcceptDrops(False)
+        self.Ratio_Test_Display.setToolTipDuration(2)
+        self.Ratio_Test_Display.setAutoFillBackground(False)
+        self.Ratio_Test_Display.setStyleSheet("background-color:black;\n"
+"color:rgb(0, 255, 0);\n"
+"\n"
+"")
+        self.Ratio_Test_Display.setSmallDecimalPoint(True)
+        self.Ratio_Test_Display.setSegmentStyle(QtWidgets.QLCDNumber.Filled)
+        self.Ratio_Test_Display.setProperty("value", 1.0)
+        self.Ratio_Test_Display.setObjectName("Ratio_Test_Display")
+        self.horizontalLayout_2.addWidget(self.Ratio_Test_Display)
         self.widget.raise_()
         self.img_label1.raise_()
         self.Right_Button.raise_()
@@ -111,6 +152,10 @@ class Ui_Dialog(object):
         self.textBrowser_3.raise_()
         self.Distance_Limit.raise_()
         self.Limit_Button.raise_()
+        self.Ratio_Test.raise_()
+        self.textBrowser_4.raise_()
+        self.label.raise_()
+        self.Ratio_Test_Display.raise_()
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
@@ -147,8 +192,14 @@ class Ui_Dialog(object):
 "</style></head><body style=\" font-family:\'PMingLiU\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
 "<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:14pt;\">Distance Limit</span></p></body></html>"))
         self.Limit_Button.setText(_translate("Dialog", "Limit"))
+        self.textBrowser_4.setHtml(_translate("Dialog", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'PMingLiU\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:14pt;\">Ratio test</span></p></body></html>"))
         self.BF_Flow_Button.setText(_translate("Dialog", "flow field"))
         self.BF_Line_Button.setText(_translate("Dialog", "line"))
+        self.label.setText(_translate("Dialog", "0                                 1"))
 
 
 if __name__ == "__main__":
