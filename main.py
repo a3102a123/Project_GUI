@@ -14,6 +14,7 @@ if __name__ == "__main__":
     img_dir_path = "im0/"
     img_name_arr = []
     img_kp_arr = []
+    BF_match_arr = []
     img_arr = []
     img_num = 0
 
@@ -30,6 +31,8 @@ if __name__ == "__main__":
         img2.set_img(img_arr, img2_idx , img_kp_arr)
         if ui.SIFT_Button.isChecked():
             draw_SIFT_kp()
+        if ui.BF_Flow_Button.isChecked():
+            draw_BF_match_flow()
         dis_img()
         text1 = img_name_arr[img1.idx]
         text2 = img_name_arr[img2.idx]
@@ -44,11 +47,29 @@ if __name__ == "__main__":
         cv2.drawKeypoints(img2.img,img2.kps,img2_out)
         img1.draw_img(img1_out)
         img2.draw_img(img2_out)
+    
+    # draw the flow of BF match
+    def draw_BF_match_flow():
+        img1_out = copy.deepcopy(img1.img)
+        img2_out = copy.deepcopy(img2.img)
+        matches = BF_match_arr[img1.idx]
+        for m in matches:
+            kp1 = img1.kps[m[0].queryIdx]
+            kp2 = img2.kps[m[0].trainIdx]
+            kp1_pt = np.array( kp1.pt )
+            kp2_pt = np.array( kp2.pt )
+            cv2.arrowedLine(img1_out,(int(kp1_pt[0]),int(kp1_pt[1])),(int(kp2_pt[0]),int(kp2_pt[1])),(0,0,255),1)
+            cv2.arrowedLine(img2_out,(int(kp1_pt[0]),int(kp1_pt[1])),(int(kp2_pt[0]),int(kp2_pt[1])),(0,0,255),1)
+        img1.draw_img(img1_out)
+        img2.draw_img(img2_out)
         
     def button_fun():
         ui.Right_Button.clicked.connect(lambda: change_image(1))
         ui.Left_Button.clicked.connect(lambda: change_image(-1))
         ui.SIFT_Button.clicked.connect(lambda: change_image(0))
+        ui.BF_Flow_Button.clicked.connect(lambda: change_image(0))
+        ui.BF_Line_Button.clicked.connect(lambda: change_image(0))
+    
     # load image
     def load_img(img_name_arr):
         img_name_arr[:] = os.listdir(img_dir_path)
@@ -63,6 +84,7 @@ if __name__ == "__main__":
             if i > 10:
                 break
         return i
+    
     # check whether the data files exist
     def check_data_file():
         dir_path = "data/"
@@ -70,9 +92,9 @@ if __name__ == "__main__":
             import create_data.SIFT_kp
         if not os.path.isfile(dir_path + "SIFT_BF_match.txt"):
             import create_data.SIFT_BF_match
+    
     # load key points data
-    def load_data(img_kp_arr):
-        check_data_file()
+    def load_SIFT_kp():
         data_path = "data/SIFT_kp.txt"
         f = open(data_path,"rb")
         data = cPickle.loads(f.read())
@@ -83,6 +105,28 @@ if __name__ == "__main__":
                                 _response=point[3], _octave=point[4], _class_id=point[5])
                 temp_arr.append(temp)
             img_kp_arr.append(temp_arr)
+        f.close()
+    
+    # load BF match data
+    def load_BF_match():
+        data_path = "data/SIFT_BF_match.txt"
+        f = open(data_path,"rb")
+        data = cPickle.loads(f.read())
+        for match_arr in data:
+            temp_arr = []
+            for m in match_arr:
+                m1 = cv2.DMatch(m[0][0],m[0][1],m[0][2])
+                m2 = cv2.DMatch(m[1][0],m[1][1],m[1][2])
+                temp_arr.append((m1,m2))
+            BF_match_arr.append(temp_arr)
+        f.close()
+    
+    # load data
+    def load_data(img_kp_arr):
+        check_data_file()
+        load_SIFT_kp()
+        load_BF_match()
+    
     # init image entity
     def init():
         img1.set_img(img_arr,0,img_kp_arr)
