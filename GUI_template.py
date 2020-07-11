@@ -22,12 +22,12 @@ class Ui_Dialog(object):
         self.img_label1.setOpenExternalLinks(False)
         self.img_label1.setObjectName("img_label1")
         self.Right_Button = QtWidgets.QPushButton(Dialog)
-        self.Right_Button.setGeometry(QtCore.QRect(830, 720, 93, 28))
+        self.Right_Button.setGeometry(QtCore.QRect(780, 720, 93, 28))
         self.Right_Button.setAutoDefault(False)
         self.Right_Button.setFlat(False)
         self.Right_Button.setObjectName("Right_Button")
         self.Left_Button = QtWidgets.QPushButton(Dialog)
-        self.Left_Button.setGeometry(QtCore.QRect(680, 720, 93, 28))
+        self.Left_Button.setGeometry(QtCore.QRect(630, 720, 93, 28))
         self.Left_Button.setAutoDefault(False)
         self.Left_Button.setObjectName("Left_Button")
         self.img_label2 = QtWidgets.QLabel(Dialog)
@@ -42,10 +42,28 @@ class Ui_Dialog(object):
         self.img_text2 = QtWidgets.QTextBrowser(Dialog)
         self.img_text2.setEnabled(False)
         self.img_text2.setGeometry(QtCore.QRect(990, 710, 256, 41))
+        self.img_text2.setStyleSheet("font-size:14pt;\n"
+"margin-top:0px;\n"
+"margin-bottom:0px;\n"
+"margin-left:0px; \n"
+"margin-right:0px; \n"
+"-qt-block-indent:0; \n"
+"text-indent:0px; \n"
+"background-color:#ffffff;\n"
+"p{text-align:center;}")
         self.img_text2.setObjectName("img_text2")
         self.img_text1 = QtWidgets.QTextBrowser(Dialog)
         self.img_text1.setEnabled(False)
         self.img_text1.setGeometry(QtCore.QRect(260, 710, 256, 41))
+        self.img_text1.setStyleSheet("font-size:14pt;\n"
+"margin-top:0px;\n"
+"margin-bottom:0px;\n"
+"margin-left:0px; \n"
+"margin-right:0px; \n"
+"-qt-block-indent:0; \n"
+"text-indent:0px; \n"
+"background-color:#ffffff;\n"
+"p{text-align:center;}")
         self.img_text1.setObjectName("img_text1")
         self.SIFT_Button = QtWidgets.QCheckBox(Dialog)
         self.SIFT_Button.setGeometry(QtCore.QRect(1450, 240, 85, 19))
@@ -168,13 +186,13 @@ class Ui_Dialog(object):
         self.img_text2.setHtml(_translate("Dialog", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'PMingLiU\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
-"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;\"><span style=\" font-size:14pt;\">out_1.jpg</span></p></body></html>"))
+"</style></head><body style=\" font-family:\'PMingLiU\'; font-size:14pt; font-weight:400; font-style:normal;\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;\"><span style=\" background-color:#ffffff;\">out_1.jpg</span></p></body></html>"))
         self.img_text1.setHtml(_translate("Dialog", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'PMingLiU\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
-"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;\"><span style=\" font-size:14pt;\">out_0.jpg</span></p></body></html>"))
+"</style></head><body style=\" font-family:\'PMingLiU\'; font-size:14pt; font-weight:400; font-style:normal;\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;\"><span style=\" background-color:#ffffff;\">out_0.jpg</span></p></body></html>"))
         self.SIFT_Button.setText(_translate("Dialog", "SIFT"))
         self.textBrowser.setHtml(_translate("Dialog", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"

@@ -1,8 +1,4 @@
-import cv2
-import numpy as np
-import os
-import sys
-import _pickle as cPickle
+from Class.image import *
 #show the image until user press any key to continue
 def show_im(name,im):
     cv2.imshow(name,im)
@@ -26,7 +22,7 @@ for filename in dir :
     img_arr.append(img)
     i += 1
     #speed up for debug
-    if i > 10:
+    if i >= image_num():
         break
 #SIFT
 sift = cv2.xfeatures2d.SIFT_create()

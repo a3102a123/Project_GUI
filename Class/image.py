@@ -2,6 +2,14 @@ from PyQt5.QtGui import QImage, QPixmap
 import numpy as np
 import cv2
 import copy
+import _pickle as cPickle
+import sys
+import os
+
+# return the number of image load from folder
+def image_num():
+    return 10
+
 # make the block bgr image.The size of image is as same as img
 def mk_empty_img(img):
     width,height,channel = img.shape

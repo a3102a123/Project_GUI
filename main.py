@@ -1,9 +1,7 @@
 from PyQt5 import QtWidgets
 import GUI_template as GUI
 from Class.image import *
-import os
-import sys
-import _pickle as cPickle
+
 if __name__ == "__main__":
     # global variable
 
@@ -121,7 +119,7 @@ if __name__ == "__main__":
             img_arr.append(img)
             i += 1
             #speed up for debug
-            if i > 10:
+            if i >= image_num():
                 break
         return i
     
