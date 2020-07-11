@@ -17,6 +17,7 @@ if __name__ == "__main__":
     img_arr = []
     img_num = 0
 
+    # display image
     def dis_img():
         ui.img_label1.setPixmap( QPixmap.fromImage(img1.qImg))
         ui.img_label2.setPixmap( QPixmap.fromImage(img2.qImg))
@@ -62,8 +63,16 @@ if __name__ == "__main__":
             if i > 10:
                 break
         return i
+    # check whether the data files exist
+    def check_data_file():
+        dir_path = "data/"
+        if not os.path.isfile(dir_path + "SIFT_kp.txt"):
+            import create_data.SIFT_kp
+        if not os.path.isfile(dir_path + "SIFT_BF_match.txt"):
+            import create_data.SIFT_BF_match
     # load key points data
     def load_data(img_kp_arr):
+        check_data_file()
         data_path = "data/SIFT_kp.txt"
         f = open(data_path,"rb")
         data = cPickle.loads(f.read())
