@@ -8,3 +8,8 @@
 2. 更改好設計後儲存(盡量不要刪除已經存在的物件和改動已經存在的物件名稱，改變位置、大小隨意)
 3. 執行 pyuic5 -x GUI_template.ui -o GUI_template.py 
 4. 執行 python main.py 應該可以看到新設計的頁面
+# 資料夾說明
+- Class資料夾放header file(EX. main.py 要import 的 module 放在image.py中)
+- create_data資料夾放用來產生 data file的module，從 main.py call 進去，寫的時候路徑以main.py的位置當作root
+- data資料夾放 data file
+- im0資料夾放圖片(資料夾內檔名任意皆可，以有序的編號為佳)
