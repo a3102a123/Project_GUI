@@ -4,6 +4,7 @@ from Class.image import *
 
 if __name__ == "__main__":
     # global variable
+    ###########################################
 
     # create ui object
     ui = GUI.Ui_Dialog()
@@ -15,6 +16,9 @@ if __name__ == "__main__":
     BF_match_arr = []
     img_arr = []
     img_num = 0
+
+    # function
+    ###########################################
 
     # display image
     def dis_img():
@@ -197,6 +201,8 @@ if __name__ == "__main__":
         img1.set_img(img_arr,0,img_kp_arr)
         img2.set_img(img_arr,1,img_kp_arr)
     
+    # main
+    ###########################################
     app = QtWidgets.QApplication(sys.argv)
     Dialog = QtWidgets.QDialog()
     ui.setupUi(Dialog)
