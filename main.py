@@ -51,6 +51,8 @@ if __name__ == "__main__":
             draw_SIFT_kp()
         if ui.BF_Flow_Button.isChecked():
             draw_BF_match_flow()
+        if ui.BF_Line_Button.isChecked():
+            draw_BF_match_line()
         dis_img()
         text1 = img_name_arr[img1.idx]
         text2 = img_name_arr[img2.idx]
@@ -85,6 +87,31 @@ if __name__ == "__main__":
         img1.draw_img(img1_out)
         img2.draw_img(img2_out)
     
+    # draw the line of BF match on two images
+    def draw_BF_match_line():
+        # prepare combined image
+        (hA, wA) = img1.img.shape[:2]
+        (hB, wB) = img2.img.shape[:2]
+        img_out = np.zeros((max(hA, hB), wA + wB, 3), dtype="uint8")
+        img_out[0:hA, 0:wA] = img1.img
+        img_out[0:hB, wA:] = img2.img
+        matches = BF_match_arr[img1.idx]
+        for m in matches:
+            kp1 = img1.kps[m[0].queryIdx]
+            kp2 = img2.kps[m[0].trainIdx]
+            kp1_pt = np.array( kp1.pt )
+            kp2_pt = np.array( kp2.pt )
+            if not is_meet_dis(kp1_pt,kp2_pt):
+                continue
+            if not is_meet_ration(m[0],m[1]):
+                continue
+            cv2.line(img_out, ( int(kp1_pt[0]) , int(kp1_pt[1]) ), ( int(kp2_pt[0] + wA) , int(kp2_pt[1]) ), (0,0,255), 1)
+        # split combined image to two image
+        img1_out = img_out[0:hA, 0:wA]
+        img2_out = img_out[0:hB, wA:]
+        img1.draw_img( np.copy(img1_out) )
+        img2.draw_img( np.copy(img2_out) )
+
     # trigger this function when limit distance is changed
     def change_limit_distance():
         if ui.Limit_Button.isChecked():
