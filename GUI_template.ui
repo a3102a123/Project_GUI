@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1731</width>
-    <height>869</height>
+    <width>1853</width>
+    <height>837</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,10 +16,10 @@
   <widget class="QLabel" name="img_label1">
    <property name="geometry">
     <rect>
-     <x>70</x>
-     <y>20</y>
-     <width>681</width>
-     <height>681</height>
+     <x>390</x>
+     <y>80</y>
+     <width>600</width>
+     <height>600</height>
     </rect>
    </property>
    <property name="text">
@@ -44,7 +44,7 @@
   <widget class="QPushButton" name="Right_Button">
    <property name="geometry">
     <rect>
-     <x>780</x>
+     <x>1060</x>
      <y>720</y>
      <width>93</width>
      <height>28</height>
@@ -63,7 +63,7 @@
   <widget class="QPushButton" name="Left_Button">
    <property name="geometry">
     <rect>
-     <x>630</x>
+     <x>910</x>
      <y>720</y>
      <width>93</width>
      <height>28</height>
@@ -79,10 +79,10 @@
   <widget class="QLabel" name="img_label2">
    <property name="geometry">
     <rect>
-     <x>750</x>
-     <y>20</y>
-     <width>681</width>
-     <height>681</height>
+     <x>990</x>
+     <y>80</y>
+     <width>600</width>
+     <height>600</height>
     </rect>
    </property>
    <property name="text">
@@ -110,7 +110,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>990</x>
+     <x>1270</x>
      <y>710</y>
      <width>256</width>
      <height>41</height>
@@ -141,7 +141,7 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="geometry">
     <rect>
-     <x>260</x>
+     <x>540</x>
      <y>710</y>
      <width>256</width>
      <height>41</height>
@@ -169,8 +169,8 @@ p, li { white-space: pre-wrap; }
   <widget class="QCheckBox" name="SIFT_Button">
    <property name="geometry">
     <rect>
-     <x>1450</x>
-     <y>240</y>
+     <x>1610</x>
+     <y>290</y>
      <width>85</width>
      <height>19</height>
     </rect>
@@ -187,8 +187,8 @@ p, li { white-space: pre-wrap; }
   <widget class="QTextBrowser" name="textBrowser">
    <property name="geometry">
     <rect>
-     <x>1450</x>
-     <y>90</y>
+     <x>1610</x>
+     <y>140</y>
      <width>191</width>
      <height>41</height>
     </rect>
@@ -204,8 +204,8 @@ p, li { white-space: pre-wrap; }
   <widget class="QTextBrowser" name="textBrowser_2">
    <property name="geometry">
     <rect>
-     <x>1450</x>
-     <y>190</y>
+     <x>1610</x>
+     <y>240</y>
      <width>191</width>
      <height>41</height>
     </rect>
@@ -221,8 +221,8 @@ p, li { white-space: pre-wrap; }
   <widget class="QTextBrowser" name="textBrowser_3">
    <property name="geometry">
     <rect>
-     <x>1450</x>
-     <y>290</y>
+     <x>1610</x>
+     <y>340</y>
      <width>191</width>
      <height>41</height>
     </rect>
@@ -238,8 +238,8 @@ p, li { white-space: pre-wrap; }
   <widget class="QSpinBox" name="Distance_Limit">
    <property name="geometry">
     <rect>
-     <x>1450</x>
-     <y>340</y>
+     <x>1610</x>
+     <y>390</y>
      <width>191</width>
      <height>51</height>
     </rect>
@@ -261,8 +261,8 @@ p, li { white-space: pre-wrap; }
   <widget class="QCheckBox" name="Limit_Button">
    <property name="geometry">
     <rect>
-     <x>1450</x>
-     <y>400</y>
+     <x>1610</x>
+     <y>450</y>
      <width>85</width>
      <height>19</height>
     </rect>
@@ -279,8 +279,8 @@ p, li { white-space: pre-wrap; }
   <widget class="QTextBrowser" name="textBrowser_4">
    <property name="geometry">
     <rect>
-     <x>1450</x>
-     <y>440</y>
+     <x>1610</x>
+     <y>490</y>
      <width>191</width>
      <height>41</height>
     </rect>
@@ -293,11 +293,11 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;Ratio test&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>1451</x>
-     <y>131</y>
+     <x>1611</x>
+     <y>181</y>
      <width>191</width>
      <height>31</height>
     </rect>
@@ -329,11 +329,11 @@ p, li { white-space: pre-wrap; }
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>1440</x>
-     <y>490</y>
+     <x>1600</x>
+     <y>540</y>
      <width>212</width>
      <height>48</height>
     </rect>
@@ -402,7 +402,43 @@ color:rgb(0, 255, 0);
     </item>
    </layout>
   </widget>
-  <zorder>widget</zorder>
+  <widget class="QLabel" name="target_label">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>200</y>
+     <width>300</width>
+     <height>300</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color:white;</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="scaledContents">
+    <bool>true</bool>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="Target_button">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>520</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Target</string>
+   </property>
+  </widget>
+  <zorder>layoutWidget</zorder>
+  <zorder>layoutWidget</zorder>
   <zorder>img_label1</zorder>
   <zorder>Right_Button</zorder>
   <zorder>Left_Button</zorder>
@@ -410,17 +446,14 @@ color:rgb(0, 255, 0);
   <zorder>img_text2</zorder>
   <zorder>img_text1</zorder>
   <zorder>SIFT_Button</zorder>
-  <zorder>BF_Flow_Button</zorder>
-  <zorder>BF_Line_Button</zorder>
   <zorder>textBrowser</zorder>
   <zorder>textBrowser_2</zorder>
   <zorder>textBrowser_3</zorder>
   <zorder>Distance_Limit</zorder>
   <zorder>Limit_Button</zorder>
-  <zorder>Ratio_Test</zorder>
   <zorder>textBrowser_4</zorder>
-  <zorder>label</zorder>
-  <zorder>Ratio_Test_Display</zorder>
+  <zorder>target_label</zorder>
+  <zorder>Target_button</zorder>
  </widget>
  <resources/>
  <connections/>

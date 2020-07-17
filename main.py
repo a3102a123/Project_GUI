@@ -10,12 +10,15 @@ if __name__ == "__main__":
     ui = GUI.Ui_Dialog()
     img1 = Image(cv2.imread("im0/out_0.jpg"),0)
     img2 = Image(cv2.imread("im0/out_1.jpg"),1)
+    img_target = Image(mk_empty_img(img1.img),-1)
     img_dir_path = "im0/"
     img_name_arr = []
     img_kp_arr = []
     BF_match_arr = []
     img_arr = []
     img_num = 0
+    img_rect = [0,0,0,0]
+    draing_flag = False
 
     # function
     ###########################################
@@ -128,7 +131,63 @@ if __name__ == "__main__":
         max_value = float(ui.Ratio_Test.maximum())
         ui.Ratio_Test_Display.display(value / max_value)
         change_image(0)
-        
+
+    # set the bounded image(rad rectangle) in img1 to img3
+    def set_target_img():
+        if not sum(img_rect):
+            print("No bounded area!")
+            return
+        im_h,im_w,c = img1.img.shape
+        lb_w = ui.img_label1.width()
+        lb_h = ui.img_label1.height()
+        w_ratio = im_w/lb_w
+        h_ratio = im_h/lb_h
+        width = int(abs(img_rect[0] - img_rect[2]) * w_ratio)
+        height = int(abs(img_rect[1] - img_rect[3]) * h_ratio)
+        x = int(img_rect[0] * w_ratio)
+        y = int(img_rect[1] * h_ratio)
+        temp_img = np.zeros((height,width,3),dtype="uint8")
+        temp_img = img1.img[y:y + height,x:x + width]
+        img_target.draw_img(np.copy(temp_img))
+        ui.target_label.setPixmap(QPixmap.fromImage(img_target.qImg))
+        ui.target_label.setFixedSize(width*2,height*2)
+
+    # mouse trigger function
+    ###########################################
+
+    # draw rectagle on image1
+    def img_label1_mousePressEvent(self,event):
+        global draing_flag
+        draing_flag = True
+        img_rect[0] = event.x()
+        img_rect[1] = event.y()
+    
+    def img_lable1_mouseReleaseEvent(self,event):
+        global draing_flag
+        draing_flag = False
+    
+    def img_label1_mouseMoveEvent(self,event):
+        if draing_flag:
+            im_h,im_w,c = img1.img.shape
+            lb_w = ui.img_label1.width()
+            lb_h = ui.img_label1.height()
+            img_rect[2] = event.x()
+            img_rect[3] = event.y()
+            img1.draw_rect(img_rect,im_w,im_h,lb_w,lb_h)
+            dis_img()
+    
+    def bind_img_lable1_func(obj):
+        funcType = type(obj.mousePressEvent)
+        obj.mousePressEvent = funcType(img_label1_mousePressEvent,obj)
+        funcType = type(obj.mouseReleaseEvent)
+        obj.mouseReleaseEvent = funcType(img_lable1_mouseReleaseEvent,obj)
+        funcType = type(obj.mouseMoveEvent)
+        obj.mouseMoveEvent = funcType(img_label1_mouseMoveEvent, obj)
+
+    # initial function
+    ###########################################
+    
+    # connect button function    
     def button_fun():
         ui.Right_Button.clicked.connect(lambda: change_image(1))
         ui.Left_Button.clicked.connect(lambda: change_image(-1))
@@ -138,7 +197,12 @@ if __name__ == "__main__":
         ui.Limit_Button.clicked.connect(lambda: change_image(0))
         ui.Distance_Limit.valueChanged.connect(change_limit_distance)
         ui.Ratio_Test.valueChanged.connect(change_ratio_test)
+        ui.Target_button.clicked.connect(set_target_img)
 
+    # overwrite mouse trigger function of label
+    def Qlabel_fun():
+        bind_img_lable1_func(ui.img_label1)
+        
     # load image
     def load_img(img_name_arr):
         img_name_arr[:] = os.listdir(img_dir_path)
@@ -211,5 +275,6 @@ if __name__ == "__main__":
     load_data(img_kp_arr)
     init()
     button_fun()
+    Qlabel_fun()
     Dialog.show()
     sys.exit(app.exec_())

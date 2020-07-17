@@ -6,14 +6,18 @@ import _pickle as cPickle
 import sys
 import os
 
+from PyQt5.QtWidgets import QWidget, QApplication, QLabel
+from PyQt5.QtCore import QRect, Qt
+from PyQt5.QtGui import QImage, QPixmap, QPainter, QPen, QGuiApplication
+
 # return the number of image load from folder
 def image_num():
     return 10
 
 # make the block bgr image.The size of image is as same as img
 def mk_empty_img(img):
-    width,height,channel = img.shape
-    img_out = np.zeros((width,height,channel))
+    height,width,channel = img.shape
+    img_out = np.zeros((height,width,channel))
     return img_out
 
 # convert opencv image to Qimage
@@ -40,6 +44,33 @@ class Image():
     def draw_img(self,img):
         self.img = copy.deepcopy(img)
         self.qImg = convImg(img)
+
+    def draw_rect(self,rect,im_w,im_h,lb_w,lb_h):
+        img = copy.deepcopy(self.img)
+        w_ratio = im_w/lb_w
+        h_ratio = im_h/lb_h
+        p1 = (int(rect[0] * w_ratio),int(rect[1] * h_ratio))
+        p2 = (int(rect[2] * w_ratio),int(rect[3] * h_ratio))
+        cv2.rectangle(img,p1,p2,(0,0,255))
+        self.qImg = convImg(img)
+
+    def show_img(self):
+        cv2.imshow("temp",self.img)
+        # press any key to close the window
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+# 需手動更換GUI_template.py中的QLabel和import image.py
+class MyLabel(QLabel):
+    # dummy event function. implement in main.py
+    def mousePressEvent(self,event):
+        return
+    
+    def mouseReleaseEvent(self,event):
+        return
+    
+    def mouseMoveEvent(self,event):
+        return
 
 if __name__ == "__main__":
     import cv2
