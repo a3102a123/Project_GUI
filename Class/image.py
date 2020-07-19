@@ -20,6 +20,23 @@ def mk_empty_img(img):
     img_out = np.zeros((height,width,channel))
     return img_out
 
+# return the horizontally combined image of img1 & img2
+def combine_img(img1,img2):
+    (hA, wA) = img1.shape[:2]
+    (hB, wB) = img2.shape[:2]
+    img_out = np.zeros((max(hA, hB), wA + wB, 3), dtype="uint8")
+    img_out[0:hA, 0:wA] = img1
+    img_out[0:hB, wA:] = img2
+    return img_out
+
+# split the combined image to two image with origin size
+def split_combined_img(img_out,img1,img2):
+    (hA, wA) = img1.shape[:2]
+    (hB, wB) = img2.shape[:2]
+    img1_out = img_out[0:hA, 0:wA]
+    img2_out = img_out[0:hB, wA:]
+    return img1_out,img2_out
+
 # convert opencv image to Qimage
 def convImg(img):
     height, width, channel = img.shape

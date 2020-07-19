@@ -424,7 +424,7 @@ color:rgb(0, 255, 0);
     <set>Qt::AlignCenter</set>
    </property>
   </widget>
-  <widget class="QPushButton" name="Target_button">
+  <widget class="QPushButton" name="Target_Button">
    <property name="geometry">
     <rect>
      <x>170</x>
@@ -435,6 +435,19 @@ color:rgb(0, 255, 0);
    </property>
    <property name="text">
     <string>Target</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="Target_Find_Button">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>560</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Find</string>
    </property>
   </widget>
   <zorder>layoutWidget</zorder>
@@ -453,7 +466,8 @@ color:rgb(0, 255, 0);
   <zorder>Limit_Button</zorder>
   <zorder>textBrowser_4</zorder>
   <zorder>target_label</zorder>
-  <zorder>Target_button</zorder>
+  <zorder>Target_Button</zorder>
+  <zorder>Target_Find_Button</zorder>
  </widget>
  <resources/>
  <connections/>

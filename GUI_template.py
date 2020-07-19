@@ -163,9 +163,12 @@ class Ui_Dialog(object):
         self.target_label.setScaledContents(True)
         self.target_label.setAlignment(QtCore.Qt.AlignCenter)
         self.target_label.setObjectName("target_label")
-        self.Target_button = QtWidgets.QPushButton(Dialog)
-        self.Target_button.setGeometry(QtCore.QRect(170, 520, 93, 28))
-        self.Target_button.setObjectName("Target_button")
+        self.Target_Button = QtWidgets.QPushButton(Dialog)
+        self.Target_Button.setGeometry(QtCore.QRect(170, 520, 93, 28))
+        self.Target_Button.setObjectName("Target_Button")
+        self.Target_Find_Button = QtWidgets.QPushButton(Dialog)
+        self.Target_Find_Button.setGeometry(QtCore.QRect(170, 560, 93, 28))
+        self.Target_Find_Button.setObjectName("Target_Find_Button")
         self.layoutWidget.raise_()
         self.layoutWidget.raise_()
         self.img_label1.raise_()
@@ -182,7 +185,8 @@ class Ui_Dialog(object):
         self.Limit_Button.raise_()
         self.textBrowser_4.raise_()
         self.target_label.raise_()
-        self.Target_button.raise_()
+        self.Target_Button.raise_()
+        self.Target_Find_Button.raise_()
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
@@ -227,7 +231,8 @@ class Ui_Dialog(object):
         self.BF_Flow_Button.setText(_translate("Dialog", "flow field"))
         self.BF_Line_Button.setText(_translate("Dialog", "line"))
         self.label.setText(_translate("Dialog", "0                                 1"))
-        self.Target_button.setText(_translate("Dialog", "Target"))
+        self.Target_Button.setText(_translate("Dialog", "Target"))
+        self.Target_Find_Button.setText(_translate("Dialog", "Find"))
 
 
 if __name__ == "__main__":
