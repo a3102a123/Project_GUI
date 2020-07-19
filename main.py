@@ -153,8 +153,8 @@ if __name__ == "__main__":
         h_ratio = im_h/lb_h
         width = int(abs(img_rect[0] - img_rect[2]) * w_ratio)
         height = int(abs(img_rect[1] - img_rect[3]) * h_ratio)
-        x = int(img_rect[0] * w_ratio)
-        y = int(img_rect[1] * h_ratio)
+        x = int(min(img_rect[0],img_rect[2]) * w_ratio)
+        y = int(min(img_rect[1],img_rect[3]) * h_ratio)
         temp_img = np.zeros((height,width,3),dtype="uint8")
         temp_img = img1.img[y:y + height,x:x + width]
         img_target.draw_img(np.copy(temp_img))
