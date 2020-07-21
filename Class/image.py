@@ -88,6 +88,9 @@ class MyLabel(QLabel):
     
     def mouseMoveEvent(self,event):
         return
+    
+    def mouseDoubleClickEvent(self,event):
+        return
 
 if __name__ == "__main__":
     import cv2

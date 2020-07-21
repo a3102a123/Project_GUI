@@ -164,6 +164,9 @@ if __name__ == "__main__":
 
     # BF match target image with img1 and img2
     def BF_target_match():
+        if ui.target_label.pixmap() == None:
+            print("No target image.")
+            return
         sift = cv2.xfeatures2d.SIFT_create()
         ori_img1 = img_arr[img1.idx]
         ori_img2 = img_arr[img2.idx]
@@ -206,6 +209,14 @@ if __name__ == "__main__":
             img1.draw_rect(img_rect,im_w,im_h,lb_w,lb_h)
             dis_img()
     
+    def img_Label1_mouseDoubleClickEvent(self,event):
+        img_rect[0] = 0
+        img_rect[1] = 0
+        img_rect[2] = 0
+        img_rect[3] = 0
+        img1.draw_img(img1.img)
+        dis_img()
+    
     def bind_img_lable1_func(obj):
         funcType = type(obj.mousePressEvent)
         obj.mousePressEvent = funcType(img_label1_mousePressEvent,obj)
@@ -213,6 +224,8 @@ if __name__ == "__main__":
         obj.mouseReleaseEvent = funcType(img_lable1_mouseReleaseEvent,obj)
         funcType = type(obj.mouseMoveEvent)
         obj.mouseMoveEvent = funcType(img_label1_mouseMoveEvent, obj)
+        funcType = type(obj.mouseDoubleClickEvent)
+        obj.mouseDoubleClickEvent = funcType(img_Label1_mouseDoubleClickEvent, obj)
 
     # initial function
     ###########################################
