@@ -427,9 +427,9 @@ color:rgb(0, 255, 0);
   <widget class="QPushButton" name="Target_Button">
    <property name="geometry">
     <rect>
-     <x>170</x>
+     <x>152</x>
      <y>520</y>
-     <width>93</width>
+     <width>111</width>
      <height>28</height>
     </rect>
    </property>
@@ -437,17 +437,30 @@ color:rgb(0, 255, 0);
     <string>Target</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="Target_Find_Button">
+  <widget class="QPushButton" name="Target_BF_Button">
    <property name="geometry">
     <rect>
-     <x>170</x>
+     <x>152</x>
      <y>560</y>
-     <width>93</width>
+     <width>111</width>
      <height>28</height>
     </rect>
    </property>
    <property name="text">
-    <string>Find</string>
+    <string>BF_match</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="Target_Hungarian_Button">
+   <property name="geometry">
+    <rect>
+     <x>152</x>
+     <y>600</y>
+     <width>111</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Hungarian_match</string>
    </property>
   </widget>
   <zorder>layoutWidget</zorder>
@@ -467,7 +480,8 @@ color:rgb(0, 255, 0);
   <zorder>textBrowser_4</zorder>
   <zorder>target_label</zorder>
   <zorder>Target_Button</zorder>
-  <zorder>Target_Find_Button</zorder>
+  <zorder>Target_BF_Button</zorder>
+  <zorder>Target_Hungarian_Button</zorder>
  </widget>
  <resources/>
  <connections/>

@@ -164,11 +164,14 @@ class Ui_Dialog(object):
         self.target_label.setAlignment(QtCore.Qt.AlignCenter)
         self.target_label.setObjectName("target_label")
         self.Target_Button = QtWidgets.QPushButton(Dialog)
-        self.Target_Button.setGeometry(QtCore.QRect(170, 520, 93, 28))
+        self.Target_Button.setGeometry(QtCore.QRect(152, 520, 111, 28))
         self.Target_Button.setObjectName("Target_Button")
-        self.Target_Find_Button = QtWidgets.QPushButton(Dialog)
-        self.Target_Find_Button.setGeometry(QtCore.QRect(170, 560, 93, 28))
-        self.Target_Find_Button.setObjectName("Target_Find_Button")
+        self.Target_BF_Button = QtWidgets.QPushButton(Dialog)
+        self.Target_BF_Button.setGeometry(QtCore.QRect(152, 560, 111, 28))
+        self.Target_BF_Button.setObjectName("Target_BF_Button")
+        self.Target_Hungarian_Button = QtWidgets.QPushButton(Dialog)
+        self.Target_Hungarian_Button.setGeometry(QtCore.QRect(152, 600, 111, 28))
+        self.Target_Hungarian_Button.setObjectName("Target_Hungarian_Button")
         self.layoutWidget.raise_()
         self.layoutWidget.raise_()
         self.img_label1.raise_()
@@ -186,7 +189,8 @@ class Ui_Dialog(object):
         self.textBrowser_4.raise_()
         self.target_label.raise_()
         self.Target_Button.raise_()
-        self.Target_Find_Button.raise_()
+        self.Target_BF_Button.raise_()
+        self.Target_Hungarian_Button.raise_()
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
@@ -232,7 +236,8 @@ class Ui_Dialog(object):
         self.BF_Line_Button.setText(_translate("Dialog", "line"))
         self.label.setText(_translate("Dialog", "0                                 1"))
         self.Target_Button.setText(_translate("Dialog", "Target"))
-        self.Target_Find_Button.setText(_translate("Dialog", "Find"))
+        self.Target_BF_Button.setText(_translate("Dialog", "BF_match"))
+        self.Target_Hungarian_Button.setText(_translate("Dialog", "Hungarian_match"))
 
 
 if __name__ == "__main__":

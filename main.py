@@ -12,7 +12,7 @@ if __name__ == "__main__":
     sub_ui = subwindow.Ui_Dialog()
     img1 = Image(cv2.imread("im0/out_0.jpg"),0)
     img2 = Image(cv2.imread("im0/out_1.jpg"),1)
-    img_target = Image(mk_empty_img(img1.img),-1)
+    img_target = Target_Image(mk_empty_img(img1.img),-1)
     img_dir_path = "im0/"
     img_name_arr = []
     img_kp_arr = []
@@ -99,13 +99,17 @@ if __name__ == "__main__":
     # draw the line of match on combined image
     def draw_match_line(matches,img_out,wA,kps1,kps2):
         for m in matches:
-            kp1 = kps1[m[0].queryIdx]
-            kp2 = kps2[m[0].trainIdx]
+            if isinstance(m,tuple) or isinstance(m,list):
+                if not is_meet_ration(m[0],m[1]):
+                    continue
+                kp1 = kps1[m[0].queryIdx]
+                kp2 = kps2[m[0].trainIdx]
+            else:
+                kp1 = kps1[m.queryIdx]
+                kp2 = kps2[m.trainIdx]
             kp1_pt = np.array( kp1.pt )
             kp2_pt = np.array( kp2.pt )
             if not is_meet_dis(kp1_pt,kp2_pt):
-                continue
-            if not is_meet_ration(m[0],m[1]):
                 continue
             cv2.line(img_out, ( int(kp1_pt[0]) , int(kp1_pt[1]) ), ( int(kp2_pt[0] + wA) , int(kp2_pt[1]) ), (0,0,255), 1)
 
@@ -159,6 +163,7 @@ if __name__ == "__main__":
         temp_img = img1.img[y:y + height,x:x + width]
         img_target.draw_img(np.copy(temp_img))
         SIFT_target_img()
+        img_target.rect = img_rect.copy()
         ui.target_label.setPixmap(QPixmap.fromImage(img_target.qImg))
         ui.target_label.setFixedSize(width*2,height*2)
 
@@ -167,14 +172,11 @@ if __name__ == "__main__":
         if ui.target_label.pixmap() == None:
             print("No target image.")
             return
-        sift = cv2.xfeatures2d.SIFT_create()
         ori_img1 = img_arr[img1.idx]
-        ori_img2 = img_arr[img2.idx]
-        des_t = sift.compute(img_target.img,img_target.kps)
-        des_1 = sift.compute(ori_img1,img1.kps)
-        des_2 = sift.compute(ori_img2,img2.kps)
+        des_t = compute_SIFT_des(img_target.img,img_target.kps)
+        des_1 = compute_SIFT_des(ori_img1,img1.kps)
         matcher = cv2.DescriptorMatcher_create("BruteForce")
-        matches = matcher.knnMatch(des_t[1],des_1[1],2)
+        matches = matcher.knnMatch(des_t,des_1,2)
         img_out = combine_img(img_target.img,ori_img1)
         hA,wA = img_target.img.shape[:2]
         # draw the line on target image and img1
@@ -184,6 +186,49 @@ if __name__ == "__main__":
         sub_ui.Image_Label.setPixmap(QPixmap.fromImage(qImg))
         # show subwindow
         Dialog2.show()
+    
+    # create the graph for Hungarian algorithm
+    def kp_feature_distance_graph(des1,des2):
+        graph = []
+        for i in range(0,len(des1)):
+            temp_dict = []
+            des1_pt = np.array(des1[i])
+            for j in range(0,len(des2)):
+                des2_pt = np.array(des2[j])
+                dis = np.linalg.norm(des1_pt - des2_pt)
+                temp_dict.append(dis)
+            graph.append(temp_dict)
+        return graph
+    
+    # Hungarian algorithm to match key points
+    def Hungarian_match():
+        if ui.target_label.pixmap() == None:
+            print("No target image.")
+            return
+        ori_img1 = img_arr[img1.idx]
+        des_t = compute_SIFT_des(img_target.img,img_target.kps)
+        des_1 = compute_SIFT_des(ori_img1,img1.kps)
+        graph = kp_feature_distance_graph(des_t, des_1)
+        matches = []
+        hungarian = Munkres()
+        print("Computing...")
+        index = hungarian.compute(graph)
+        print("Finish!")
+        for row,column in index:
+            dis = graph[row][column]
+            temp = cv2.DMatch(row,column,dis)
+            matches.append(temp)
+        img_out = combine_img(img_target.img,ori_img1)
+        hA,wA = img_target.img.shape[:2]
+        # draw the line on target image and img1
+        draw_match_line(matches,img_out,wA,img_target.kps,img1.kps)
+        # set image to subwindow's label
+        qImg = convImg(np.copy(img_out))
+        sub_ui.Image_Label.setPixmap(QPixmap.fromImage(qImg))
+        # show subwindow
+        Dialog2.show()
+        
+
     
     # mouse trigger function
     ###########################################
@@ -241,7 +286,8 @@ if __name__ == "__main__":
         ui.Distance_Limit.valueChanged.connect(change_limit_distance)
         ui.Ratio_Test.valueChanged.connect(change_ratio_test)
         ui.Target_Button.clicked.connect(set_target_img)
-        ui.Target_Find_Button.clicked.connect(BF_target_match)
+        ui.Target_BF_Button.clicked.connect(BF_target_match)
+        ui.Target_Hungarian_Button.clicked.connect(Hungarian_match)
 
     # overwrite mouse trigger function of label
     def Qlabel_fun():

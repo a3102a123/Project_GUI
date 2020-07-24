@@ -9,6 +9,7 @@ import os
 from PyQt5.QtWidgets import QWidget, QApplication, QLabel
 from PyQt5.QtCore import QRect, Qt
 from PyQt5.QtGui import QImage, QPixmap, QPainter, QPen, QGuiApplication
+from munkres import Munkres, print_matrix
 
 # return the number of image load from folder
 def image_num():
@@ -37,6 +38,15 @@ def split_combined_img(img_out,img1,img2):
     img2_out = img_out[0:hB, wA:]
     return img1_out,img2_out
 
+def compute_SIFT_des(img,kps):
+    sift = cv2.xfeatures2d.SIFT_create()
+    new_kp,des = sift.compute(img,kps)
+    # RootSIFT descriptor
+    eps = 1e-7
+    des /= (des.sum(axis=1, keepdims=True) + eps)
+    des = np.sqrt(des)
+    return des
+
 # convert opencv image to Qimage
 def convImg(img):
     height, width, channel = img.shape
@@ -44,6 +54,7 @@ def convImg(img):
     qImg = QImage(img.data, width, height, bytesPerline, QImage.Format_RGB888).rgbSwapped()
     return qImg
 
+# the class to maintain QLabel image's infomation
 class Image():
     
     def __init__(self,img,i):
@@ -76,6 +87,11 @@ class Image():
         # press any key to close the window
         cv2.waitKey(0)
         cv2.destroyAllWindows()
+
+# the class for target image to additionally store rectangle info
+class Target_Image(Image):
+    def __init__(self,img,i):
+        self.rect = [0,0,0,0]
 
 # 需手動更換GUI_template.py中的QLabel和import image.py
 class MyLabel(QLabel):
