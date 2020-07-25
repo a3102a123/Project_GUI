@@ -427,7 +427,7 @@ color:rgb(0, 255, 0);
   <widget class="QPushButton" name="Target_Button">
    <property name="geometry">
     <rect>
-     <x>152</x>
+     <x>60</x>
      <y>520</y>
      <width>111</width>
      <height>28</height>
@@ -440,7 +440,7 @@ color:rgb(0, 255, 0);
   <widget class="QPushButton" name="Target_BF_Button">
    <property name="geometry">
     <rect>
-     <x>152</x>
+     <x>60</x>
      <y>560</y>
      <width>111</width>
      <height>28</height>
@@ -453,7 +453,7 @@ color:rgb(0, 255, 0);
   <widget class="QPushButton" name="Target_Hungarian_Button">
    <property name="geometry">
     <rect>
-     <x>152</x>
+     <x>60</x>
      <y>600</y>
      <width>111</width>
      <height>28</height>
@@ -461,6 +461,24 @@ color:rgb(0, 255, 0);
    </property>
    <property name="text">
     <string>Hungarian_match</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="Target_Limit_Button">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>520</y>
+     <width>171</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>使用鄰近key point</string>
    </property>
   </widget>
   <zorder>layoutWidget</zorder>
@@ -482,6 +500,7 @@ color:rgb(0, 255, 0);
   <zorder>Target_Button</zorder>
   <zorder>Target_BF_Button</zorder>
   <zorder>Target_Hungarian_Button</zorder>
+  <zorder>Target_Limit_Button</zorder>
  </widget>
  <resources/>
  <connections/>

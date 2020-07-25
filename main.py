@@ -19,6 +19,7 @@ if __name__ == "__main__":
     BF_match_arr = []
     img_arr = []
     img_num = 0
+    # the rectangle corner position of label size
     img_rect = [0,0,0,0]
     draing_flag = False
 
@@ -96,7 +97,7 @@ if __name__ == "__main__":
         img1.draw_img(img1_out)
         img2.draw_img(img2_out)
     
-    # draw the line of match on combined image
+    # draw the line of match on combined image 
     def draw_match_line(matches,img_out,wA,kps1,kps2):
         for m in matches:
             if isinstance(m,tuple) or isinstance(m,list):
@@ -138,6 +139,19 @@ if __name__ == "__main__":
         max_value = float(ui.Ratio_Test.maximum())
         ui.Ratio_Test_Display.display(value / max_value)
         change_image(0)
+    
+    # create GMM foreground mask
+    def GMM():
+        fgbg_gmm = cv2.createBackgroundSubtractorMOG2(detectShadows=True)
+        #the kernel for morphologyEx
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))
+        fgbg_gmm.apply(img1.img)
+        fgmask = fgbg_gmm.apply(img2.img)
+        fgmask = cv2.erode(fgmask,kernel,iterations = 2)
+        fgmask = cv2.dilate(fgmask,kernel,iterations = 5)
+        out_mask = cv2.bitwise_and(img2.img,img2.img,mask = fgmask)
+        show_im("temp",out_mask)
+        return out_mask
 
     # finding the SIFT key points of target image
     def SIFT_target_img():
@@ -163,32 +177,32 @@ if __name__ == "__main__":
         temp_img = img1.img[y:y + height,x:x + width]
         img_target.draw_img(np.copy(temp_img))
         SIFT_target_img()
-        img_target.rect = img_rect.copy()
+        # store the adjusted rectangle size
+        img_target.rect = [x,y,x + width,y + height]
         ui.target_label.setPixmap(QPixmap.fromImage(img_target.qImg))
         ui.target_label.setFixedSize(width*2,height*2)
+        GMM()
 
     # BF match target image with img1 and img2
     def BF_target_match():
-        if ui.target_label.pixmap() == None:
-            print("No target image.")
-            return
         ori_img1 = img_arr[img1.idx]
         des_t = compute_SIFT_des(img_target.img,img_target.kps)
-        des_1 = compute_SIFT_des(ori_img1,img1.kps)
+        if ui.Target_Limit_Button.isChecked():
+            kps1,des_1 = compute_SIFT_des(ori_img1,img1.kps,img_target.rect,30)
+        else:
+            des_1 = compute_SIFT_des(ori_img1,img1.kps)
+            kps1 = img1.kps
         matcher = cv2.DescriptorMatcher_create("BruteForce")
         matches = matcher.knnMatch(des_t,des_1,2)
         img_out = combine_img(img_target.img,ori_img1)
         hA,wA = img_target.img.shape[:2]
         # draw the line on target image and img1
-        draw_match_line(matches,img_out,wA,img_target.kps,img1.kps)
-        # set image to subwindow's label
-        qImg = convImg(np.copy(img_out))
-        sub_ui.Image_Label.setPixmap(QPixmap.fromImage(qImg))
-        # show subwindow
-        Dialog2.show()
+        draw_match_line(matches,img_out,wA,img_target.kps,kps1)
+        return img_out
     
     # create the graph for Hungarian algorithm
     def kp_feature_distance_graph(des1,des2):
+        print(len(des1),len(des2))
         graph = []
         for i in range(0,len(des1)):
             temp_dict = []
@@ -202,12 +216,13 @@ if __name__ == "__main__":
     
     # Hungarian algorithm to match key points
     def Hungarian_match():
-        if ui.target_label.pixmap() == None:
-            print("No target image.")
-            return
         ori_img1 = img_arr[img1.idx]
         des_t = compute_SIFT_des(img_target.img,img_target.kps)
-        des_1 = compute_SIFT_des(ori_img1,img1.kps)
+        if ui.Target_Limit_Button.isChecked():
+            kps1,des_1 = compute_SIFT_des(ori_img1,img1.kps,img_target.rect,30)
+        else:
+            des_1 = compute_SIFT_des(ori_img1,img1.kps)
+            kps1 = img1.kps
         graph = kp_feature_distance_graph(des_t, des_1)
         matches = []
         hungarian = Munkres()
@@ -221,14 +236,28 @@ if __name__ == "__main__":
         img_out = combine_img(img_target.img,ori_img1)
         hA,wA = img_target.img.shape[:2]
         # draw the line on target image and img1
-        draw_match_line(matches,img_out,wA,img_target.kps,img1.kps)
+        draw_match_line(matches,img_out,wA,img_target.kps,kps1)
+        return img_out
+        
+    # display the match result in subwindows
+    # mode determine which match algorithm to use 
+    def show_match_result(mode):
+        if ui.target_label.pixmap() == None:
+            print("No target image.")
+            return
+        # mode 0 use BF match
+        if mode == 0 :
+            img_out = BF_target_match()
+        # mode 1 use Hungarian algorithm
+        elif mode == 1:
+            BF_img = BF_target_match()
+            Hungarian_img = Hungarian_match()
+            img_out = combine_img(BF_img,Hungarian_img)
         # set image to subwindow's label
         qImg = convImg(np.copy(img_out))
         sub_ui.Image_Label.setPixmap(QPixmap.fromImage(qImg))
         # show subwindow
         Dialog2.show()
-        
-
     
     # mouse trigger function
     ###########################################
@@ -286,8 +315,8 @@ if __name__ == "__main__":
         ui.Distance_Limit.valueChanged.connect(change_limit_distance)
         ui.Ratio_Test.valueChanged.connect(change_ratio_test)
         ui.Target_Button.clicked.connect(set_target_img)
-        ui.Target_BF_Button.clicked.connect(BF_target_match)
-        ui.Target_Hungarian_Button.clicked.connect(Hungarian_match)
+        ui.Target_BF_Button.clicked.connect(lambda: show_match_result(0))
+        ui.Target_Hungarian_Button.clicked.connect(lambda: show_match_result(1))
 
     # overwrite mouse trigger function of label
     def Qlabel_fun():

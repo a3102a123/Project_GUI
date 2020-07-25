@@ -15,6 +15,13 @@ from munkres import Munkres, print_matrix
 def image_num():
     return 10
 
+# show the opencv image
+def show_im(name,im):
+    cv2.imshow(name,im)
+    # press any key to close the window
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
 # make the block bgr image.The size of image is as same as img
 def mk_empty_img(img):
     height,width,channel = img.shape
@@ -38,14 +45,42 @@ def split_combined_img(img_out,img1,img2):
     img2_out = img_out[0:hB, wA:]
     return img1_out,img2_out
 
-def compute_SIFT_des(img,kps):
+# the dis is the distance out of rectangle
+# which is used to select potential key points for match
+# if dis = 0 return all key points' descripter
+def compute_SIFT_des(img,kps,rect=[0,0,0,0],dis=0):
     sift = cv2.xfeatures2d.SIFT_create()
     new_kp,des = sift.compute(img,kps)
     # RootSIFT descriptor
     eps = 1e-7
     des /= (des.sum(axis=1, keepdims=True) + eps)
     des = np.sqrt(des)
-    return des
+    if dis == 0 :
+        return des
+    new_des = []
+    max_x = max(rect[0],rect[2]) + dis
+    min_x = min(rect[0],rect[2]) - dis
+    max_y = max(rect[1],rect[3]) + dis
+    min_y = min(rect[1],rect[3]) - dis
+    for i in range(len(kps) - 1 , -1 , -1):
+        kp = kps[i]
+        x,y = kp.pt
+        if x < min_x or x > max_x:
+            new_kp.pop(i)
+            continue
+        if y < min_y or y > max_y:
+            new_kp.pop(i)
+            continue
+        new_des.append(des[i])
+    img_out = copy.deepcopy(img)
+    cv2.drawKeypoints(img,new_kp,img_out)
+    # to show the remain key points on image
+    # cv2.imshow("temp",img_out)
+    # # press any key to close the window
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+    new_des.reverse()
+    return new_kp,np.array(new_des)
 
 # convert opencv image to Qimage
 def convImg(img):

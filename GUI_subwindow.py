@@ -18,6 +18,18 @@ class Ui_Dialog(object):
 "")
         self.Image_Label.setText("")
         self.Image_Label.setObjectName("Image_Label")
+        self.textBrowser = QtWidgets.QTextBrowser(Dialog)
+        self.textBrowser.setGeometry(QtCore.QRect(250, 740, 221, 51))
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        self.textBrowser.setFont(font)
+        self.textBrowser.setObjectName("textBrowser")
+        self.textBrowser_2 = QtWidgets.QTextBrowser(Dialog)
+        self.textBrowser_2.setGeometry(QtCore.QRect(860, 740, 221, 51))
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        self.textBrowser_2.setFont(font)
+        self.textBrowser_2.setObjectName("textBrowser_2")
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
@@ -25,6 +37,16 @@ class Ui_Dialog(object):
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
+        self.textBrowser.setHtml(_translate("Dialog", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'PMingLiU\'; font-size:14pt; font-weight:400; font-style:normal;\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">BF match</p></body></html>"))
+        self.textBrowser_2.setHtml(_translate("Dialog", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'PMingLiU\'; font-size:14pt; font-weight:400; font-style:normal;\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Hungarian</p></body></html>"))
 
 
 if __name__ == "__main__":
