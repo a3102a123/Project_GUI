@@ -24,8 +24,12 @@ def show_im(name,im):
 
 # make the block bgr image.The size of image is as same as img
 def mk_empty_img(img):
-    height,width,channel = img.shape
-    img_out = np.zeros((height,width,channel))
+    if len(img.shape) > 2:
+        height,width,channel = img.shape
+        img_out = np.zeros((height,width,channel), dtype="uint8")
+    else:
+        height,width = img.shape
+        img_out = np.zeros((height,width), dtype="uint8")
     return img_out
 
 # return the horizontally combined image of img1 & img2
@@ -44,6 +48,11 @@ def split_combined_img(img_out,img1,img2):
     img1_out = img_out[0:hA, 0:wA]
     img2_out = img_out[0:hB, wA:]
     return img1_out,img2_out
+
+# apply the mask on rgb image
+def apply_mask(img,mask):
+    out_img = cv2.bitwise_and(img,img,mask = mask)
+    return out_img
 
 # the dis is the distance out of rectangle
 # which is used to select potential key points for match

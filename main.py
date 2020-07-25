@@ -44,7 +44,7 @@ if __name__ == "__main__":
                 return True
 
     # determine whether the match meets the ration test
-    def is_meet_ration(m1,m2):
+    def is_meet_ratio(m1,m2):
         ratio = ui.Ratio_Test_Display.value()
         if m1.distance < m2.distance * ratio:
             return True
@@ -90,24 +90,27 @@ if __name__ == "__main__":
             kp2_pt = np.array( kp2.pt )
             if not is_meet_dis(kp1_pt,kp2_pt):
                 continue
-            if not is_meet_ration(m[0],m[1]):
+            if not is_meet_ratio(m[0],m[1]):
                 continue
             cv2.arrowedLine(img1_out,(int(kp1_pt[0]),int(kp1_pt[1])),(int(kp2_pt[0]),int(kp2_pt[1])),(0,0,255),1)
             cv2.arrowedLine(img2_out,(int(kp1_pt[0]),int(kp1_pt[1])),(int(kp2_pt[0]),int(kp2_pt[1])),(0,0,255),1)
         img1.draw_img(img1_out)
         img2.draw_img(img2_out)
     
+    # input a Dmatch and then return the pair of matched key points
+    def get_match_kp(match,kps1,kps2):
+        if isinstance(match,tuple) or isinstance(match,list):
+            kp1 = kps1[match[0].queryIdx]
+            kp2 = kps2[match[0].trainIdx]
+        else:
+            kp1 = kps1[match.queryIdx]
+            kp2 = kps2[match.trainIdx]
+        return kp1,kp2
+    
     # draw the line of match on combined image 
     def draw_match_line(matches,img_out,wA,kps1,kps2):
         for m in matches:
-            if isinstance(m,tuple) or isinstance(m,list):
-                if not is_meet_ration(m[0],m[1]):
-                    continue
-                kp1 = kps1[m[0].queryIdx]
-                kp2 = kps2[m[0].trainIdx]
-            else:
-                kp1 = kps1[m.queryIdx]
-                kp2 = kps2[m.trainIdx]
+            kp1,kp2 = get_match_kp(m,kps1,kps2)
             kp1_pt = np.array( kp1.pt )
             kp2_pt = np.array( kp2.pt )
             if not is_meet_dis(kp1_pt,kp2_pt):
@@ -118,8 +121,13 @@ if __name__ == "__main__":
     def draw_BF_match_line():
         # prepare combined image
         img_out = combine_img(img1.img,img2.img)
-        matches = BF_match_arr[img1.idx]
+        raw_matches = BF_match_arr[img1.idx]
+        matches = []
         hA, wA = img1.img.shape[:2]
+        for i in range(len(raw_matches) - 1 , -1 , -1):
+            m = raw_matches[i]
+            if is_meet_ratio(m[0],m[1]):
+                matches.append(m)
         # draw line
         draw_match_line(matches,img_out,wA,img1.kps,img2.kps)
         # split combined image to two image
@@ -140,7 +148,7 @@ if __name__ == "__main__":
         ui.Ratio_Test_Display.display(value / max_value)
         change_image(0)
     
-    # create GMM foreground mask
+    # create GMM foreground mask of img2
     def GMM():
         fgbg_gmm = cv2.createBackgroundSubtractorMOG2(detectShadows=True)
         #the kernel for morphologyEx
@@ -149,8 +157,28 @@ if __name__ == "__main__":
         fgmask = fgbg_gmm.apply(img2.img)
         fgmask = cv2.erode(fgmask,kernel,iterations = 2)
         fgmask = cv2.dilate(fgmask,kernel,iterations = 5)
-        out_mask = cv2.bitwise_and(img2.img,img2.img,mask = fgmask)
-        show_im("temp",out_mask)
+        return fgmask
+    
+    # using the mask and SIFT key point match to find the target's contour on img2
+    def find_target_contour(kps_t,kps2,matches,mask):
+        _,contours, hierarchy = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        temp = []
+        count_arr = [0 for i in range(len(contours))]
+        count = 0
+        for m in matches:
+            kp1,kp2 = get_match_kp(m,kps_t,kps2)
+            pt = kp2.pt
+            for i,c in enumerate( contours ):
+                if cv2.pointPolygonTest(c,pt,False) >= 0:
+                    count += 1
+                    count_arr[i] += 1
+            temp.append(kp2)
+        out_mask = mk_empty_img(mask)
+        for i in range(0,len(contours)):
+            if count_arr[i] > 0:
+                x,y,w,h = cv2.boundingRect(contours[i])
+                cv2.rectangle(img2.img,(x,y),(x+w,y+h),(0,255,0),2)
+                out_mask[y:y+h, x:x+w] = mask[y:y+h, x:x+w]
         return out_mask
 
     # finding the SIFT key points of target image
@@ -181,24 +209,23 @@ if __name__ == "__main__":
         img_target.rect = [x,y,x + width,y + height]
         ui.target_label.setPixmap(QPixmap.fromImage(img_target.qImg))
         ui.target_label.setFixedSize(width*2,height*2)
-        GMM()
 
-    # BF match target image with img1 and img2
+    # BF match target image with img2
     def BF_target_match():
-        ori_img1 = img_arr[img1.idx]
+        ori_img2 = img_arr[img2.idx]
         des_t = compute_SIFT_des(img_target.img,img_target.kps)
         if ui.Target_Limit_Button.isChecked():
-            kps1,des_1 = compute_SIFT_des(ori_img1,img1.kps,img_target.rect,30)
+            kps2,des_2 = compute_SIFT_des(ori_img2,img2.kps,img_target.rect,30)
         else:
-            des_1 = compute_SIFT_des(ori_img1,img1.kps)
-            kps1 = img1.kps
+            des_2 = compute_SIFT_des(ori_img2,img2.kps)
+            kps2 = img2.kps
         matcher = cv2.DescriptorMatcher_create("BruteForce")
-        matches = matcher.knnMatch(des_t,des_1,2)
-        img_out = combine_img(img_target.img,ori_img1)
+        matches = matcher.knnMatch(des_t,des_2,2)
+        img_out = combine_img(img_target.img,ori_img2)
         hA,wA = img_target.img.shape[:2]
         # draw the line on target image and img1
-        draw_match_line(matches,img_out,wA,img_target.kps,kps1)
-        return img_out
+        draw_match_line(matches,img_out,wA,img_target.kps,kps2)
+        return kps2,matches,img_out
     
     # create the graph for Hungarian algorithm
     def kp_feature_distance_graph(des1,des2):
@@ -214,16 +241,16 @@ if __name__ == "__main__":
             graph.append(temp_dict)
         return graph
     
-    # Hungarian algorithm to match key points
+    # Hungarian algorithm to match target image with img2
     def Hungarian_match():
-        ori_img1 = img_arr[img1.idx]
+        ori_img2 = img_arr[img2.idx]
         des_t = compute_SIFT_des(img_target.img,img_target.kps)
         if ui.Target_Limit_Button.isChecked():
-            kps1,des_1 = compute_SIFT_des(ori_img1,img1.kps,img_target.rect,30)
+            kps2,des_2 = compute_SIFT_des(ori_img2,img2.kps,img_target.rect,30)
         else:
-            des_1 = compute_SIFT_des(ori_img1,img1.kps)
-            kps1 = img1.kps
-        graph = kp_feature_distance_graph(des_t, des_1)
+            des_2 = compute_SIFT_des(ori_img2,img2.kps)
+            kps2 = img2.kps
+        graph = kp_feature_distance_graph(des_t, des_2)
         matches = []
         hungarian = Munkres()
         print("Computing...")
@@ -233,11 +260,11 @@ if __name__ == "__main__":
             dis = graph[row][column]
             temp = cv2.DMatch(row,column,dis)
             matches.append(temp)
-        img_out = combine_img(img_target.img,ori_img1)
+        img_out = combine_img(img_target.img,ori_img2)
         hA,wA = img_target.img.shape[:2]
         # draw the line on target image and img1
-        draw_match_line(matches,img_out,wA,img_target.kps,kps1)
-        return img_out
+        draw_match_line(matches,img_out,wA,img_target.kps,kps2)
+        return kps2,matches,img_out
         
     # display the match result in subwindows
     # mode determine which match algorithm to use 
@@ -247,12 +274,15 @@ if __name__ == "__main__":
             return
         # mode 0 use BF match
         if mode == 0 :
-            img_out = BF_target_match()
+            kps2,matches,img_out = BF_target_match()
         # mode 1 use Hungarian algorithm
         elif mode == 1:
-            BF_img = BF_target_match()
-            Hungarian_img = Hungarian_match()
+            _,_,BF_img = BF_target_match()
+            kps2,matches,Hungarian_img = Hungarian_match()
             img_out = combine_img(BF_img,Hungarian_img)
+        # find the GMM mask contour of target
+        mask = GMM()
+        find_target_contour(img_target.kps,kps2,matches,mask)
         # set image to subwindow's label
         qImg = convImg(np.copy(img_out))
         sub_ui.Image_Label.setPixmap(QPixmap.fromImage(qImg))
