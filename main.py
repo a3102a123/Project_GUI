@@ -265,6 +265,17 @@ if __name__ == "__main__":
         # draw the line on target image and img1
         draw_match_line(matches,img_out,wA,img_target.kps,kps2)
         return kps2,matches,img_out
+    
+    # find the target in next image & move img1,img2 to next image
+    # input rect is a list of 4 element (index 0,1 for first point, index 2,3 for second point)
+    # (the left top & right bottom point of target rectangle's coordinate)
+    def find_next_target(rect):
+        change_image(1)
+        im_h,im_w,c = img1.img.shape
+        lb_w = ui.img_label1.width()
+        lb_h = ui.img_label1.height()
+        img1.draw_rect(rect,im_w,im_h,lb_w,lb_h,(0,255,0),True)
+        dis_img()
         
     # display the match result in subwindows
     # mode determine which match algorithm to use 
@@ -288,6 +299,7 @@ if __name__ == "__main__":
         sub_ui.Image_Label.setPixmap(QPixmap.fromImage(qImg))
         # show subwindow
         Dialog2.show()
+        find_next_target(img_target.rect)
     
     # mouse trigger function
     ###########################################
@@ -310,7 +322,7 @@ if __name__ == "__main__":
             lb_h = ui.img_label1.height()
             img_rect[2] = event.x()
             img_rect[3] = event.y()
-            img1.draw_rect(img_rect,im_w,im_h,lb_w,lb_h)
+            img1.draw_rect(img_rect,im_w,im_h,lb_w,lb_h,(0,0,255))
             dis_img()
     
     def img_Label1_mouseDoubleClickEvent(self,event):

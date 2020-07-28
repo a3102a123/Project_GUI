@@ -117,13 +117,20 @@ class Image():
         self.img = copy.deepcopy(img)
         self.qImg = convImg(img)
 
-    def draw_rect(self,rect,im_w,im_h,lb_w,lb_h):
+    # draw the rectangle on image
+    # is_img_coor determine whether the input rectangle is in image's coordinate
+    # default assume input rect is in label's coordinate
+    def draw_rect(self,rect,im_w,im_h,lb_w,lb_h,color,is_img_coor = False):
         img = copy.deepcopy(self.img)
-        w_ratio = im_w/lb_w
-        h_ratio = im_h/lb_h
+        if not is_img_coor:
+            w_ratio = im_w/lb_w
+            h_ratio = im_h/lb_h
+        else:
+            w_ratio = 1
+            h_ratio = 1
         p1 = (int(rect[0] * w_ratio),int(rect[1] * h_ratio))
         p2 = (int(rect[2] * w_ratio),int(rect[3] * h_ratio))
-        cv2.rectangle(img,p1,p2,(0,0,255))
+        cv2.rectangle(img,p1,p2,color)
         self.qImg = convImg(img)
 
     def show_img(self):
