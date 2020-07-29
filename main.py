@@ -19,8 +19,6 @@ if __name__ == "__main__":
     BF_match_arr = []
     img_arr = []
     img_num = 0
-    # the rectangle corner position of label size
-    img_rect = [0,0,0,0]
     draing_flag = False
 
     # function
@@ -187,26 +185,20 @@ if __name__ == "__main__":
         kp = sift.detect(img_target.img, None)
         img_target.kps = kp
 
-    # set the bounded image(rad rectangle) in img1 to img3
+    # set the bounded image(rad rectangle) in img1 to img_target
+    # compute on image's coordinate
     def set_target_img():
-        if not sum(img_rect):
+        if not sum(img_target.rect):
             print("No bounded area!")
             return
-        im_h,im_w,c = img1.img.shape
-        lb_w = ui.img_label1.width()
-        lb_h = ui.img_label1.height()
-        w_ratio = im_w/lb_w
-        h_ratio = im_h/lb_h
-        width = int(abs(img_rect[0] - img_rect[2]) * w_ratio)
-        height = int(abs(img_rect[1] - img_rect[3]) * h_ratio)
-        x = int(min(img_rect[0],img_rect[2]) * w_ratio)
-        y = int(min(img_rect[1],img_rect[3]) * h_ratio)
+        width = int(abs(img_target.rect[0] - img_target.rect[2]))
+        height = int(abs(img_target.rect[1] - img_target.rect[3]))
+        x = int(min(img_target.rect[0],img_target.rect[2]))
+        y = int(min(img_target.rect[1],img_target.rect[3]))
         temp_img = np.zeros((height,width,3),dtype="uint8")
         temp_img = img1.img[y:y + height,x:x + width]
         img_target.draw_img(np.copy(temp_img))
         SIFT_target_img()
-        # store the adjusted rectangle size
-        img_target.rect = [x,y,x + width,y + height]
         ui.target_label.setPixmap(QPixmap.fromImage(img_target.qImg))
         ui.target_label.setFixedSize(width*2,height*2)
 
@@ -270,12 +262,15 @@ if __name__ == "__main__":
     # input rect is a list of 4 element (index 0,1 for first point, index 2,3 for second point)
     # (the left top & right bottom point of target rectangle's coordinate)
     def find_next_target(rect):
+        # draw the rectangle on next image to highlight the target
         change_image(1)
         im_h,im_w,c = img1.img.shape
         lb_w = ui.img_label1.width()
         lb_h = ui.img_label1.height()
         img1.draw_rect(rect,im_w,im_h,lb_w,lb_h,(0,255,0),True)
         dis_img()
+        # set the rectangle highlight part of img1 as the next target image
+        set_target_img()
         
     # display the match result in subwindows
     # mode determine which match algorithm to use 
@@ -308,28 +303,38 @@ if __name__ == "__main__":
     def img_label1_mousePressEvent(self,event):
         global draing_flag
         draing_flag = True
-        img_rect[0] = event.x()
-        img_rect[1] = event.y()
+        img_target.rect[0] = event.x()
+        img_target.rect[1] = event.y()
     
     def img_lable1_mouseReleaseEvent(self,event):
         global draing_flag
         draing_flag = False
+        # convert the target rectangle's coordinate to image's coordinate
+        im_h,im_w,c = img1.img.shape
+        lb_w = ui.img_label1.width()
+        lb_h = ui.img_label1.height()
+        w_ratio = im_w/lb_w
+        h_ratio = im_h/lb_h
+        img_target.rect[0] = img_target.rect[0] * w_ratio
+        img_target.rect[1] = img_target.rect[1] * h_ratio
+        img_target.rect[2] = img_target.rect[2] * w_ratio
+        img_target.rect[3] = img_target.rect[3] * h_ratio
     
     def img_label1_mouseMoveEvent(self,event):
         if draing_flag:
             im_h,im_w,c = img1.img.shape
             lb_w = ui.img_label1.width()
             lb_h = ui.img_label1.height()
-            img_rect[2] = event.x()
-            img_rect[3] = event.y()
-            img1.draw_rect(img_rect,im_w,im_h,lb_w,lb_h,(0,0,255))
+            img_target.rect[2] = event.x()
+            img_target.rect[3] = event.y()
+            img1.draw_rect(img_target.rect,im_w,im_h,lb_w,lb_h,(0,0,255))
             dis_img()
     
     def img_Label1_mouseDoubleClickEvent(self,event):
-        img_rect[0] = 0
-        img_rect[1] = 0
-        img_rect[2] = 0
-        img_rect[3] = 0
+        img_target.rect[0] = 0
+        img_target.rect[1] = 0
+        img_target.rect[2] = 0
+        img_target.rect[3] = 0
         img1.draw_img(img1.img)
         dis_img()
     
