@@ -173,6 +173,7 @@ if __name__ == "__main__":
                     count += 1
                     count_arr[i] += 1
             temp.append(kp2)
+        show_im("mask",mask)
         out_mask = mk_empty_img(mask)
         for i in range(0,len(contours)):
             if count_arr[i] > 0:
@@ -188,7 +189,9 @@ if __name__ == "__main__":
                     #print(x,y,x+w,y+h)
                     #show_im("out"+str(i),out_mask)
         print("next_p 1:",next_p)
-        img_target.rect = next_p
+        img_target.rect = next_p       
+        cv2.rectangle(out_mask,(int(next_p[0]),int(next_p[1])),(int(next_p[2]),int(next_p[3])),255,thickness=1)
+        show_im("result",out_mask)
         return next_p
 
     # finding the SIFT key points of target image
