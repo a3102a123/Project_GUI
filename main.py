@@ -12,7 +12,6 @@ if __name__ == "__main__":
     sub_ui = subwindow.Ui_Dialog()
     img1 = Image(cv2.imread("im0/out_0.jpg"),0)
     img2 = Image(cv2.imread("im0/out_1.jpg"),1)
-    img3 = Image(cv2.imread("im0/out_3.jpg"),3)
     img_target = Target_Image(mk_empty_img(img1.img),-1)
     img_dir_path = "im0/"
     img_name_arr = []
@@ -165,7 +164,6 @@ if __name__ == "__main__":
         count = 0
 
         next_p = np.array([512.0, 512.0, 0.0, 0.0]) 
-        result_p = np.array([512.0, 512.0, 0.0, 0.0])
 
         for m in matches:
             kp1,kp2 = get_match_kp(m,kps_t,kps2)
@@ -190,25 +188,6 @@ if __name__ == "__main__":
                     #print(x,y,x+w,y+h)
                     #show_im("out"+str(i),out_mask)
         print("next_p 1:",next_p)
-        cv2.rectangle(out_mask,(int(next_p[0]),int(next_p[1])),(int(next_p[2]),int(next_p[3])),255,thickness=1)
-        show_im("out",out_mask)
-
-        result_mask = mk_empty_img(mask)
-        next_mask = GMM(img2,img3)
-        show_im("next",next_mask)
-        _,contours, hierarchy = cv2.findContours(next_mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
-        for i in range(0,len(contours)):
-            x,y,w,h = cv2.boundingRect(contours[i])
-            if((next_p[0]<=(x+w/2)<=next_p[2])&(next_p[1]<=(y+h/2)<=next_p[3])):
-                result_p[0] = min(result_p[0],x)
-                result_p[1] = min(result_p[1],y)
-                result_p[2] = max(result_p[2],x+w)
-                result_p[3] = max(result_p[3],y+h)
-                result_mask[y:y+h, x:x+w] = next_mask[y:y+h, x:x+w]
-
-        cv2.rectangle(result_mask,(int(result_p[0]),int(result_p[1])),(int(result_p[2]),int(result_p[3])),255,thickness=1)
-        show_im("result",result_mask)  
-        print("next_p 2:",next_p)
         img_target.rect = next_p
         return next_p
 
