@@ -12,6 +12,7 @@ if __name__ == "__main__":
     sub_ui = subwindow.Ui_Dialog()
     img1 = Image(cv2.imread("im0/out_0.jpg"),0)
     img2 = Image(cv2.imread("im0/out_1.jpg"),1)
+    img3 = Image(cv2.imread("im0/out_3.jpg"),3)
     img_target = Target_Image(mk_empty_img(img1.img),-1)
     img_dir_path = "im0/"
     img_name_arr = []
@@ -20,7 +21,6 @@ if __name__ == "__main__":
     img_arr = []
     img_num = 0
     draing_flag = False
-
     # function
     ###########################################
 
@@ -147,12 +147,12 @@ if __name__ == "__main__":
         change_image(0)
     
     # create GMM foreground mask of img2
-    def GMM():
+    def GMM(img_GMM1,img_GMM2):
         fgbg_gmm = cv2.createBackgroundSubtractorMOG2(detectShadows=True)
         #the kernel for morphologyEx
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))
-        fgbg_gmm.apply(img1.img)
-        fgmask = fgbg_gmm.apply(img2.img)
+        fgbg_gmm.apply(img_GMM1.img)
+        fgmask = fgbg_gmm.apply(img_GMM2.img)
         fgmask = cv2.erode(fgmask,kernel,iterations = 2)
         fgmask = cv2.dilate(fgmask,kernel,iterations = 5)
         return fgmask
@@ -163,6 +163,10 @@ if __name__ == "__main__":
         temp = []
         count_arr = [0 for i in range(len(contours))]
         count = 0
+
+        next_p = np.array([512.0, 512.0, 0.0, 0.0]) 
+        result_p = np.array([512.0, 512.0, 0.0, 0.0])
+
         for m in matches:
             kp1,kp2 = get_match_kp(m,kps_t,kps2)
             pt = kp2.pt
@@ -176,8 +180,37 @@ if __name__ == "__main__":
             if count_arr[i] > 0:
                 x,y,w,h = cv2.boundingRect(contours[i])
                 cv2.rectangle(img2.img,(x,y),(x+w,y+h),(0,255,0),2)
-                out_mask[y:y+h, x:x+w] = mask[y:y+h, x:x+w]
-        return out_mask
+
+                if((img_target.rect[0]<=(x+w/2)<=img_target.rect[2])&(img_target.rect[1]<=(y+h/2)<=img_target.rect[3])):
+                    next_p[0] = min(next_p[0],x)
+                    next_p[1] = min(next_p[1],y)
+                    next_p[2] = max(next_p[2],x+w)
+                    next_p[3] = max(next_p[3],y+h)
+                    out_mask[y:y+h, x:x+w] = mask[y:y+h, x:x+w]
+                    #print(x,y,x+w,y+h)
+                    #show_im("out"+str(i),out_mask)
+        print("next_p 1:",next_p)
+        cv2.rectangle(out_mask,(int(next_p[0]),int(next_p[1])),(int(next_p[2]),int(next_p[3])),255,thickness=1)
+        show_im("out",out_mask)
+
+        result_mask = mk_empty_img(mask)
+        next_mask = GMM(img2,img3)
+        show_im("next",next_mask)
+        _,contours, hierarchy = cv2.findContours(next_mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        for i in range(0,len(contours)):
+            x,y,w,h = cv2.boundingRect(contours[i])
+            if((next_p[0]<=(x+w/2)<=next_p[2])&(next_p[1]<=(y+h/2)<=next_p[3])):
+                result_p[0] = min(result_p[0],x)
+                result_p[1] = min(result_p[1],y)
+                result_p[2] = max(result_p[2],x+w)
+                result_p[3] = max(result_p[3],y+h)
+                result_mask[y:y+h, x:x+w] = next_mask[y:y+h, x:x+w]
+
+        cv2.rectangle(result_mask,(int(result_p[0]),int(result_p[1])),(int(result_p[2]),int(result_p[3])),255,thickness=1)
+        show_im("result",result_mask)  
+        print("next_p 2:",next_p)
+        img_target.rect = next_p
+        return next_p
 
     # finding the SIFT key points of target image
     def SIFT_target_img():
@@ -191,6 +224,9 @@ if __name__ == "__main__":
         if not sum(img_target.rect):
             print("No bounded area!")
             return
+
+        print(img_target.rect)
+
         width = int(abs(img_target.rect[0] - img_target.rect[2]))
         height = int(abs(img_target.rect[1] - img_target.rect[3]))
         x = int(min(img_target.rect[0],img_target.rect[2]))
@@ -287,7 +323,9 @@ if __name__ == "__main__":
             kps2,matches,Hungarian_img = Hungarian_match()
             img_out = combine_img(BF_img,Hungarian_img)
         # find the GMM mask contour of target
-        mask = GMM()
+        mask = GMM(img1,img2)
+        
+        # show_im("fgmask",mask)
         find_target_contour(img_target.kps,kps2,matches,mask)
         # set image to subwindow's label
         qImg = convImg(np.copy(img_out))
