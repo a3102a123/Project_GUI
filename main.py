@@ -164,7 +164,7 @@ if __name__ == "__main__":
         count = 0
 
         next_p = np.array([512.0, 512.0, 0.0, 0.0]) 
-
+        # determine which contour is pointed by key point
         for m in matches:
             kp1,kp2 = get_match_kp(m,kps_t,kps2)
             pt = kp2.pt
@@ -175,6 +175,7 @@ if __name__ == "__main__":
             temp.append(kp2)
         show_im("mask",mask)
         out_mask = mk_empty_img(mask)
+        # find the rectangle coordinate of pointed contour
         for i in range(0,len(contours)):
             if count_arr[i] > 0:
                 x,y,w,h = cv2.boundingRect(contours[i])
@@ -189,10 +190,9 @@ if __name__ == "__main__":
                     #print(x,y,x+w,y+h)
                     #show_im("out"+str(i),out_mask)
         print("next_p 1:",next_p)
-        img_target.rect = next_p       
+        img_target.rect = next_p 
         cv2.rectangle(out_mask,(int(next_p[0]),int(next_p[1])),(int(next_p[2]),int(next_p[3])),255,thickness=1)
-        show_im("result",out_mask)
-        return next_p
+        return out_mask
 
     # finding the SIFT key points of target image
     def SIFT_target_img():
@@ -308,7 +308,8 @@ if __name__ == "__main__":
         mask = GMM(img1,img2)
         
         # show_im("fgmask",mask)
-        find_target_contour(img_target.kps,kps2,matches,mask)
+        out_mask = find_target_contour(img_target.kps,kps2,matches,mask)
+        img_out = np.hstack((img_out,cv2.cvtColor( out_mask, cv2.COLOR_GRAY2RGB)))
         # set image to subwindow's label
         qImg = convImg(np.copy(img_out))
         sub_ui.Image_Label.setPixmap(QPixmap.fromImage(qImg))
