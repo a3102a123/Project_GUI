@@ -208,7 +208,12 @@ if __name__ == "__main__":
             return
 
         print(img_target.rect)
-
+        temp = [img_target.rect[0],img_target.rect[1],img_target.rect[2],img_target.rect[3]]
+        img_target.rect[0] = min(temp[0],temp[2])
+        img_target.rect[1] = min(temp[1],temp[3]) 
+        img_target.rect[2] = max(temp[0],temp[2]) 
+        img_target.rect[3] = max(temp[1],temp[3]) 
+        print(img_target.rect)
         width = int(abs(img_target.rect[0] - img_target.rect[2]))
         height = int(abs(img_target.rect[1] - img_target.rect[3]))
         x = int(min(img_target.rect[0],img_target.rect[2]))
