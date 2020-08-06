@@ -192,7 +192,8 @@ if __name__ == "__main__":
         print("next_p 1:",next_p)
         img_target.rect = next_p 
         cv2.rectangle(out_mask,(int(next_p[0]),int(next_p[1])),(int(next_p[2]),int(next_p[3])),255,thickness=1)
-        return out_mask
+        # return the target contour of mask and rectangle coordinate
+        return out_mask,next_p
 
     # finding the SIFT key points of target image
     def SIFT_target_img():
@@ -311,11 +312,14 @@ if __name__ == "__main__":
             img_out = combine_img(BF_img,Hungarian_img)
         # find the GMM mask contour of target
         mask = GMM(img1,img2)
-        
-        # show_im("fgmask",mask)
-        out_mask = find_target_contour(img_target.kps,kps2,matches,mask)
+        # use mask and match restult to find the target in next image
+        out_mask,next_rect = find_target_contour(img_target.kps,kps2,matches,mask)
+        # draw the finding result on match result image
+        _,target_width,_ = img_target.img.shape
+        cv2.rectangle(img_out,(int(next_rect[0] + target_width),int(next_rect[1])),(int(next_rect[2] + target_width),int(next_rect[3])),(0,255,0),thickness=1)
+        # combine the match result and final GMM mask
         img_out = np.hstack((img_out,cv2.cvtColor( out_mask, cv2.COLOR_GRAY2RGB)))
-        # set image to subwindow's label
+        # set image of result to subwindow's label
         qImg = convImg(np.copy(img_out))
         sub_ui.Image_Label.setPixmap(QPixmap.fromImage(qImg))
         # show subwindow
