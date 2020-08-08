@@ -17,6 +17,7 @@ if __name__ == "__main__":
     img_name_arr = []
     img_kp_arr = []
     BF_match_arr = []
+    img_optical_flow_arr = []
     img_arr = []
     img_num = 0
     draing_flag = False
@@ -52,8 +53,12 @@ if __name__ == "__main__":
     def change_image(direction):
         img1_idx = (img1.idx + direction) % img_num
         img2_idx = (img2.idx + direction) % img_num
-        img1.set_img(img_arr , img1_idx , img_kp_arr)
-        img2.set_img(img_arr, img2_idx , img_kp_arr)
+        if ui.Optical_Flow_Button.isChecked():
+            img1.set_img(img_optical_flow_arr , img1_idx , img_kp_arr)
+            img2.set_img(img_optical_flow_arr, img2_idx , img_kp_arr)
+        else:
+            img1.set_img(img_arr , img1_idx , img_kp_arr)
+            img2.set_img(img_arr, img2_idx , img_kp_arr)
         if ui.SIFT_Button.isChecked():
             draw_SIFT_kp()
         if ui.BF_Flow_Button.isChecked():
@@ -394,6 +399,7 @@ if __name__ == "__main__":
         ui.Target_Button.clicked.connect(set_target_img)
         ui.Target_BF_Button.clicked.connect(lambda: show_match_result(0))
         ui.Target_Hungarian_Button.clicked.connect(lambda: show_match_result(1))
+        ui.Optical_Flow_Button.clicked.connect(lambda: change_image(0))
 
     # overwrite mouse trigger function of label
     def Qlabel_fun():
@@ -421,6 +427,8 @@ if __name__ == "__main__":
             import create_data.SIFT_kp
         if not os.path.isfile(dir_path + "SIFT_BF_match.txt"):
             import create_data.SIFT_BF_match
+        if not os.path.isfile(dir_path + "optical_flow.txt"):
+            import create_data.Optical_Flow
     
     # load key points data
     def load_SIFT_kp():
@@ -450,11 +458,20 @@ if __name__ == "__main__":
             BF_match_arr.append(temp_arr)
         f.close()
     
+    # load optical flow data
+    def load_optical_flow():
+        data_path = "data/optical_flow.txt"
+        f = open(data_path,"rb")
+        data = cPickle.loads(f.read())
+        for img in data:
+            img_optical_flow_arr.append(img)
+    
     # load data
     def load_data(img_kp_arr):
         check_data_file()
         load_SIFT_kp()
         load_BF_match()
+        load_optical_flow()
     
     # init image entity
     def init():

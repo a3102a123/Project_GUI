@@ -178,6 +178,15 @@ class Ui_Dialog(object):
         font.setPointSize(12)
         self.Target_Limit_Button.setFont(font)
         self.Target_Limit_Button.setObjectName("Target_Limit_Button")
+        self.textBrowser_5 = QtWidgets.QTextBrowser(Dialog)
+        self.textBrowser_5.setGeometry(QtCore.QRect(1610, 610, 191, 41))
+        self.textBrowser_5.setObjectName("textBrowser_5")
+        self.Optical_Flow_Button = QtWidgets.QCheckBox(Dialog)
+        self.Optical_Flow_Button.setGeometry(QtCore.QRect(1610, 660, 201, 21))
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        self.Optical_Flow_Button.setFont(font)
+        self.Optical_Flow_Button.setObjectName("Optical_Flow_Button")
         self.layoutWidget.raise_()
         self.layoutWidget.raise_()
         self.img_label1.raise_()
@@ -198,6 +207,8 @@ class Ui_Dialog(object):
         self.Target_BF_Button.raise_()
         self.Target_Hungarian_Button.raise_()
         self.Target_Limit_Button.raise_()
+        self.textBrowser_5.raise_()
+        self.Optical_Flow_Button.raise_()
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
@@ -246,6 +257,12 @@ class Ui_Dialog(object):
         self.Target_BF_Button.setText(_translate("Dialog", "BF_match"))
         self.Target_Hungarian_Button.setText(_translate("Dialog", "Hungarian_match"))
         self.Target_Limit_Button.setText(_translate("Dialog", "使用鄰近key point"))
+        self.textBrowser_5.setHtml(_translate("Dialog", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'PMingLiU\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:14pt;\">Optical Flow</span></p></body></html>"))
+        self.Optical_Flow_Button.setText(_translate("Dialog", "Show Optical Flow"))
 
 
 if __name__ == "__main__":
