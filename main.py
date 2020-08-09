@@ -310,11 +310,13 @@ if __name__ == "__main__":
         # mode 0 use BF match
         if mode == 0 :
             kps2,matches,img_out = BF_target_match()
+            sub_ui.textBrowser_2.setText("Result mask")
         # mode 1 use Hungarian algorithm
         elif mode == 1:
             _,_,BF_img = BF_target_match()
             kps2,matches,Hungarian_img = Hungarian_match()
             img_out = combine_img(BF_img,Hungarian_img)
+            sub_ui.textBrowser_2.setText("Hungarian")
         # find the GMM mask contour of target
         mask = GMM(img1,img2)
         # use mask and match restult to find the target in next image
@@ -327,6 +329,7 @@ if __name__ == "__main__":
         # set image of result to subwindow's label
         qImg = convImg(np.copy(img_out))
         sub_ui.Image_Label.setPixmap(QPixmap.fromImage(qImg))
+        sub_ui.textBrowser.setText("BF Match")
         # show subwindow
         Dialog2.show()
         find_next_target(img_target.rect)
