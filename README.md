@@ -14,4 +14,5 @@
 - Class資料夾放header file(EX. main.py 要import 的 module 放在image.py中)
 - create_data資料夾放用來產生 data file的module，從 main.py call 進去，寫的時候路徑以main.py的位置當作root
 - data資料夾放 data file
+- result_data資料夾放各種車輛偵測、實驗的結果
 - im0資料夾放圖片(資料夾內檔名任意皆可，以有序的編號為佳)
