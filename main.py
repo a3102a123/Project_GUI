@@ -162,12 +162,11 @@ if __name__ == "__main__":
         return fgmask
     
     # using the mask and SIFT key point match to find the target's contour on img2
-    def find_target_contour(kps_t,kps2,matches,mask):
+    def find_target_contour(kps_t,kps2,matches,mask,is_show):
         _,contours, hierarchy = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
         temp = []
         count_arr = [0 for i in range(len(contours))]
         count = 0
-
         next_p = np.array([512.0, 512.0, 0.0, 0.0]) 
         # determine which contour is pointed by key point
         for m in matches:
@@ -178,7 +177,8 @@ if __name__ == "__main__":
                     count += 1
                     count_arr[i] += 1
             temp.append(kp2)
-        show_im("mask",mask)
+        if is_show:
+            show_im("mask",mask)
         out_mask = mk_empty_img(mask)
         # find the rectangle coordinate of pointed contour
         for i in range(0,len(contours)):
@@ -195,7 +195,6 @@ if __name__ == "__main__":
                     #print(x,y,x+w,y+h)
                     #show_im("out"+str(i),out_mask)
         print("next_p 1:",next_p)
-        img_target.rect = next_p 
         cv2.rectangle(out_mask,(int(next_p[0]),int(next_p[1])),(int(next_p[2]),int(next_p[3])),255,thickness=1)
         # return the target contour of mask and rectangle coordinate
         return out_mask,next_p
@@ -212,14 +211,11 @@ if __name__ == "__main__":
         if not sum(img_target.rect):
             print("No bounded area!")
             return
-
-        print(img_target.rect)
         temp = [img_target.rect[0],img_target.rect[1],img_target.rect[2],img_target.rect[3]]
         img_target.rect[0] = min(temp[0],temp[2])
         img_target.rect[1] = min(temp[1],temp[3]) 
         img_target.rect[2] = max(temp[0],temp[2]) 
         img_target.rect[3] = max(temp[1],temp[3]) 
-        print(img_target.rect)
         width = int(abs(img_target.rect[0] - img_target.rect[2]))
         height = int(abs(img_target.rect[1] - img_target.rect[3]))
         x = int(min(img_target.rect[0],img_target.rect[2]))
@@ -301,9 +297,10 @@ if __name__ == "__main__":
         # set the rectangle highlight part of img1 as the next target image
         set_target_img()
         
-    # display the match result in subwindows
-    # mode determine which match algorithm to use 
-    def show_match_result(mode):
+    # display the match result in subwindows and detect result on next image
+    # mode determine which match algorithm to use
+    # is_show flag determine whether the process is showed 
+    def show_detect_result(mode,is_show):
         if ui.target_label.pixmap() == None:
             print("No target image.")
             return
@@ -320,7 +317,7 @@ if __name__ == "__main__":
         # find the GMM mask contour of target
         mask = GMM(img1,img2)
         # use mask and match restult to find the target in next image
-        out_mask,next_rect = find_target_contour(img_target.kps,kps2,matches,mask)
+        out_mask,next_rect = find_target_contour(img_target.kps,kps2,matches,mask,is_show)
         # draw the finding result on match result image
         _,target_width,_ = img_target.img.shape
         cv2.rectangle(img_out,(int(next_rect[0] + target_width),int(next_rect[1])),(int(next_rect[2] + target_width),int(next_rect[3])),(0,255,0),thickness=1)
@@ -331,8 +328,42 @@ if __name__ == "__main__":
         sub_ui.Image_Label.setPixmap(QPixmap.fromImage(qImg))
         sub_ui.textBrowser.setText("BF Match")
         # show subwindow
-        Dialog2.show()
+        if is_show:
+            Dialog2.show()
+        # update the next target's coordinate of rectangle
+        img_target.rect = next_rect
         find_next_target(img_target.rect)
+        return next_rect
+    
+    # save the match result 
+    def save_detect_result():
+        # check dir exist
+        data_dir = "result_data"
+        if not os.path.isdir(data_dir):
+            os.mkdir(data_dir)
+        filename = ui.FileName.toPlainText()
+        # check filename isn't empty
+        if filename == "":
+            print("The filename is empty!")
+            return
+        # check whether the target exist
+        if ui.target_label.pixmap() == None:
+            print("No target image!")
+            return
+        # check img1 is first image
+        if img1.idx != 0 :
+            print("The left image is not the first image!")
+            return
+        # run detect to find target on all image
+        result_rect_arr = []
+        for i in range(len(img_arr) - 1):
+            result_rect = show_detect_result(0,False)
+            result_rect_arr.append(result_rect)
+        # store the result
+        f = open(data_dir + "/" + filename,"wb")
+        f.write(cPickle.dumps(result_rect_arr))
+        f.close()
+        print("Already save result into the file: " + filename + "!")
     
     # mouse trigger function
     ###########################################
@@ -400,9 +431,10 @@ if __name__ == "__main__":
         ui.Distance_Limit.valueChanged.connect(change_limit_distance)
         ui.Ratio_Test.valueChanged.connect(change_ratio_test)
         ui.Target_Button.clicked.connect(set_target_img)
-        ui.Target_BF_Button.clicked.connect(lambda: show_match_result(0))
-        ui.Target_Hungarian_Button.clicked.connect(lambda: show_match_result(1))
+        ui.Target_BF_Button.clicked.connect(lambda: show_detect_result(0,True))
+        ui.Target_Hungarian_Button.clicked.connect(lambda: show_detect_result(1,True))
         ui.Optical_Flow_Button.clicked.connect(lambda: change_image(0))
+        ui.SaveFileButton.clicked.connect(save_detect_result)
 
     # overwrite mouse trigger function of label
     def Qlabel_fun():

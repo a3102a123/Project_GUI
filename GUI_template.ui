@@ -405,8 +405,8 @@ color:rgb(0, 255, 0);
   <widget class="QLabel" name="target_label">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>200</y>
+     <x>50</x>
+     <y>90</y>
      <width>300</width>
      <height>300</height>
     </rect>
@@ -427,8 +427,8 @@ color:rgb(0, 255, 0);
   <widget class="QPushButton" name="Target_Button">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>520</y>
+     <x>50</x>
+     <y>410</y>
      <width>111</width>
      <height>28</height>
     </rect>
@@ -440,8 +440,8 @@ color:rgb(0, 255, 0);
   <widget class="QPushButton" name="Target_BF_Button">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>560</y>
+     <x>50</x>
+     <y>450</y>
      <width>111</width>
      <height>28</height>
     </rect>
@@ -453,8 +453,8 @@ color:rgb(0, 255, 0);
   <widget class="QPushButton" name="Target_Hungarian_Button">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>600</y>
+     <x>50</x>
+     <y>490</y>
      <width>111</width>
      <height>28</height>
     </rect>
@@ -466,8 +466,8 @@ color:rgb(0, 255, 0);
   <widget class="QCheckBox" name="Target_Limit_Button">
    <property name="geometry">
     <rect>
-     <x>190</x>
-     <y>520</y>
+     <x>180</x>
+     <y>410</y>
      <width>171</width>
      <height>41</height>
     </rect>
@@ -516,6 +516,28 @@ p, li { white-space: pre-wrap; }
     <string>Show Optical Flow</string>
    </property>
   </widget>
+  <widget class="QWidget" name="">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>540</y>
+     <width>301</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <item>
+     <widget class="QTextEdit" name="FileName"/>
+    </item>
+    <item>
+     <widget class="QPushButton" name="SaveFileButton">
+      <property name="text">
+       <string>Save</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
   <zorder>layoutWidget</zorder>
   <zorder>layoutWidget</zorder>
   <zorder>img_label1</zorder>
@@ -538,6 +560,8 @@ p, li { white-space: pre-wrap; }
   <zorder>Target_Limit_Button</zorder>
   <zorder>textBrowser_5</zorder>
   <zorder>Optical_Flow_Button</zorder>
+  <zorder>FileName</zorder>
+  <zorder>SaveFileButton</zorder>
  </widget>
  <resources/>
  <connections/>
