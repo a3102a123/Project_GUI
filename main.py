@@ -28,6 +28,8 @@ if __name__ == "__main__":
     def dis_img():
         ui.img_label1.setPixmap( QPixmap.fromImage(img1.qImg))
         ui.img_label2.setPixmap( QPixmap.fromImage(img2.qImg))
+        # refresh the mainwindow
+        QApplication.processEvents()
 
     # determine whether the match meets the distance limit
     def is_meet_dis(kp1_pt,kp2_pt):
@@ -284,15 +286,16 @@ if __name__ == "__main__":
         return kps2,matches,img_out
     
     # find the target in next image & move img1,img2 to next image
-    # input rect is a list of 4 element (index 0,1 for first point, index 2,3 for second point)
+    # set up the rect attribute of img_target which is a list of 4 element (index 0,1 for first point, index 2,3 for second point)
     # (the left top & right bottom point of target rectangle's coordinate)
-    def find_next_target(rect):
+    # dir is the direction of next image(also can set 0 to let image unchanged)
+    def find_next_target(dir):
         # draw the rectangle on next image to highlight the target
-        change_image(1)
+        change_image(dir)
         im_h,im_w,c = img1.img.shape
         lb_w = ui.img_label1.width()
         lb_h = ui.img_label1.height()
-        img1.draw_rect(rect,im_w,im_h,lb_w,lb_h,(0,255,0),True)
+        img1.draw_rect(img_target.rect,im_w,im_h,lb_w,lb_h,(0,255,0),True)
         dis_img()
         # set the rectangle highlight part of img1 as the next target image
         set_target_img()
@@ -332,7 +335,7 @@ if __name__ == "__main__":
             Dialog2.show()
         # update the next target's coordinate of rectangle
         img_target.rect = next_rect
-        find_next_target(img_target.rect)
+        find_next_target(1)
         return next_rect
     
     # save the match result 
@@ -355,7 +358,7 @@ if __name__ == "__main__":
             print("The left image is not the first image!")
             return
         # run detect to find target on all image
-        result_rect_arr = []
+        result_rect_arr = [img_target.rect]
         for i in range(len(img_arr) - 1):
             result_rect = show_detect_result(0,False)
             result_rect_arr.append(result_rect)
@@ -364,6 +367,40 @@ if __name__ == "__main__":
         f.write(cPickle.dumps(result_rect_arr))
         f.close()
         print("Already save result into the file: " + filename + "!")
+    
+    # display the detect result file of selected type of vehicle 
+    def display_select_result():
+        # intial the image to first image
+        img1.set_img(img_arr,0,img_kp_arr)
+        img2.set_img(img_arr,1,img_kp_arr)
+        select_data = ui.Result_Data.currentText()
+        if select_data == "Bus":
+            load_and_show_detect_result(File_Type.BUS)
+        elif select_data == "Car":
+            load_and_show_detect_result(File_Type.CAR)
+
+    # load the detect result file and display it 
+    def load_and_show_detect_result(type):
+        dir_path = "result_data"
+        if type == File_Type.BUS:
+            file_path = dir_path + "/" + "bus.txt"
+        elif type == File_Type.CAR:
+            file_path = dir_path + "/" + "car.txt"
+        else:
+            file_path = dir_path + "/" + ""
+        if not os.path.isfile(file_path):
+            print("The result file doesn't exist!!")
+            return
+        f = open(file_path,"rb")
+        result_rect_arr = cPickle.loads(f.read())
+        for i,rect in enumerate(result_rect_arr):
+            img_target.rect = rect
+            if i == 0:
+                find_next_target(0)
+                continue
+            find_next_target(1)
+            time.sleep(.500)
+        f.close()
     
     # mouse trigger function
     ###########################################
@@ -435,6 +472,7 @@ if __name__ == "__main__":
         ui.Target_Hungarian_Button.clicked.connect(lambda: show_detect_result(1,True))
         ui.Optical_Flow_Button.clicked.connect(lambda: change_image(0))
         ui.SaveFileButton.clicked.connect(save_detect_result)
+        ui.Dispaly_Button.clicked.connect(display_select_result)
 
     # overwrite mouse trigger function of label
     def Qlabel_fun():

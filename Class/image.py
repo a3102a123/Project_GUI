@@ -5,7 +5,9 @@ import copy
 import _pickle as cPickle
 import sys
 import os
+import time
 
+from enum import Enum,IntEnum
 from PyQt5.QtWidgets import QWidget, QApplication, QLabel
 from PyQt5.QtCore import QRect, Qt
 from PyQt5.QtGui import QImage, QPixmap, QPainter, QPen, QGuiApplication
@@ -143,6 +145,12 @@ class Image():
 class Target_Image(Image):
     def __init__(self,img,i):
         self.rect = [0,0,0,0]
+
+# The enum of result file type
+class File_Type(IntEnum):
+    BUS = 1
+    CAR = 2
+    AUTOBIKE = 3
 
 # 需手動更換GUI_template.py中的QLabel和import image.py
 class MyLabel(QLabel):
