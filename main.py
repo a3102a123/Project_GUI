@@ -223,12 +223,14 @@ if __name__ == "__main__":
         width = int(abs(img_target.rect[0] - img_target.rect[2]))
         height = int(abs(img_target.rect[1] - img_target.rect[3]))
         print(width*height)
-        if(width*height < 10000):
-            erode_num = 1
-            dilate_num = 15
+        global erode_num
+        global dilate_num
+        if(width*height < 15000):
+            erode_num = 2
+            dilate_num = 3
         else:
-            erode_num = 8
-            dilate_num = 10
+            erode_num = 4
+            dilate_num = 8
         x = int(min(img_target.rect[0],img_target.rect[2]))
         y = int(min(img_target.rect[1],img_target.rect[3]))
         temp_img = np.zeros((height,width,3),dtype="uint8")
@@ -327,7 +329,7 @@ if __name__ == "__main__":
             img_out = combine_img(BF_img,Hungarian_img)
             sub_ui.textBrowser_2.setText("Hungarian")
         # find the GMM mask contour of target
-        print(erode_num,dilate_num)
+        print("e d:", erode_num,dilate_num)
         mask = GMM(img1,img2)
         # use mask and match restult to find the target in next image
         out_mask,next_rect = find_target_contour(img_target.kps,kps2,matches,mask,is_show)
