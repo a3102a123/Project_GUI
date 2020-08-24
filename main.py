@@ -21,6 +21,8 @@ if __name__ == "__main__":
     img_arr = []
     img_num = 0
     draing_flag = False
+    erode_num = 3
+    dilate_num = 5
     # function
     ###########################################
 
@@ -159,8 +161,8 @@ if __name__ == "__main__":
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))
         fgbg_gmm.apply(img_GMM1.img)
         fgmask = fgbg_gmm.apply(img_GMM2.img)
-        fgmask = cv2.erode(fgmask,kernel,iterations = 2)
-        fgmask = cv2.dilate(fgmask,kernel,iterations = 5)
+        fgmask = cv2.erode(fgmask,kernel,iterations = erode_num)
+        fgmask = cv2.dilate(fgmask,kernel,iterations = dilate_num)
         return fgmask
     
     # using the mask and SIFT key point match to find the target's contour on img2
@@ -220,6 +222,13 @@ if __name__ == "__main__":
         img_target.rect[3] = max(temp[1],temp[3]) 
         width = int(abs(img_target.rect[0] - img_target.rect[2]))
         height = int(abs(img_target.rect[1] - img_target.rect[3]))
+        print(width*height)
+        if(width*height < 10000):
+            erode_num = 1
+            dilate_num = 15
+        else:
+            erode_num = 8
+            dilate_num = 10
         x = int(min(img_target.rect[0],img_target.rect[2]))
         y = int(min(img_target.rect[1],img_target.rect[3]))
         temp_img = np.zeros((height,width,3),dtype="uint8")
@@ -318,6 +327,7 @@ if __name__ == "__main__":
             img_out = combine_img(BF_img,Hungarian_img)
             sub_ui.textBrowser_2.setText("Hungarian")
         # find the GMM mask contour of target
+        print(erode_num,dilate_num)
         mask = GMM(img1,img2)
         # use mask and match restult to find the target in next image
         out_mask,next_rect = find_target_contour(img_target.kps,kps2,matches,mask,is_show)
