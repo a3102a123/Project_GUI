@@ -516,36 +516,14 @@ p, li { white-space: pre-wrap; }
     <string>Show Optical Flow</string>
    </property>
   </widget>
-  <widget class="QWidget" name="layoutWidget">
-   <property name="geometry">
-    <rect>
-     <x>50</x>
-     <y>540</y>
-     <width>301</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <layout class="QHBoxLayout" name="horizontalLayout_3">
-    <item>
-     <widget class="QTextEdit" name="FileName"/>
-    </item>
-    <item>
-     <widget class="QPushButton" name="SaveFileButton">
-      <property name="text">
-       <string>Save</string>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
   <widget class="QTextBrowser" name="Result_Data_Text">
    <property name="enabled">
     <bool>false</bool>
    </property>
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>590</y>
+     <x>10</x>
+     <y>600</y>
      <width>351</width>
      <height>31</height>
     </rect>
@@ -572,8 +550,8 @@ p, li { white-space: pre-wrap; }
   <widget class="QComboBox" name="Result_Data">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>630</y>
+     <x>50</x>
+     <y>650</y>
      <width>131</width>
      <height>31</height>
     </rect>
@@ -590,26 +568,59 @@ p, li { white-space: pre-wrap; }
    </item>
    <item>
     <property name="text">
-     <string>Car</string>
+     <string>Car1</string>
     </property>
    </item>
    <item>
     <property name="text">
-     <string>Autobike</string>
+     <string>Car2</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Autobike1</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Autobike2</string>
     </property>
    </item>
   </widget>
   <widget class="QPushButton" name="Dispaly_Button">
    <property name="geometry">
     <rect>
-     <x>220</x>
-     <y>630</y>
+     <x>210</x>
+     <y>650</y>
      <width>81</width>
      <height>31</height>
     </rect>
    </property>
    <property name="text">
     <string>Display</string>
+   </property>
+  </widget>
+  <widget class="QTextEdit" name="FileName">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>540</y>
+     <width>199</width>
+     <height>41</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="SaveFileButton">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>550</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Save</string>
    </property>
   </widget>
   <zorder>layoutWidget</zorder>

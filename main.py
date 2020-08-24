@@ -386,8 +386,14 @@ if __name__ == "__main__":
         select_data = ui.Result_Data.currentText()
         if select_data == "Bus":
             load_and_show_detect_result(File_Type.BUS)
-        elif select_data == "Car":
+        elif select_data == "Car1":
             load_and_show_detect_result(File_Type.CAR)
+        elif select_data == "Car2":
+            load_and_show_detect_result(File_Type.CAR2)
+        elif select_data == "Autobike1":
+            load_and_show_detect_result(File_Type.AUTOBIKE)
+        elif select_data == "Autobike2":
+            load_and_show_detect_result(File_Type.AUTOBIKE2)
 
     # load the detect result file and display it 
     def load_and_show_detect_result(type):
@@ -396,6 +402,12 @@ if __name__ == "__main__":
             file_path = dir_path + "/" + "bus.txt"
         elif type == File_Type.CAR:
             file_path = dir_path + "/" + "car.txt"
+        elif type == File_Type.CAR2:
+            file_path = dir_path + "/" + "car_left.txt"
+        elif type == File_Type.AUTOBIKE:
+            file_path = dir_path + "/" + "moto.txt"
+        elif type == File_Type.AUTOBIKE2:
+            file_path = dir_path + "/" + "moto_right.txt"
         else:
             file_path = dir_path + "/" + ""
         if not os.path.isfile(file_path):

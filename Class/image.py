@@ -150,7 +150,9 @@ class Target_Image(Image):
 class File_Type(IntEnum):
     BUS = 1
     CAR = 2
-    AUTOBIKE = 3
+    CAR2 = 3
+    AUTOBIKE = 4
+    AUTOBIKE2 = 5
 
 # 需手動更換GUI_template.py中的QLabel和import image.py
 class MyLabel(QLabel):

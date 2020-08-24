@@ -187,21 +187,9 @@ class Ui_Dialog(object):
         font.setPointSize(14)
         self.Optical_Flow_Button.setFont(font)
         self.Optical_Flow_Button.setObjectName("Optical_Flow_Button")
-        self.layoutWidget2 = QtWidgets.QWidget(Dialog)
-        self.layoutWidget2.setGeometry(QtCore.QRect(50, 540, 301, 31))
-        self.layoutWidget2.setObjectName("layoutWidget2")
-        self.horizontalLayout_3 = QtWidgets.QHBoxLayout(self.layoutWidget2)
-        self.horizontalLayout_3.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
-        self.FileName = QtWidgets.QTextEdit(self.layoutWidget2)
-        self.FileName.setObjectName("FileName")
-        self.horizontalLayout_3.addWidget(self.FileName)
-        self.SaveFileButton = QtWidgets.QPushButton(self.layoutWidget2)
-        self.SaveFileButton.setObjectName("SaveFileButton")
-        self.horizontalLayout_3.addWidget(self.SaveFileButton)
         self.Result_Data_Text = QtWidgets.QTextBrowser(Dialog)
         self.Result_Data_Text.setEnabled(False)
-        self.Result_Data_Text.setGeometry(QtCore.QRect(20, 590, 351, 31))
+        self.Result_Data_Text.setGeometry(QtCore.QRect(10, 600, 351, 31))
         self.Result_Data_Text.setStyleSheet("font-size:14pt;\n"
 "margin-top:0px;\n"
 "margin-bottom:0px;\n"
@@ -213,7 +201,7 @@ class Ui_Dialog(object):
 "p{text-align:center;}")
         self.Result_Data_Text.setObjectName("Result_Data_Text")
         self.Result_Data = QtWidgets.QComboBox(Dialog)
-        self.Result_Data.setGeometry(QtCore.QRect(60, 630, 131, 31))
+        self.Result_Data.setGeometry(QtCore.QRect(50, 650, 131, 31))
         font = QtGui.QFont()
         font.setPointSize(14)
         self.Result_Data.setFont(font)
@@ -221,9 +209,17 @@ class Ui_Dialog(object):
         self.Result_Data.addItem("")
         self.Result_Data.addItem("")
         self.Result_Data.addItem("")
+        self.Result_Data.addItem("")
+        self.Result_Data.addItem("")
         self.Dispaly_Button = QtWidgets.QPushButton(Dialog)
-        self.Dispaly_Button.setGeometry(QtCore.QRect(220, 630, 81, 31))
+        self.Dispaly_Button.setGeometry(QtCore.QRect(210, 650, 81, 31))
         self.Dispaly_Button.setObjectName("Dispaly_Button")
+        self.FileName = QtWidgets.QTextEdit(Dialog)
+        self.FileName.setGeometry(QtCore.QRect(20, 540, 199, 41))
+        self.FileName.setObjectName("FileName")
+        self.SaveFileButton = QtWidgets.QPushButton(Dialog)
+        self.SaveFileButton.setGeometry(QtCore.QRect(240, 550, 93, 28))
+        self.SaveFileButton.setObjectName("SaveFileButton")
         self.layoutWidget.raise_()
         self.layoutWidget.raise_()
         self.layoutWidget.raise_()
@@ -304,16 +300,18 @@ class Ui_Dialog(object):
 "</style></head><body style=\" font-family:\'PMingLiU\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
 "<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:14pt;\">Optical Flow</span></p></body></html>"))
         self.Optical_Flow_Button.setText(_translate("Dialog", "Show Optical Flow"))
-        self.SaveFileButton.setText(_translate("Dialog", "Save"))
         self.Result_Data_Text.setHtml(_translate("Dialog", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'PMingLiU\'; font-size:14pt; font-weight:400; font-style:normal;\">\n"
 "<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;\"><span style=\" background-color:#ffffff;\">Display Detect Result Data</span></p></body></html>"))
         self.Result_Data.setItemText(0, _translate("Dialog", "Bus"))
-        self.Result_Data.setItemText(1, _translate("Dialog", "Car"))
-        self.Result_Data.setItemText(2, _translate("Dialog", "Autobike"))
+        self.Result_Data.setItemText(1, _translate("Dialog", "Car1"))
+        self.Result_Data.setItemText(2, _translate("Dialog", "Car2"))
+        self.Result_Data.setItemText(3, _translate("Dialog", "Autobike1"))
+        self.Result_Data.setItemText(4, _translate("Dialog", "Autobike2"))
         self.Dispaly_Button.setText(_translate("Dialog", "Display"))
+        self.SaveFileButton.setText(_translate("Dialog", "Save"))
 
 
 if __name__ == "__main__":
