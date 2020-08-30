@@ -23,6 +23,7 @@ if __name__ == "__main__":
     draing_flag = False
     erode_num = 3
     dilate_num = 5
+    saved_result_arr = []
     # function
     ###########################################
 
@@ -74,6 +75,16 @@ if __name__ == "__main__":
         text2 = img_name_arr[img2.idx]
         ui.img_text1.setText(text1)
         ui.img_text2.setText(text2)
+    
+    # change the image with saved result data
+    def change_image_with_result(direction):
+        change_image(direction)
+        if len(saved_result_arr) != 0:
+            img_target.rect = saved_result_arr[img1.idx]
+            find_next_target(0)
+            dis_img()
+        else :
+            print("Haven't loaded result data.")
 
     # display SIFT key points on image
     def draw_SIFT_kp():
@@ -307,7 +318,6 @@ if __name__ == "__main__":
         lb_w = ui.img_label1.width()
         lb_h = ui.img_label1.height()
         img1.draw_rect(img_target.rect,im_w,im_h,lb_w,lb_h,(0,255,0),True)
-        dis_img()
         # set the rectangle highlight part of img1 as the next target image
         set_target_img()
         
@@ -348,6 +358,7 @@ if __name__ == "__main__":
         # update the next target's coordinate of rectangle
         img_target.rect = next_rect
         find_next_target(1)
+        dis_img()
         return next_rect
     
     # save the match result 
@@ -387,18 +398,28 @@ if __name__ == "__main__":
         img2.set_img(img_arr,1,img_kp_arr)
         select_data = ui.Result_Data.currentText()
         if select_data == "Bus":
-            load_and_show_detect_result(File_Type.BUS)
+            load_detect_result(File_Type.BUS)
         elif select_data == "Car1":
-            load_and_show_detect_result(File_Type.CAR)
+            load_detect_result(File_Type.CAR)
         elif select_data == "Car2":
-            load_and_show_detect_result(File_Type.CAR2)
+            load_detect_result(File_Type.CAR2)
         elif select_data == "Autobike1":
-            load_and_show_detect_result(File_Type.AUTOBIKE)
+            load_detect_result(File_Type.AUTOBIKE)
         elif select_data == "Autobike2":
-            load_and_show_detect_result(File_Type.AUTOBIKE2)
+            load_detect_result(File_Type.AUTOBIKE2)
+        if len(saved_result_arr) == 0:
+            return
+        for i,rect in enumerate(saved_result_arr):
+            img_target.rect = rect
+            if i == 0:
+                find_next_target(0)
+            else:
+                find_next_target(1)
+            dis_img()
+            time.sleep(.500)
 
-    # load the detect result file and display it 
-    def load_and_show_detect_result(type):
+    # load the detect result file and store the detect result data into global array
+    def load_detect_result(type):
         dir_path = "result_data"
         if type == File_Type.BUS:
             file_path = dir_path + "/" + "bus.txt"
@@ -414,16 +435,12 @@ if __name__ == "__main__":
             file_path = dir_path + "/" + ""
         if not os.path.isfile(file_path):
             print("The result file doesn't exist!!")
+            saved_result_arr.clear()
             return
         f = open(file_path,"rb")
-        result_rect_arr = cPickle.loads(f.read())
-        for i,rect in enumerate(result_rect_arr):
-            img_target.rect = rect
-            if i == 0:
-                find_next_target(0)
-                continue
-            find_next_target(1)
-            time.sleep(.500)
+        data = cPickle.loads(f.read())
+        for rect_data in data:
+            saved_result_arr.append(rect_data)
         f.close()
     
     # mouse trigger function
@@ -497,6 +514,8 @@ if __name__ == "__main__":
         ui.Optical_Flow_Button.clicked.connect(lambda: change_image(0))
         ui.SaveFileButton.clicked.connect(save_detect_result)
         ui.Dispaly_Button.clicked.connect(display_select_result)
+        ui.Result_Left_Button.clicked.connect(lambda: change_image_with_result(-1))
+        ui.Result_Right_Button.clicked.connect(lambda: change_image_with_result(1))
 
     # overwrite mouse trigger function of label
     def Qlabel_fun():
