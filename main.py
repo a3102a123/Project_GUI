@@ -435,8 +435,8 @@ if __name__ == "__main__":
             file_path = dir_path + "/" + ""
         if not os.path.isfile(file_path):
             print("The result file doesn't exist!!")
-            saved_result_arr.clear()
             return
+        saved_result_arr.clear()
         f = open(file_path,"rb")
         data = cPickle.loads(f.read())
         for rect_data in data:
