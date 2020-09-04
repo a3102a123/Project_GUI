@@ -80,8 +80,7 @@ if __name__ == "__main__":
     def change_image_with_result(direction):
         change_image(direction)
         if len(saved_result_arr) != 0:
-            img_target.rect = saved_result_arr[img1.idx]
-            find_next_target(0)
+            find_next_target(0,saved_result_arr[img1.idx])
             dis_img()
         else :
             print("Haven't loaded result data.")
@@ -177,21 +176,22 @@ if __name__ == "__main__":
         return fgmask
     
     # using the mask and SIFT key point match to find the target's contour on img2
-    def find_target_contour(kps_t,kps2,matches,mask,is_show):
+    def find_target_contour(kps_t_arr,kps2_arr,matches_arr,mask,is_show):
         _,contours, hierarchy = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
         temp = []
         count_arr = [0 for i in range(len(contours))]
         count = 0
         next_p = np.array([512.0, 512.0, 0.0, 0.0]) 
         # determine which contour is pointed by key point
-        for m in matches:
-            kp1,kp2 = get_match_kp(m,kps_t,kps2)
-            pt = kp2.pt
-            for i,c in enumerate( contours ):
-                if cv2.pointPolygonTest(c,pt,False) >= 0:
-                    count += 1
-                    count_arr[i] += 1
-            temp.append(kp2)
+        for m_idx,matches in enumerate(matches_arr):
+            for m in matches:
+                kp1,kp2 = get_match_kp(m,kps_t_arr[m_idx],kps2_arr[m_idx])
+                pt = kp2.pt
+                for i,c in enumerate( contours ):
+                    if cv2.pointPolygonTest(c,pt,False) >= 0:
+                        count += 1
+                        count_arr[i] += 1
+                temp.append(kp2)
         if is_show:
             show_im("mask",mask)
         out_mask = mk_empty_img(mask)
@@ -242,10 +242,7 @@ if __name__ == "__main__":
         else:
             erode_num = 4
             dilate_num = 8
-        x = int(min(img_target.rect[0],img_target.rect[2]))
-        y = int(min(img_target.rect[1],img_target.rect[3]))
-        temp_img = np.zeros((height,width,3),dtype="uint8")
-        temp_img = img1.img[y:y + height,x:x + width]
+        temp_img = get_rect_img(img1.img,img_target.rect)
         img_target.draw_img(np.copy(temp_img))
         SIFT_target_img()
         ui.target_label.setPixmap(QPixmap.fromImage(img_target.qImg))
@@ -256,7 +253,7 @@ if __name__ == "__main__":
         ori_img2 = img_arr[img2.idx]
         des_t = compute_SIFT_des(img_target.img,img_target.kps)
         if ui.Target_Limit_Button.isChecked():
-            kps2,des_2 = compute_SIFT_des(ori_img2,img2.kps,img_target.rect,30)
+            kps2,des_2 = compute_SIFT_des(ori_img2,img2.kps,img_target.rect,[30,30])
         else:
             des_2 = compute_SIFT_des(ori_img2,img2.kps)
             kps2 = img2.kps
@@ -267,6 +264,27 @@ if __name__ == "__main__":
         # draw the line on target image and img1
         draw_match_line(matches,img_out,wA,img_target.kps,kps2)
         return kps2,matches,img_out
+    
+    # match the previous target image with img2
+    def pre_target_BF_match():
+        pre_img_idx = (img1.idx - 1)%img_num
+        pre_img = img_arr[pre_img_idx]
+        pre_target_img = get_rect_img(pre_img,img_target.pre_rect)
+        sift = cv2.xfeatures2d.SIFT_create()
+        kp_t,des_t = sift.detectAndCompute(pre_target_img,None)
+        # use the target velocity(target's motion attribute) to limit key point on img2
+        ori_img2 = img_arr[img2.idx]
+        # the move distance should be two times of motion
+        predict_motion = (img_target.motion[0] * 2,img_target.motion[1] * 2)
+        kps2,des_2 = compute_SIFT_des(ori_img2,img2.kps,img_target.pre_rect,predict_motion)
+        # match
+        matcher = cv2.DescriptorMatcher_create("BruteForce")
+        matches = matcher.knnMatch(des_t,des_2,2)
+        img_out = combine_img(pre_target_img,ori_img2)
+        hA,wA = pre_target_img.shape[:2]
+        # draw the line on target image and img1
+        draw_match_line(matches,img_out,wA,kp_t,kps2)
+        return kps2,matches,img_out,kp_t
     
     # create the graph for Hungarian algorithm
     def kp_feature_distance_graph(des1,des2):
@@ -287,7 +305,7 @@ if __name__ == "__main__":
         ori_img2 = img_arr[img2.idx]
         des_t = compute_SIFT_des(img_target.img,img_target.kps)
         if ui.Target_Limit_Button.isChecked():
-            kps2,des_2 = compute_SIFT_des(ori_img2,img2.kps,img_target.rect,30)
+            kps2,des_2 = compute_SIFT_des(ori_img2,img2.kps,img_target.rect,[30,30])
         else:
             des_2 = compute_SIFT_des(ori_img2,img2.kps)
             kps2 = img2.kps
@@ -311,20 +329,27 @@ if __name__ == "__main__":
     # set up the rect attribute of img_target which is a list of 4 element (index 0,1 for first point, index 2,3 for second point)
     # (the left top & right bottom point of target rectangle's coordinate)
     # dir is the direction of next image(also can set 0 to let image unchanged)
-    def find_next_target(dir):
+    def find_next_target(dir,next_rect):
         # draw the rectangle on next image to highlight the target
         change_image(dir)
+        img_target.pre_rect = copy.deepcopy(img_target.rect)
+        img_target.rect = next_rect
         im_h,im_w,c = img1.img.shape
         lb_w = ui.img_label1.width()
         lb_h = ui.img_label1.height()
         img1.draw_rect(img_target.rect,im_w,im_h,lb_w,lb_h,(0,255,0),True)
         # set the rectangle highlight part of img1 as the next target image
         set_target_img()
-        
+    
+    # Dector main function
     # display the match result in subwindows and detect result on next image
     # mode determine which match algorithm to use
     # is_show flag determine whether the process is showed 
     def show_detect_result(mode,is_show):
+        # store the two kind of match result and used key point
+        kps2_arr = []
+        kps_t_arr = []
+        matches_arr = []
         if ui.target_label.pixmap() == None:
             print("No target image.")
             return
@@ -338,11 +363,22 @@ if __name__ == "__main__":
             kps2,matches,Hungarian_img = Hungarian_match()
             img_out = combine_img(BF_img,Hungarian_img)
             sub_ui.textBrowser_2.setText("Hungarian")
+        kps2_arr.append(kps2)
+        kps_t_arr.append(img_target.kps)
+        matches_arr.append(matches)
+        # use the previous rectangle to reinforce match result
+        if sum(img_target.pre_rect) != 0:
+            kps2,matches,pre_img_out,kps_t = pre_target_BF_match()
+            kps2_arr.append(kps2)
+            kps_t_arr.append(kps_t)
+            matches_arr.append(matches)
+            temp = np.hstack((img_out,pre_img_out))
+            show_im("two match result",temp)
         # find the GMM mask contour of target
         print("e d:", erode_num,dilate_num)
         mask = GMM(img1,img2)
         # use mask and match restult to find the target in next image
-        out_mask,next_rect = find_target_contour(img_target.kps,kps2,matches,mask,is_show)
+        out_mask,next_rect = find_target_contour(kps_t_arr,kps2_arr,matches_arr,mask,is_show)
         # draw the finding result on match result image
         _,target_width,_ = img_target.img.shape
         cv2.rectangle(img_out,(int(next_rect[0] + target_width),int(next_rect[1])),(int(next_rect[2] + target_width),int(next_rect[3])),(0,255,0),thickness=1)
@@ -356,8 +392,7 @@ if __name__ == "__main__":
         if is_show:
             Dialog2.show()
         # update the next target's coordinate of rectangle
-        img_target.rect = next_rect
-        find_next_target(1)
+        find_next_target(1,next_rect)
         dis_img()
         return next_rect
     
@@ -410,11 +445,10 @@ if __name__ == "__main__":
         if len(saved_result_arr) == 0:
             return
         for i,rect in enumerate(saved_result_arr):
-            img_target.rect = rect
             if i == 0:
-                find_next_target(0)
+                find_next_target(0,rect)
             else:
-                find_next_target(1)
+                find_next_target(1,rect)
             dis_img()
             time.sleep(.500)
 
