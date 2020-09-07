@@ -303,9 +303,12 @@ if __name__ == "__main__":
         print("motion:" + str(img_target.motion[0]) + " " +  str(img_target.motion[1]))
 
     def predect_next():
-        mask = GMM(img1.img,img2.img)
-        print((img_target.rect[0] + img_target.motion[0]), (img_target.rect[2] + img_target.motion[0]) ), ((img_target.rect[1] + img_target.motion[1]), (img_target.rect[3] + img_target.motion[1]))
-        return ((img_target.rect[0] + img_target.motion[0]), (img_target.rect[2] + img_target.motion[0]) ), ((img_target.rect[1] + img_target.motion[1]), (img_target.rect[3] + img_target.motion[1]))
+        #mask = GMM(img1.img,img2.img)
+        #cv2.rectangle(mask,(int(img_target.rect[1] + img_target.motion[0]), int(img_target.rect[1] + img_target.motion[0]) ), (int(img_target.rect[2] + img_target.motion[1]), int(img_target.rect[3] + img_target.motion[1])),255,thickness=1)
+        #show_im("show",mask)
+        print("ori:" + str(img_target.rect))
+        print("next:" , (img_target.rect[0] + img_target.motion[0]), (img_target.rect[1] + img_target.motion[1]) , (img_target.rect[2] + img_target.motion[0]), (img_target.rect[3] + img_target.motion[1]))
+        return ((img_target.rect[0] + img_target.motion[0]), (img_target.rect[1] + img_target.motion[0]) ), ((img_target.rect[2] + img_target.motion[1]), (img_target.rect[3] + img_target.motion[1]))
 
 
 
@@ -469,6 +472,7 @@ if __name__ == "__main__":
         # show subwindow
         if is_show:
             Dialog2.show()
+        predect_next()
         if ((int(next_rect[0]) == 512) & (int(next_rect[3]) == 0)):
             predect_next()
         # update the next target's coordinate of rectangle
