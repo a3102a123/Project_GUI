@@ -81,10 +81,11 @@ def compute_SIFT_des(img,kps,rect=[0,0,0,0],dis=[0,0]):
     if dis == [0,0] :
         return des
     new_des = []
-    max_x = max(rect[0],rect[2]) + dis[0]
-    min_x = min(rect[0],rect[2]) - dis[0]
-    max_y = max(rect[1],rect[3]) + dis[1]
-    min_y = min(rect[1],rect[3]) - dis[1]
+    max_x = max(rect[0],rect[2]) + abs(dis[0])
+    min_x = min(rect[0],rect[2]) - abs(dis[0])
+    max_y = max(rect[1],rect[3]) + abs(dis[1])
+    min_y = min(rect[1],rect[3]) - abs(dis[1])
+    print(min_x,min_y,max_x,max_y)
     for i in range(len(kps) - 1 , -1 , -1):
         kp = kps[i]
         x,y = kp.pt
@@ -96,13 +97,13 @@ def compute_SIFT_des(img,kps,rect=[0,0,0,0],dis=[0,0]):
             continue
         new_des.append(des[i])
     # to show the remain key points on image
-    # img_out = copy.deepcopy(img)
-    # cv2.drawKeypoints(img,new_kp,img_out)
-    # cv2.rectangle(img_out,(int(min_x),int(min_y)),(int(max_x),int(max_y)),(0,255,0),thickness=1)
-    # cv2.imshow("limited_key_points",img_out)
-    # # press any key to close the window
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
+    img_out = copy.deepcopy(img)
+    cv2.drawKeypoints(img,new_kp,img_out)
+    cv2.rectangle(img_out,(int(min_x),int(min_y)),(int(max_x),int(max_y)),(0,255,0),thickness=1)
+    cv2.imshow("limited_key_points",img_out)
+    # press any key to close the window
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
     new_des.reverse()
     return new_kp,np.array(new_des)
 
