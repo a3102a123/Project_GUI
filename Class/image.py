@@ -15,7 +15,10 @@ from munkres import Munkres, print_matrix
 
 # return the number of image load from folder
 def image_num():
-    return 20
+    dir_path = "im0/"
+    dir = os.listdir( dir_path)
+    img_num = len(dir)
+    return img_num
 
 # show the opencv image
 def show_im(name,im):
