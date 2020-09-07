@@ -308,8 +308,9 @@ if __name__ == "__main__":
         #show_im("show",mask)
         print("ori:" + str(img_target.rect))
         print("next:" , (img_target.rect[0] + img_target.motion[0]), (img_target.rect[1] + img_target.motion[1]) , (img_target.rect[2] + img_target.motion[0]), (img_target.rect[3] + img_target.motion[1]))
-        return ((img_target.rect[0] + img_target.motion[0]), (img_target.rect[1] + img_target.motion[0]) ), ((img_target.rect[2] + img_target.motion[1]), (img_target.rect[3] + img_target.motion[1]))
 
+        result = [(img_target.rect[0] + img_target.motion[0]), (img_target.rect[1] + img_target.motion[1]) , (img_target.rect[2] + img_target.motion[0]), (img_target.rect[3] + img_target.motion[1])]
+        return result
 
 
         '''next_rect = [0,0,0,0]
@@ -472,9 +473,12 @@ if __name__ == "__main__":
         # show subwindow
         if is_show:
             Dialog2.show()
-        predect_next()
-        if ((int(next_rect[0]) == 512) & (int(next_rect[3]) == 0)):
-            predect_next()
+        line_x = abs((next_rect[2] - next_rect[0]) / (img_target.rect[2] - img_target.rect[0]))
+        line_y = abs((next_rect[3] - next_rect[1]) / (img_target.rect[3] - img_target.rect[1]))
+        
+
+        if (line_x*line_y > 3):
+            next_rect = predect_next()
         # update the next target's coordinate of rectangle
         find_next_target(1,next_rect)
         dis_img()
