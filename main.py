@@ -254,8 +254,6 @@ if __name__ == "__main__":
         SIFT_target_img()
         ui.target_label.setPixmap(QPixmap.fromImage(img_target.qImg))
         ui.target_label.setFixedSize(width*2,height*2)
-        motion()
-        predect_next()
 
 
     # BF match target image with img2
@@ -298,20 +296,28 @@ if __name__ == "__main__":
     
     # count motion
     def motion():
+        if sum(img_target.pre_rect) == 0:
+            return
         img_target.motion[0] = (img_target.rect[0] - img_target.pre_rect[0] + img_target.rect[2] - img_target.pre_rect[2]) / 2 
         img_target.motion[1] = (img_target.rect[1] - img_target.pre_rect[1] + img_target.rect[3] - img_target.pre_rect[3]) / 2 
         print("motion:" + str(img_target.motion[0]) + " " +  str(img_target.motion[1]))
 
     def predect_next():
-        next_rect = [0,0,0,0]
-        for index in range(3):
+        mask = GMM(img1.img,img2.img)
+        print((img_target.rect[0] + img_target.motion[0]), (img_target.rect[2] + img_target.motion[0]) ), ((img_target.rect[1] + img_target.motion[1]), (img_target.rect[3] + img_target.motion[1]))
+        return ((img_target.rect[0] + img_target.motion[0]), (img_target.rect[2] + img_target.motion[0]) ), ((img_target.rect[1] + img_target.motion[1]), (img_target.rect[3] + img_target.motion[1]))
+
+
+
+        '''next_rect = [0,0,0,0]
+        for index in range(5):
             next_rect[0] = img_target.rect[0] + img_target.motion[0] * index
             next_rect[1] = img_target.rect[1] + img_target.motion[1] * index
             next_rect[2] = img_target.rect[2] + img_target.motion[0] * index
             next_rect[3] = img_target.rect[3] + img_target.motion[1] * index
 
-            print("o_rect" + str(img_target.rect))
-            print("n_rect" + str(next_rect))            
+            #print("o_rect" + str(img_target.rect))
+            #print("n_rect" + str(next_rect))            
             mask = GMM(img1.img,img_arr[img1.idx + 1 + index])
             _,contours, hierarchy = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
 
@@ -322,7 +328,7 @@ if __name__ == "__main__":
                 for j in range(5):
                     next_pt.append((int(next_rect[0] + x * i), int(next_rect[1] + y * j)))
             
-            print("next pt :" + str(next_pt))
+            #print("next pt :" + str(next_pt))
 
             count_arr = [0 for i in range(len(contours))]
             count = 0
@@ -350,6 +356,8 @@ if __name__ == "__main__":
             print("next_p 1:",next_p)
             cv2.rectangle(out_mask,(int(next_p[0]),int(next_p[1])),(int(next_p[2]),int(next_p[3])),255,thickness=1)
             show_im("next_" + str(index), out_mask)
+            #img_target.rect = next_p'''
+
             
 
 
@@ -422,6 +430,7 @@ if __name__ == "__main__":
         if ui.target_label.pixmap() == None:
             print("No target image.")
             return
+        motion()
         # mode 0 use BF match
         if mode == 0 :
             kps2,matches,img_out = BF_target_match()
@@ -460,6 +469,8 @@ if __name__ == "__main__":
         # show subwindow
         if is_show:
             Dialog2.show()
+        if ((int(next_rect[0]) == 512) & (int(next_rect[3]) == 0)):
+            predect_next()
         # update the next target's coordinate of rectangle
         find_next_target(1,next_rect)
         dis_img()
