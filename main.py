@@ -169,8 +169,8 @@ if __name__ == "__main__":
         fgbg_gmm = cv2.createBackgroundSubtractorMOG2(detectShadows=True)
         #the kernel for morphologyEx
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))
-        fgbg_gmm.apply(img_GMM1.img)
-        fgmask = fgbg_gmm.apply(img_GMM2.img)
+        fgbg_gmm.apply(img_GMM1)
+        fgmask = fgbg_gmm.apply(img_GMM2)
         fgmask = cv2.erode(fgmask,kernel,iterations = erode_num)
         fgmask = cv2.dilate(fgmask,kernel,iterations = dilate_num)
         return fgmask
@@ -187,6 +187,7 @@ if __name__ == "__main__":
             for m in matches:
                 kp1,kp2 = get_match_kp(m,kps_t_arr[m_idx],kps2_arr[m_idx])
                 pt = kp2.pt
+                #print("pt:" + str(pt))
                 for i,c in enumerate( contours ):
                     if cv2.pointPolygonTest(c,pt,False) >= 0:
                         count += 1
@@ -247,6 +248,9 @@ if __name__ == "__main__":
         SIFT_target_img()
         ui.target_label.setPixmap(QPixmap.fromImage(img_target.qImg))
         ui.target_label.setFixedSize(width*2,height*2)
+        motion()
+        predect_next()
+
 
     # BF match target image with img2
     def BF_target_match():
@@ -286,6 +290,65 @@ if __name__ == "__main__":
         draw_match_line(matches,img_out,wA,kp_t,kps2)
         return kps2,matches,img_out,kp_t
     
+    # count motion
+    def motion():
+        img_target.motion[0] = (img_target.rect[0] - img_target.pre_rect[0] + img_target.rect[2] - img_target.pre_rect[2]) / 2 
+        img_target.motion[1] = (img_target.rect[1] - img_target.pre_rect[1] + img_target.rect[3] - img_target.pre_rect[3]) / 2 
+        print("motion:" + str(img_target.motion[0]) + " " +  str(img_target.motion[1]))
+
+    def predect_next():
+        next_rect = [0,0,0,0]
+        for index in range(3):
+            next_rect[0] = img_target.rect[0] + img_target.motion[0] * index
+            next_rect[1] = img_target.rect[1] + img_target.motion[1] * index
+            next_rect[2] = img_target.rect[2] + img_target.motion[0] * index
+            next_rect[3] = img_target.rect[3] + img_target.motion[1] * index
+
+            print("o_rect" + str(img_target.rect))
+            print("n_rect" + str(next_rect))            
+            mask = GMM(img1.img,img_arr[img1.idx + 1 + index])
+            _,contours, hierarchy = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+
+            x = (next_rect[2] - next_rect[0]) / 5
+            y = (next_rect[3] - next_rect[1]) / 5
+            next_pt = []
+            for i in range(5):
+                for j in range(5):
+                    next_pt.append((int(next_rect[0] + x * i), int(next_rect[1] + y * j)))
+            
+            print("next pt :" + str(next_pt))
+
+            count_arr = [0 for i in range(len(contours))]
+            count = 0
+            for j in range(25):
+                pt = next_pt[j]
+                print("pt:" + str(pt))
+                for i,c in enumerate( contours ):
+                    if cv2.pointPolygonTest(c,pt,False) >= 0:
+                        count += 1
+                        count_arr[i] += 1
+            out_mask = mk_empty_img(mask)
+            next_p = np.array([512.0, 512.0, 0.0, 0.0])
+            for i in range(0,len(contours)):
+                if count_arr[i] > 0:
+                    x,y,w,h = cv2.boundingRect(contours[i])
+                    cv2.rectangle(img2.img,(x,y),(x+w,y+h),(0,255,0),2)
+
+                    next_p[0] = min(next_p[0],x)
+                    next_p[1] = min(next_p[1],y)
+                    next_p[2] = max(next_p[2],x+w)
+                    next_p[3] = max(next_p[3],y+h)
+                    out_mask[y:y+h, x:x+w] = mask[y:y+h, x:x+w]
+                    #print(x,y,x+w,y+h)
+                    #show_im("out"+str(i),out_mask)
+            print("next_p 1:",next_p)
+            cv2.rectangle(out_mask,(int(next_p[0]),int(next_p[1])),(int(next_p[2]),int(next_p[3])),255,thickness=1)
+            show_im("next_" + str(index), out_mask)
+            
+
+
+
+
     # create the graph for Hungarian algorithm
     def kp_feature_distance_graph(des1,des2):
         print(len(des1),len(des2))
@@ -376,7 +439,7 @@ if __name__ == "__main__":
             show_im("two match result",temp)
         # find the GMM mask contour of target
         print("e d:", erode_num,dilate_num)
-        mask = GMM(img1,img2)
+        mask = GMM(img1.img,img2.img)
         # use mask and match restult to find the target in next image
         out_mask,next_rect = find_target_contour(kps_t_arr,kps2_arr,matches_arr,mask,is_show)
         # draw the finding result on match result image
