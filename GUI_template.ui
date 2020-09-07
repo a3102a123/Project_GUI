@@ -658,6 +658,29 @@ p, li { white-space: pre-wrap; }
     <bool>false</bool>
    </property>
   </widget>
+  <widget class="QSpinBox" name="Image_Selector">
+   <property name="geometry">
+    <rect>
+     <x>940</x>
+     <y>770</y>
+     <width>191</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>16</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="maximum">
+    <number>2000</number>
+   </property>
+   <property name="value">
+    <number>0</number>
+   </property>
+  </widget>
   <zorder>FileName</zorder>
   <zorder>SaveFileButton</zorder>
   <zorder>layoutWidget</zorder>
@@ -687,6 +710,7 @@ p, li { white-space: pre-wrap; }
   <zorder>Dispaly_Button</zorder>
   <zorder>Result_Right_Button</zorder>
   <zorder>Result_Left_Button</zorder>
+  <zorder>Image_Selector</zorder>
  </widget>
  <resources/>
  <connections/>

@@ -76,6 +76,12 @@ if __name__ == "__main__":
         ui.img_text1.setText(text1)
         ui.img_text2.setText(text2)
     
+    # select the perticular image to change
+    def select_image():
+        img_id = ui.Image_Selector.value()
+        direction = img_id - img1.idx
+        change_image(direction)
+    
     # change the image with saved result data
     def change_image_with_result(direction):
         change_image(direction)
@@ -550,6 +556,7 @@ if __name__ == "__main__":
         ui.Dispaly_Button.clicked.connect(display_select_result)
         ui.Result_Left_Button.clicked.connect(lambda: change_image_with_result(-1))
         ui.Result_Right_Button.clicked.connect(lambda: change_image_with_result(1))
+        ui.Image_Selector.valueChanged.connect(select_image)
 
     # overwrite mouse trigger function of label
     def Qlabel_fun():
