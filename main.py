@@ -207,10 +207,11 @@ if __name__ == "__main__":
             if count_arr[i] > 0:
                 x,y,w,h = cv2.boundingRect(contours[i])
                 cv2.rectangle(img2.img,(x,y),(x+w,y+h),(0,255,0),2)
-                test_range = [(img_target.rect[0]-img_target.motion[0]*3), (img_target.rect[2]+img_target.motion[0]*3), (img_target.rect[1]-img_target.motion[1]*3), (img_target.rect[3]+img_target.motion[1]*3)]
+                count = 1
+                test_range = [(img_target.rect[0]-img_target.motion[0]*count), (img_target.rect[1]-img_target.motion[1]*count), (img_target.rect[2]+img_target.motion[0]*count), (img_target.rect[3]+img_target.motion[1]*count)]
                 print("img_rect:" + str(img_target.rect))
                 print("text_range:" + str(test_range))
-                if((test_range[0]<=(x+w/2)<=test_range[1])&(test_range[2]<=(y+h/2)<=test_range[3])):
+                if((test_range[0]<=(x+w/2)<=test_range[2])&(test_range[1]<=(y+h/2)<=test_range[3])):
                     next_p[0] = min(next_p[0],x)
                     next_p[1] = min(next_p[1],y)
                     next_p[2] = max(next_p[2],x+w)
@@ -479,7 +480,7 @@ if __name__ == "__main__":
         line_y = abs((next_rect[3] - next_rect[1]) / (img_target.rect[3] - img_target.rect[1]))
         
 
-        if (line_x*line_y > 5):
+        if (line_x*line_y > 20):
             print("use motion:", line_x*line_y) 
             next_rect = predect_next()
         # update the next target's coordinate of rectangle
