@@ -309,44 +309,55 @@ if __name__ == "__main__":
         #mask = GMM(img1.img,img2.img)
         #cv2.rectangle(mask,(int(img_target.rect[1] + img_target.motion[0]), int(img_target.rect[1] + img_target.motion[0]) ), (int(img_target.rect[2] + img_target.motion[1]), int(img_target.rect[3] + img_target.motion[1])),255,thickness=1)
         #show_im("show",mask)
-        print("ori:" + str(img_target.rect))
+        '''print("ori:" + str(img_target.rect))
         print("next:" , (img_target.rect[0] + img_target.motion[0]), (img_target.rect[1] + img_target.motion[1]) , (img_target.rect[2] + img_target.motion[0]), (img_target.rect[3] + img_target.motion[1]))
 
         result = [(img_target.rect[0] + img_target.motion[0]), (img_target.rect[1] + img_target.motion[1]) , (img_target.rect[2] + img_target.motion[0]), (img_target.rect[3] + img_target.motion[1])]
-        return result
+        return result'''
 
 
-        '''next_rect = [0,0,0,0]
+        result = img_target.rect
+        index_x = index_y = 0
+        check = 0
+        if img_target.motion[0] > 0:
+            index_x = 2
+        else:
+            index_x = 0
+        if img_target.motion[1] > 0:
+            index_y = 3
+        else:
+            index_y = 1
         for index in range(5):
-            next_rect[0] = img_target.rect[0] + img_target.motion[0] * index
-            next_rect[1] = img_target.rect[1] + img_target.motion[1] * index
-            next_rect[2] = img_target.rect[2] + img_target.motion[0] * index
-            next_rect[3] = img_target.rect[3] + img_target.motion[1] * index
+            result[index_x] += img_target.motion[0] * (index + 1) * 3
+            result[index_y] += img_target.motion[1] * (index + 1) * 3
 
             #print("o_rect" + str(img_target.rect))
             #print("n_rect" + str(next_rect))            
             mask = GMM(img1.img,img_arr[img1.idx + 1 + index])
             _,contours, hierarchy = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
 
-            x = (next_rect[2] - next_rect[0]) / 5
-            y = (next_rect[3] - next_rect[1]) / 5
+            x = (result[2] - result[0]) / 25
+            y = (result[3] - result[1]) / 25
             next_pt = []
-            for i in range(5):
-                for j in range(5):
-                    next_pt.append((int(next_rect[0] + x * i), int(next_rect[1] + y * j)))
+            for i in range(25):
+                for j in range(25):
+                    next_pt.append((int(result[0] + x * i), int(result[1] + y * j)))
             
             #print("next pt :" + str(next_pt))
 
             count_arr = [0 for i in range(len(contours))]
             count = 0
-            for j in range(25):
+            for j in range(625):
                 pt = next_pt[j]
-                print("pt:" + str(pt))
+                #print("pt:" + str(pt))
                 for i,c in enumerate( contours ):
                     if cv2.pointPolygonTest(c,pt,False) >= 0:
                         count += 1
                         count_arr[i] += 1
+                        check = 1
             out_mask = mk_empty_img(mask)
+            #cv2.rectangle(out_mask,(int(result[0]),int(result[1])),(int(result[2]),int(result[3])),255,thickness=1)
+            #show_im("next_" + str(index), out_mask)
             next_p = np.array([512.0, 512.0, 0.0, 0.0])
             for i in range(0,len(contours)):
                 if count_arr[i] > 0:
@@ -363,8 +374,16 @@ if __name__ == "__main__":
             print("next_p 1:",next_p)
             cv2.rectangle(out_mask,(int(next_p[0]),int(next_p[1])),(int(next_p[2]),int(next_p[3])),255,thickness=1)
             show_im("next_" + str(index), out_mask)
-            #img_target.rect = next_p'''
-
+            #img_target.rect = next_p
+            if(check == 1):
+                break
+        print("check:", check)
+        if(check == 1):
+            result = next_p
+            return result
+        else:
+            result = [(img_target.rect[0] + img_target.motion[0]), (img_target.rect[1] + img_target.motion[1]) , (img_target.rect[2] + img_target.motion[0]), (img_target.rect[3] + img_target.motion[1])]
+            return result
             
 
 

@@ -81,7 +81,7 @@ def compute_SIFT_des(img,kps,rect=[0,0,0,0],dis=[0,0]):
     if dis == [0,0] :
         return des
     new_des = []
-    count = 3
+    count = 2
     max_x = max(rect[0],rect[2]) + count*abs(dis[0])
     min_x = min(rect[0],rect[2]) - count*abs(dis[0])
     max_y = max(rect[1],rect[3]) + count*abs(dis[1])
