@@ -232,7 +232,7 @@ if __name__ == "__main__":
 
     # set the bounded image(rad rectangle) in img1 to img_target
     # compute on image's coordinate
-    def set_target_img():
+    def set_target_img(is_init=False):
         if not sum(img_target.rect):
             print("No bounded area!")
             return
@@ -243,7 +243,6 @@ if __name__ == "__main__":
         img_target.rect[3] = max(temp[1],temp[3]) 
         width = int(abs(img_target.rect[0] - img_target.rect[2]))
         height = int(abs(img_target.rect[1] - img_target.rect[3]))
-        print(width*height)
         global erode_num
         global dilate_num
         if(width*height < 15000):
@@ -252,6 +251,8 @@ if __name__ == "__main__":
         else:
             erode_num = 4
             dilate_num = 8
+        if is_init:
+            img_target.pre_rect = [0,0,0,0]
         temp_img = get_rect_img(img1.img,img_target.rect)
         img_target.draw_img(np.copy(temp_img))
         SIFT_target_img()
@@ -634,7 +635,7 @@ if __name__ == "__main__":
         ui.Limit_Button.clicked.connect(lambda: change_image(0))
         ui.Distance_Limit.valueChanged.connect(change_limit_distance)
         ui.Ratio_Test.valueChanged.connect(change_ratio_test)
-        ui.Target_Button.clicked.connect(set_target_img)
+        ui.Target_Button.clicked.connect(lambda: set_target_img(True))
         ui.Target_BF_Button.clicked.connect(lambda: show_detect_result(0,True))
         ui.Target_Hungarian_Button.clicked.connect(lambda: show_detect_result(1,True))
         ui.Optical_Flow_Button.clicked.connect(lambda: change_image(0))
