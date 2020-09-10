@@ -102,8 +102,8 @@ def compute_SIFT_des(img,kps,rect=[0,0,0,0],dis=[0,0]):
     cv2.rectangle(img_out,(int(min_x),int(min_y)),(int(max_x),int(max_y)),(0,255,0),thickness=1)
     cv2.imshow("limited_key_points",img_out)
     # press any key to close the window
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
     new_des.reverse()
     return new_kp,np.array(new_des)
 

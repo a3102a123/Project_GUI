@@ -182,7 +182,7 @@ if __name__ == "__main__":
         return fgmask
     
     # using the mask and SIFT key point match to find the target's contour on img2
-    def find_target_contour(kps_t_arr,kps2_arr,matches_arr,mask,is_show):
+    def find_target_contour(kps_t_arr,kps2_arr,matches_arr,mask):
         print("Finding target contour......")
         print_bar()
         _,contours, hierarchy = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
@@ -201,8 +201,6 @@ if __name__ == "__main__":
                         count += 1
                         count_arr[i] += 1
                 temp.append(kp2)
-        if is_show:
-            show_im("mask",mask)
         out_mask = mk_empty_img(mask)
         # find the rectangle coordinate of pointed contour
         for i in range(0,len(contours)):
@@ -457,13 +455,11 @@ if __name__ == "__main__":
             # mode 0 use BF match
             if mode == 0 :
                 kps2,matches,img_out = BF_target_match()
-                sub_ui.textBrowser_2.setText("Result mask")
             # mode 1 use Hungarian algorithm
             elif mode == 1:
                 _,_,BF_img = BF_target_match()
                 kps2,matches,Hungarian_img = Hungarian_match()
                 img_out = combine_img(BF_img,Hungarian_img)
-                sub_ui.textBrowser_2.setText("Hungarian")
             kps2_arr.append(kps2)
             kps_t_arr.append(img_target.kps)
             matches_arr.append(matches)
@@ -478,19 +474,15 @@ if __name__ == "__main__":
         # find the GMM mask contour of target
         mask = GMM(img1.img,img2.img)
         # use mask and match restult to find the target in next image
-        out_mask,next_rect = find_target_contour(kps_t_arr,kps2_arr,matches_arr,mask,is_show)
+        out_mask,next_rect = find_target_contour(kps_t_arr,kps2_arr,matches_arr,mask)
         # draw the finding result on match result image
         _,target_width,_ = img_target.img.shape
         cv2.rectangle(img_out,(int(next_rect[0] + target_width),int(next_rect[1])),(int(next_rect[2] + target_width),int(next_rect[3])),(0,255,0),thickness=1)
         # combine the match result and final GMM mask
-        img_out = np.hstack((img_out,cv2.cvtColor( out_mask, cv2.COLOR_GRAY2RGB)))
-        # set image of result to subwindow's label
-        qImg = convImg(np.copy(img_out))
-        sub_ui.Image_Label.setPixmap(QPixmap.fromImage(qImg))
-        sub_ui.textBrowser.setText("BF Match")
-        # show subwindow
+        img_out = np.hstack((img_out,cv2.cvtColor( out_mask, cv2.COLOR_GRAY2RGB),cv2.cvtColor( mask, cv2.COLOR_GRAY2RGB)))
+        # show Result
         if is_show:
-            Dialog2.show()
+            show_im("Detect Result",img_out)
         line_x = abs((next_rect[2] - next_rect[0]) / (img_target.rect[2] - img_target.rect[0]))
         line_y = abs((next_rect[3] - next_rect[1]) / (img_target.rect[3] - img_target.rect[1]))
         if (line_x*line_y > 20):
