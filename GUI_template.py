@@ -172,12 +172,6 @@ class Ui_Dialog(object):
         self.Target_Hungarian_Button = QtWidgets.QPushButton(Dialog)
         self.Target_Hungarian_Button.setGeometry(QtCore.QRect(50, 490, 111, 28))
         self.Target_Hungarian_Button.setObjectName("Target_Hungarian_Button")
-        self.Target_Limit_Button = QtWidgets.QCheckBox(Dialog)
-        self.Target_Limit_Button.setGeometry(QtCore.QRect(180, 410, 171, 41))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.Target_Limit_Button.setFont(font)
-        self.Target_Limit_Button.setObjectName("Target_Limit_Button")
         self.textBrowser_5 = QtWidgets.QTextBrowser(Dialog)
         self.textBrowser_5.setGeometry(QtCore.QRect(1610, 610, 191, 41))
         self.textBrowser_5.setObjectName("textBrowser_5")
@@ -260,7 +254,6 @@ class Ui_Dialog(object):
         self.Target_Button.raise_()
         self.Target_BF_Button.raise_()
         self.Target_Hungarian_Button.raise_()
-        self.Target_Limit_Button.raise_()
         self.textBrowser_5.raise_()
         self.Optical_Flow_Button.raise_()
         self.Result_Data_Text.raise_()
@@ -316,7 +309,6 @@ class Ui_Dialog(object):
         self.Target_Button.setText(_translate("Dialog", "Target"))
         self.Target_BF_Button.setText(_translate("Dialog", "BF_match"))
         self.Target_Hungarian_Button.setText(_translate("Dialog", "Hungarian_match"))
-        self.Target_Limit_Button.setText(_translate("Dialog", "使用鄰近key point"))
         self.textBrowser_5.setHtml(_translate("Dialog", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"

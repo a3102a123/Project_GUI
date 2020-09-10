@@ -183,6 +183,8 @@ if __name__ == "__main__":
     
     # using the mask and SIFT key point match to find the target's contour on img2
     def find_target_contour(kps_t_arr,kps2_arr,matches_arr,mask,is_show):
+        print("Finding target contour......")
+        print_bar()
         _,contours, hierarchy = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
         temp = []
         count_arr = [0 for i in range(len(contours))]
@@ -209,8 +211,8 @@ if __name__ == "__main__":
                 cv2.rectangle(img2.img,(x,y),(x+w,y+h),(0,255,0),2)
                 count = 1
                 test_range = [(img_target.rect[0]-img_target.motion[0]*count), (img_target.rect[1]-img_target.motion[1]*count), (img_target.rect[2]+img_target.motion[0]*count), (img_target.rect[3]+img_target.motion[1]*count)]
-                print("img_rect:" + str(img_target.rect))
-                print("text_range:" + str(test_range))
+                print("current target rectangle:" + str(img_target.rect))
+                print("test rectangle range:" + str(test_range))
                 if((test_range[0]<=(x+w/2)<=test_range[2])&(test_range[1]<=(y+h/2)<=test_range[3])):
                     next_p[0] = min(next_p[0],x)
                     next_p[1] = min(next_p[1],y)
@@ -219,7 +221,8 @@ if __name__ == "__main__":
                     out_mask[y:y+h, x:x+w] = mask[y:y+h, x:x+w]
                     #print(x,y,x+w,y+h)
                     #show_im("out"+str(i),out_mask)
-        print("next_p 1:",next_p)
+        print("next target's rectangle:",next_p)
+        print_bar()
         cv2.rectangle(out_mask,(int(next_p[0]),int(next_p[1])),(int(next_p[2]),int(next_p[3])),255,thickness=1)
         # return the target contour of mask and rectangle coordinate
         return out_mask,next_p
@@ -253,6 +256,7 @@ if __name__ == "__main__":
             dilate_num = 8
         if is_init:
             img_target.pre_rect = [0,0,0,0]
+            img_target.is_predict = False
         temp_img = get_rect_img(img1.img,img_target.rect)
         img_target.draw_img(np.copy(temp_img))
         SIFT_target_img()
@@ -264,11 +268,9 @@ if __name__ == "__main__":
     def BF_target_match():
         ori_img2 = img_arr[img2.idx]
         des_t = compute_SIFT_des(img_target.img,img_target.kps)
-        if ui.Target_Limit_Button.isChecked():
-            kps2,des_2 = compute_SIFT_des(ori_img2,img2.kps,img_target.rect,[30,30])
-        else:
-            des_2 = compute_SIFT_des(ori_img2,img2.kps)
-            kps2 = img2.kps
+        # use target motion to match
+        predict_motion = (img_target.motion[0] * 2,img_target.motion[1] * 2)
+        kps2,des_2 = compute_SIFT_des(ori_img2,img2.kps,img_target.rect,predict_motion)
         matcher = cv2.DescriptorMatcher_create("BruteForce")
         matches = matcher.knnMatch(des_t,des_2,2)
         img_out = combine_img(img_target.img,ori_img2)
@@ -279,8 +281,7 @@ if __name__ == "__main__":
     
     # match the previous target image with img2
     def pre_target_BF_match():
-        pre_img_idx = (img1.idx - 1)%img_num
-        pre_img = img_arr[pre_img_idx]
+        pre_img = img_arr[img_target.pre_idx]
         pre_target_img = get_rect_img(pre_img,img_target.pre_rect)
         sift = cv2.xfeatures2d.SIFT_create()
         kp_t,des_t = sift.detectAndCompute(pre_target_img,None)
@@ -306,7 +307,7 @@ if __name__ == "__main__":
         img_target.motion[1] = (img_target.rect[1] - img_target.pre_rect[1] + img_target.rect[3] - img_target.pre_rect[3]) / 2 
         print("motion:" + str(img_target.motion[0]) + " " +  str(img_target.motion[1]))
 
-    def predect_next():
+    def predict_next():
         #mask = GMM(img1.img,img2.img)
         #cv2.rectangle(mask,(int(img_target.rect[1] + img_target.motion[0]), int(img_target.rect[1] + img_target.motion[0]) ), (int(img_target.rect[2] + img_target.motion[1]), int(img_target.rect[3] + img_target.motion[1])),255,thickness=1)
         #show_im("show",mask)
@@ -315,8 +316,6 @@ if __name__ == "__main__":
 
         result = [(img_target.rect[0] + img_target.motion[0]), (img_target.rect[1] + img_target.motion[1]) , (img_target.rect[2] + img_target.motion[0]), (img_target.rect[3] + img_target.motion[1])]
         return result'''
-
-
         result = img_target.rect
         index_x = index_y = 0
         check = 0
@@ -372,23 +371,20 @@ if __name__ == "__main__":
                     out_mask[y:y+h, x:x+w] = mask[y:y+h, x:x+w]
                     #print(x,y,x+w,y+h)
                     #show_im("out"+str(i),out_mask)
-            print("next_p 1:",next_p)
+            print("next predicted rectangle:",next_p)
             cv2.rectangle(out_mask,(int(next_p[0]),int(next_p[1])),(int(next_p[2]),int(next_p[3])),255,thickness=1)
             show_im("next_" + str(index), out_mask)
             #img_target.rect = next_p
             if(check == 1):
                 break
         print("check:", check)
+        print_bar()
         if(check == 1):
             result = next_p
             return result
         else:
             result = [(img_target.rect[0] + img_target.motion[0]), (img_target.rect[1] + img_target.motion[1]) , (img_target.rect[2] + img_target.motion[0]), (img_target.rect[3] + img_target.motion[1])]
             return result
-            
-
-
-
 
     # create the graph for Hungarian algorithm
     def kp_feature_distance_graph(des1,des2):
@@ -408,11 +404,8 @@ if __name__ == "__main__":
     def Hungarian_match():
         ori_img2 = img_arr[img2.idx]
         des_t = compute_SIFT_des(img_target.img,img_target.kps)
-        if ui.Target_Limit_Button.isChecked():
-            kps2,des_2 = compute_SIFT_des(ori_img2,img2.kps,img_target.rect,[30,30])
-        else:
-            des_2 = compute_SIFT_des(ori_img2,img2.kps)
-            kps2 = img2.kps
+        # use default motion to match
+        kps2,des_2 = compute_SIFT_des(ori_img2,img2.kps,img_target.rect,[30,30])
         graph = kp_feature_distance_graph(des_t, des_2)
         matches = []
         hungarian = Munkres()
@@ -435,8 +428,10 @@ if __name__ == "__main__":
     # dir is the direction of next image(also can set 0 to let image unchanged)
     def find_next_target(dir,next_rect):
         # draw the rectangle on next image to highlight the target
+        if not img_target.is_predict:
+            img_target.pre_rect = copy.deepcopy(img_target.rect)
+            img_target.pre_idx = img1.idx
         change_image(dir)
-        img_target.pre_rect = copy.deepcopy(img_target.rect)
         img_target.rect = next_rect
         im_h,im_w,c = img1.img.shape
         lb_w = ui.img_label1.width()
@@ -458,29 +453,29 @@ if __name__ == "__main__":
             print("No target image.")
             return
         motion()
-        # mode 0 use BF match
-        if mode == 0 :
-            kps2,matches,img_out = BF_target_match()
-            sub_ui.textBrowser_2.setText("Result mask")
-        # mode 1 use Hungarian algorithm
-        elif mode == 1:
-            _,_,BF_img = BF_target_match()
-            kps2,matches,Hungarian_img = Hungarian_match()
-            img_out = combine_img(BF_img,Hungarian_img)
-            sub_ui.textBrowser_2.setText("Hungarian")
-        kps2_arr.append(kps2)
-        kps_t_arr.append(img_target.kps)
-        matches_arr.append(matches)
-        # use the previous rectangle to reinforce match result
-        if sum(img_target.pre_rect) != 0:
-            kps2,matches,pre_img_out,kps_t = pre_target_BF_match()
+        if not img_target.is_predict:
+            # mode 0 use BF match
+            if mode == 0 :
+                kps2,matches,img_out = BF_target_match()
+                sub_ui.textBrowser_2.setText("Result mask")
+            # mode 1 use Hungarian algorithm
+            elif mode == 1:
+                _,_,BF_img = BF_target_match()
+                kps2,matches,Hungarian_img = Hungarian_match()
+                img_out = combine_img(BF_img,Hungarian_img)
+                sub_ui.textBrowser_2.setText("Hungarian")
+            kps2_arr.append(kps2)
+            kps_t_arr.append(img_target.kps)
+            matches_arr.append(matches)
+        # curretn target image isn't trustable
+        # use the previous rectangle to match result
+        else:
+            kps2,matches,img_out,kps_t = pre_target_BF_match()
             kps2_arr.append(kps2)
             kps_t_arr.append(kps_t)
             matches_arr.append(matches)
-            temp = np.hstack((img_out,pre_img_out))
-            show_im("two match result",temp)
+            show_im("match result",img_out)
         # find the GMM mask contour of target
-        print("e d:", erode_num,dilate_num)
         mask = GMM(img1.img,img2.img)
         # use mask and match restult to find the target in next image
         out_mask,next_rect = find_target_contour(kps_t_arr,kps2_arr,matches_arr,mask,is_show)
@@ -498,11 +493,13 @@ if __name__ == "__main__":
             Dialog2.show()
         line_x = abs((next_rect[2] - next_rect[0]) / (img_target.rect[2] - img_target.rect[0]))
         line_y = abs((next_rect[3] - next_rect[1]) / (img_target.rect[3] - img_target.rect[1]))
-        
-
         if (line_x*line_y > 20):
-            print("use motion:", line_x*line_y) 
-            next_rect = predect_next()
+            print("use motion to predict target rectangle...:", line_x*line_y)
+            print_bar()
+            img_target.is_predict = True
+            next_rect = predict_next()
+        else:
+            img_target.is_predict = False
         # update the next target's coordinate of rectangle
         find_next_target(1,next_rect)
         dis_img()

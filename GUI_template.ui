@@ -463,24 +463,6 @@ color:rgb(0, 255, 0);
     <string>Hungarian_match</string>
    </property>
   </widget>
-  <widget class="QCheckBox" name="Target_Limit_Button">
-   <property name="geometry">
-    <rect>
-     <x>180</x>
-     <y>410</y>
-     <width>171</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>12</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>使用鄰近key point</string>
-   </property>
-  </widget>
   <widget class="QTextBrowser" name="textBrowser_5">
    <property name="geometry">
     <rect>
@@ -702,7 +684,6 @@ p, li { white-space: pre-wrap; }
   <zorder>Target_Button</zorder>
   <zorder>Target_BF_Button</zorder>
   <zorder>Target_Hungarian_Button</zorder>
-  <zorder>Target_Limit_Button</zorder>
   <zorder>textBrowser_5</zorder>
   <zorder>Optical_Flow_Button</zorder>
   <zorder>Result_Data_Text</zorder>

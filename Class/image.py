@@ -114,6 +114,9 @@ def convImg(img):
     qImg = QImage(img.data, width, height, bytesPerline, QImage.Format_RGB888).rgbSwapped()
     return qImg
 
+def print_bar():
+    print("======================================\n")
+
 # the class to maintain QLabel image's infomation
 class Image():
     
@@ -159,8 +162,10 @@ class Image():
 class Target_Image(Image):
     def __init__(self,img,i):
         self.rect = [0,0,0,0]
-        self.pre_rect = [0,0,0,0]
         self.motion = [30,30]
+        self.pre_rect = [0,0,0,0]
+        self.pre_idx = i
+        self.is_predict = False
 
 # The enum of result file type
 class File_Type(IntEnum):
