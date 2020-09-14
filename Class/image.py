@@ -99,6 +99,7 @@ def compute_SIFT_des(img,kps,rect=[0,0,0,0],dis=[0,0]):
     # to show the remain key points on image
     img_out = copy.deepcopy(img)
     cv2.drawKeypoints(img,new_kp,img_out)
+    cv2.rectangle(img_out,(int(min(rect[0],rect[2])),int(min(rect[1],rect[3]))),(int(max(rect[0],rect[2])),int(max(rect[1],rect[3]))),(0,0,255),thickness=1)
     cv2.rectangle(img_out,(int(min_x),int(min_y)),(int(max_x),int(max_y)),(0,255,0),thickness=1)
     cv2.imshow("limited_key_points",img_out)
     # press any key to close the window
@@ -163,9 +164,39 @@ class Target_Image(Image):
     def __init__(self,img,i):
         self.rect = [0,0,0,0]
         self.motion = [30,30]
+        #previous trustable target image information
         self.pre_rect = [0,0,0,0]
         self.pre_idx = i
+        self.predict_pre_rect = [0,0,0,0]
+        self.is_predict = False #means current target image ism't trustable
+
+    def set_rect(self,new_rect):
+        x1 = min(new_rect[0],new_rect[2])
+        y1 = min(new_rect[1],new_rect[3])
+        x2 = max(new_rect[0],new_rect[2])
+        y2 = max(new_rect[1],new_rect[3])
+        self.rect = [x1,y1,x2,y2]
+
+    def set_pre_rect(self,new_rect):
+        x1 = min(new_rect[0],new_rect[2])
+        y1 = min(new_rect[1],new_rect[3])
+        x2 = max(new_rect[0],new_rect[2])
+        y2 = max(new_rect[1],new_rect[3])
+        self.pre_rect = [x1,y1,x2,y2]
+    
+    def set_predict_pre_rect(self,new_rect):
+        x1 = min(new_rect[0],new_rect[2])
+        y1 = min(new_rect[1],new_rect[3])
+        x2 = max(new_rect[0],new_rect[2])
+        y2 = max(new_rect[1],new_rect[3])
+        self.predict_pre_rect = [x1,y1,x2,y2]
+    
+    def clear(self):
+        self.motion = [30,30]
+        self.pre_rect = [0,0,0,0]
+        self.pre_idx = -1
         self.is_predict = False
+        self.predict_rect = [0,0,0,0]
 
 # The enum of result file type
 class File_Type(IntEnum):

@@ -237,11 +237,10 @@ if __name__ == "__main__":
         if not sum(img_target.rect):
             print("No bounded area!")
             return
+        if is_init:
+            img_target.clear()
         temp = [img_target.rect[0],img_target.rect[1],img_target.rect[2],img_target.rect[3]]
-        img_target.rect[0] = min(temp[0],temp[2])
-        img_target.rect[1] = min(temp[1],temp[3]) 
-        img_target.rect[2] = max(temp[0],temp[2]) 
-        img_target.rect[3] = max(temp[1],temp[3]) 
+        img_target.set_rect(temp)
         width = int(abs(img_target.rect[0] - img_target.rect[2]))
         height = int(abs(img_target.rect[1] - img_target.rect[3]))
         global erode_num
@@ -252,9 +251,6 @@ if __name__ == "__main__":
         else:
             erode_num = 4
             dilate_num = 8
-        if is_init:
-            img_target.pre_rect = [0,0,0,0]
-            img_target.is_predict = False
         temp_img = get_rect_img(img1.img,img_target.rect)
         img_target.draw_img(np.copy(temp_img))
         SIFT_target_img()
@@ -287,7 +283,7 @@ if __name__ == "__main__":
         ori_img2 = img_arr[img2.idx]
         # the move distance should be two times of motion
         predict_motion = (img_target.motion[0] * 2,img_target.motion[1] * 2)
-        kps2,des_2 = compute_SIFT_des(ori_img2,img2.kps,img_target.pre_rect,predict_motion)
+        kps2,des_2 = compute_SIFT_des(ori_img2,img2.kps,img_target.predict_pre_rect,predict_motion)
         # match
         matcher = cv2.DescriptorMatcher_create("BruteForce")
         matches = matcher.knnMatch(des_t,des_2,2)
@@ -301,8 +297,12 @@ if __name__ == "__main__":
     def motion():
         if sum(img_target.pre_rect) == 0:
             return
-        img_target.motion[0] = (img_target.rect[0] - img_target.pre_rect[0] + img_target.rect[2] - img_target.pre_rect[2]) / 2 
-        img_target.motion[1] = (img_target.rect[1] - img_target.pre_rect[1] + img_target.rect[3] - img_target.pre_rect[3]) / 2 
+        if img_target.is_predict:
+            img_target.motion[0] = (img_target.rect[0] - img_target.predict_pre_rect[0] + img_target.rect[2] - img_target.predict_pre_rect[2]) / 2 
+            img_target.motion[1] = (img_target.rect[1] - img_target.predict_pre_rect[1] + img_target.rect[3] - img_target.predict_pre_rect[3]) / 2 
+        else:
+            img_target.motion[0] = (img_target.rect[0] - img_target.pre_rect[0] + img_target.rect[2] - img_target.pre_rect[2]) / 2 
+            img_target.motion[1] = (img_target.rect[1] - img_target.pre_rect[1] + img_target.rect[3] - img_target.pre_rect[3]) / 2 
         print("motion:" + str(img_target.motion[0]) + " " +  str(img_target.motion[1]))
 
     def predict_next():
@@ -427,10 +427,12 @@ if __name__ == "__main__":
     def find_next_target(dir,next_rect):
         # draw the rectangle on next image to highlight the target
         if not img_target.is_predict:
-            img_target.pre_rect = copy.deepcopy(img_target.rect)
+            img_target.set_pre_rect(img_target.rect)
             img_target.pre_idx = img1.idx
+        else:
+            img_target.set_predict_pre_rect(img_target.rect)
         change_image(dir)
-        img_target.rect = next_rect
+        img_target.set_rect(next_rect)
         im_h,im_w,c = img1.img.shape
         lb_w = ui.img_label1.width()
         lb_h = ui.img_label1.height()
@@ -450,7 +452,7 @@ if __name__ == "__main__":
         if ui.target_label.pixmap() == None:
             print("No target image.")
             return
-        motion()
+        # current target image is trustable
         if not img_target.is_predict:
             # mode 0 use BF match
             if mode == 0 :
@@ -463,7 +465,7 @@ if __name__ == "__main__":
             kps2_arr.append(kps2)
             kps_t_arr.append(img_target.kps)
             matches_arr.append(matches)
-        # curretn target image isn't trustable
+        # current target image isn't trustable
         # use the previous rectangle to match result
         else:
             kps2,matches,img_out,kps_t = pre_target_BF_match()
@@ -494,6 +496,7 @@ if __name__ == "__main__":
             img_target.is_predict = False
         # update the next target's coordinate of rectangle
         find_next_target(1,next_rect)
+        motion()
         dis_img()
         return next_rect
     
