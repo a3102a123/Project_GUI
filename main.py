@@ -295,14 +295,15 @@ if __name__ == "__main__":
     
     # count motion
     def motion():
-        if sum(img_target.pre_rect) == 0:
-            return
+        new_motion = [0,0]
         if img_target.is_predict:
-            img_target.motion[0] = (img_target.rect[0] - img_target.predict_pre_rect[0] + img_target.rect[2] - img_target.predict_pre_rect[2]) / 2 
-            img_target.motion[1] = (img_target.rect[1] - img_target.predict_pre_rect[1] + img_target.rect[3] - img_target.predict_pre_rect[3]) / 2 
+            new_motion[0] = (img_target.rect[0] - img_target.predict_pre_rect[0] + img_target.rect[2] - img_target.predict_pre_rect[2]) / 2 
+            new_motion[1] = (img_target.rect[1] - img_target.predict_pre_rect[1] + img_target.rect[3] - img_target.predict_pre_rect[3]) / 2 
         else:
-            img_target.motion[0] = (img_target.rect[0] - img_target.pre_rect[0] + img_target.rect[2] - img_target.pre_rect[2]) / 2 
-            img_target.motion[1] = (img_target.rect[1] - img_target.pre_rect[1] + img_target.rect[3] - img_target.pre_rect[3]) / 2 
+            new_motion[0] = (img_target.rect[0] - img_target.pre_rect[0] + img_target.rect[2] - img_target.pre_rect[2]) / 2 
+            new_motion[1] = (img_target.rect[1] - img_target.pre_rect[1] + img_target.rect[3] - img_target.pre_rect[3]) / 2 
+        img_target.motion[0] = new_motion[0]
+        img_target.motion[1] = new_motion[1]
         print("motion:" + str(img_target.motion[0]) + " " +  str(img_target.motion[1]))
 
     def predict_next():
