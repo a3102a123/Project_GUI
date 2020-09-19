@@ -208,8 +208,9 @@ if __name__ == "__main__":
                 x,y,w,h = cv2.boundingRect(contours[i])
                 cv2.rectangle(img2.img,(x,y),(x+w,y+h),(0,255,0),2)
                 count = 1
-                test_range = [(img_target.rect[0]-img_target.motion[0]*count), (img_target.rect[1]-img_target.motion[1]*count), (img_target.rect[2]+img_target.motion[0]*count), (img_target.rect[3]+img_target.motion[1]*count)]
+                test_range = img_target.check_range()
                 print("current target rectangle:" + str(img_target.rect))
+                print("motion:" + str(img_target.motion))
                 print("test rectangle range:" + str(test_range))
                 if((test_range[0]<=(x+w/2)<=test_range[2])&(test_range[1]<=(y+h/2)<=test_range[3])):
                     next_p[0] = min(next_p[0],x)
@@ -306,83 +307,67 @@ if __name__ == "__main__":
         img_target.motion[1] = new_motion[1]
         print("motion:" + str(img_target.motion[0]) + " " +  str(img_target.motion[1]))
 
-    def predict_next():
-        #mask = GMM(img1.img,img2.img)
-        #cv2.rectangle(mask,(int(img_target.rect[1] + img_target.motion[0]), int(img_target.rect[1] + img_target.motion[0]) ), (int(img_target.rect[2] + img_target.motion[1]), int(img_target.rect[3] + img_target.motion[1])),255,thickness=1)
-        #show_im("show",mask)
-        '''print("ori:" + str(img_target.rect))
-        print("next:" , (img_target.rect[0] + img_target.motion[0]), (img_target.rect[1] + img_target.motion[1]) , (img_target.rect[2] + img_target.motion[0]), (img_target.rect[3] + img_target.motion[1]))
+    def predict_next(mask):
+        result = copy.deepcopy(img_target.rect)
+        if(img_target.motion[0] >= 0 ):
+            result[2] += (img_target.motion[0] * 1.5)
+        else:
+            result[0] += (img_target.motion[0] * 1.5)
+        if(img_target.motion[1] >= 0 ):
+            result[3] += (img_target.motion[1] * 1.5)
+        else:
+            result[1] += (img_target.motion[1] * 1.5)
 
-        result = [(img_target.rect[0] + img_target.motion[0]), (img_target.rect[1] + img_target.motion[1]) , (img_target.rect[2] + img_target.motion[0]), (img_target.rect[3] + img_target.motion[1])]
-        return result'''
-        result = img_target.rect
-        index_x = index_y = 0
+
         check = 0
-        if img_target.motion[0] > 0:
-            index_x = 2
-        else:
-            index_x = 0
-        if img_target.motion[1] > 0:
-            index_y = 3
-        else:
-            index_y = 1
-        for index in range(5):
-            result[index_x] += img_target.motion[0] * (index + 1) * 3
-            result[index_y] += img_target.motion[1] * (index + 1) * 3
 
-            #print("o_rect" + str(img_target.rect))
-            #print("n_rect" + str(next_rect))            
-            mask = GMM(img1.img,img_arr[img1.idx + 1 + index])
-            _,contours, hierarchy = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        #print("o_rect" + str(img_target.rect))
+        #print("n_rect" + str(next_rect))            
+        _,contours, hierarchy = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
 
-            x = (result[2] - result[0]) / 25
-            y = (result[3] - result[1]) / 25
-            next_pt = []
-            for i in range(25):
-                for j in range(25):
-                    next_pt.append((int(result[0] + x * i), int(result[1] + y * j)))
+        x = (result[2] - result[0]) / 25
+        y = (result[3] - result[1]) / 25
+        next_pt = []
+        for i in range(25):
+            for j in range(25):
+                next_pt.append((int(result[0] + x * i), int(result[1] + y * j)))
             
-            #print("next pt :" + str(next_pt))
+        #print("next pt :" + str(next_pt))
 
-            count_arr = [0 for i in range(len(contours))]
-            count = 0
-            for j in range(625):
-                pt = next_pt[j]
-                #print("pt:" + str(pt))
-                for i,c in enumerate( contours ):
-                    if cv2.pointPolygonTest(c,pt,False) >= 0:
-                        count += 1
-                        count_arr[i] += 1
-                        check = 1
-            out_mask = mk_empty_img(mask)
-            #cv2.rectangle(out_mask,(int(result[0]),int(result[1])),(int(result[2]),int(result[3])),255,thickness=1)
-            #show_im("next_" + str(index), out_mask)
-            next_p = np.array([512.0, 512.0, 0.0, 0.0])
-            for i in range(0,len(contours)):
-                if count_arr[i] > 0:
-                    x,y,w,h = cv2.boundingRect(contours[i])
-                    cv2.rectangle(img2.img,(x,y),(x+w,y+h),(0,255,0),2)
+        count_arr = [0 for i in range(len(contours))]
+        count = 0
+        for j in range(625):
+            pt = next_pt[j]
+            #print("pt:" + str(pt))
+            for i,c in enumerate( contours ):
+                if cv2.pointPolygonTest(c,pt,False) >= 0:
+                    count += 1
+                    count_arr[i] += 1
+                    check = 1
+        out_mask = mk_empty_img(mask)
+        #cv2.rectangle(out_mask,(int(result[0]),int(result[1])),(int(result[2]),int(result[3])),255,thickness=1)
+        #show_im("next_" + str(index), out_mask)
+        next_p = np.array([512.0, 512.0, 0.0, 0.0])
+        for i in range(0,len(contours)):
+            if count_arr[i] > 0:
+                x,y,w,h = cv2.boundingRect(contours[i])
+                cv2.rectangle(img2.img,(x,y),(x+w,y+h),(0,255,0),2)
 
-                    next_p[0] = min(next_p[0],x)
-                    next_p[1] = min(next_p[1],y)
-                    next_p[2] = max(next_p[2],x+w)
-                    next_p[3] = max(next_p[3],y+h)
-                    out_mask[y:y+h, x:x+w] = mask[y:y+h, x:x+w]
-                    #print(x,y,x+w,y+h)
-                    #show_im("out"+str(i),out_mask)
-            print("next predicted rectangle:",next_p)
-            cv2.rectangle(out_mask,(int(next_p[0]),int(next_p[1])),(int(next_p[2]),int(next_p[3])),255,thickness=1)
-            show_im("next_" + str(index), out_mask)
-            #img_target.rect = next_p
-            if(check == 1):
-                break
+                next_p[0] = min(next_p[0],x)
+                next_p[1] = min(next_p[1],y)
+                next_p[2] = max(next_p[2],x+w)
+                next_p[3] = max(next_p[3],y+h)
+                out_mask[y:y+h, x:x+w] = mask[y:y+h, x:x+w]
+                #print(x,y,x+w,y+h)
+                #show_im("out"+str(i),out_mask)
+        print("next predicted rectangle:",next_p)
+        cv2.rectangle(out_mask,(int(next_p[0]),int(next_p[1])),(int(next_p[2]),int(next_p[3])),255,thickness=1)
+        #img_target.rect = next_p
         print("check:", check)
         print_bar()
-        if(check == 1):
-            result = next_p
-            return result
+        if(check == 1): 
+            return next_p
         else:
-            result = [(img_target.rect[0] + img_target.motion[0]), (img_target.rect[1] + img_target.motion[1]) , (img_target.rect[2] + img_target.motion[0]), (img_target.rect[3] + img_target.motion[1])]
             return result
 
     # create the graph for Hungarian algorithm
@@ -492,7 +477,7 @@ if __name__ == "__main__":
             print("use motion to predict target rectangle...:", line_x*line_y)
             print_bar()
             img_target.is_predict = True
-            next_rect = predict_next()
+            next_rect = predict_next(mask)
         else:
             img_target.is_predict = False
         # update the next target's coordinate of rectangle

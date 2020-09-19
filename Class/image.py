@@ -165,9 +165,9 @@ class Target_Image(Image):
         self.rect = [0,0,0,0]
         self.motion = [30,30]
         #previous trustable target image information
-        self.pre_rect = [0,0,0,0]
+        self.pre_rect = [0,0,0,0]   #可靠
         self.pre_idx = i
-        self.predict_pre_rect = [0,0,0,0]
+        self.predict_pre_rect = [0,0,0,0]   #可能不可靠
         self.is_predict = False #means current target image ism't trustable
 
     def set_rect(self,new_rect):
@@ -197,6 +197,19 @@ class Target_Image(Image):
         self.pre_idx = -1
         self.is_predict = False
         self.predict_rect = [0,0,0,0]
+
+    def check_range(self):
+        target_rect = copy.deepcopy(self.rect)
+        if(self.motion[0] >= 0 ):
+            target_rect[2] += self.motion[0]
+        else:
+            target_rect[0] += self.motion[0]
+        if(self.motion[1] >= 0 ):
+            target_rect[3] += self.motion[1]
+        else:
+            target_rect[1] += self.motion[1]
+        return target_rect
+
 
 # The enum of result file type
 class File_Type(IntEnum):
