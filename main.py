@@ -202,23 +202,23 @@ if __name__ == "__main__":
                         count_arr[i] += 1
                 temp.append(kp2)
         out_mask = mk_empty_img(mask)
+        test_range = img_target.check_range(2)
+        print("test rectangle range:" + str(test_range))
+        print("motion:" + str(img_target.motion))
         # find the rectangle coordinate of pointed contour
         for i in range(0,len(contours)):
             if count_arr[i] > 0:
                 x,y,w,h = cv2.boundingRect(contours[i])
                 cv2.rectangle(img2.img,(x,y),(x+w,y+h),(0,255,0),2)
                 count = 1
-                test_range = img_target.check_range()
-                print("current target rectangle:" + str(img_target.rect))
-                print("motion:" + str(img_target.motion))
-                print("test rectangle range:" + str(test_range))
+                print("current contour rectangle:",x,y,x+w,y+h)
                 if((test_range[0]<=(x+w/2)<=test_range[2])&(test_range[1]<=(y+h/2)<=test_range[3])):
                     next_p[0] = min(next_p[0],x)
                     next_p[1] = min(next_p[1],y)
                     next_p[2] = max(next_p[2],x+w)
                     next_p[3] = max(next_p[3],y+h)
                     out_mask[y:y+h, x:x+w] = mask[y:y+h, x:x+w]
-                    #print(x,y,x+w,y+h)
+                    print("Adopt!")
                     #show_im("out"+str(i),out_mask)
         print("next target's rectangle:",next_p)
         print_bar()
@@ -283,8 +283,8 @@ if __name__ == "__main__":
         # use the target velocity(target's motion attribute) to limit key point on img2
         ori_img2 = img_arr[img2.idx]
         # the move distance should be two times of motion
-        predict_motion = (img_target.motion[0] * 2,img_target.motion[1] * 2)
-        kps2,des_2 = compute_SIFT_des(ori_img2,img2.kps,img_target.predict_pre_rect,predict_motion)
+        predict_motion = (img_target.motion[0],img_target.motion[1])
+        kps2,des_2 = compute_SIFT_des(ori_img2,img2.kps,img_target.rect,predict_motion)
         # match
         matcher = cv2.DescriptorMatcher_create("BruteForce")
         matches = matcher.knnMatch(des_t,des_2,2)
@@ -473,7 +473,7 @@ if __name__ == "__main__":
             show_im("Detect Result",img_out)
         line_x = abs((next_rect[2] - next_rect[0]) / (img_target.rect[2] - img_target.rect[0]))
         line_y = abs((next_rect[3] - next_rect[1]) / (img_target.rect[3] - img_target.rect[1]))
-        if (line_x*line_y > 20):
+        if (line_x > 2 or line_y > 2):
             print("use motion to predict target rectangle...:", line_x*line_y)
             print_bar()
             img_target.is_predict = True

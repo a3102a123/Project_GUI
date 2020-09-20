@@ -196,18 +196,18 @@ class Target_Image(Image):
         self.pre_rect = [0,0,0,0]
         self.pre_idx = -1
         self.is_predict = False
-        self.predict_rect = [0,0,0,0]
+        self.predict_pre_rect = [0,0,0,0]
 
-    def check_range(self):
+    def check_range(self,time):
         target_rect = copy.deepcopy(self.rect)
         if(self.motion[0] >= 0 ):
-            target_rect[2] += self.motion[0]
+            target_rect[2] += (self.motion[0] * time)
         else:
-            target_rect[0] += self.motion[0]
+            target_rect[0] += (self.motion[0] * time)
         if(self.motion[1] >= 0 ):
-            target_rect[3] += self.motion[1]
+            target_rect[3] += (self.motion[1] * time)
         else:
-            target_rect[1] += self.motion[1]
+            target_rect[1] += (self.motion[1] * time)
         return target_rect
 
 
