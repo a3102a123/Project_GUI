@@ -267,7 +267,13 @@ if __name__ == "__main__":
         predict_motion = (img_target.motion[0] * 2,img_target.motion[1] * 2)
         kps2,des_2 = compute_SIFT_des(ori_img2,img2.kps,img_target.rect,predict_motion)
         matcher = cv2.DescriptorMatcher_create("BruteForce")
-        matches = matcher.knnMatch(des_t,des_2,2)
+        raw_matches = matcher.knnMatch(des_t,des_2,2)
+        matches = []
+        # the ratio test of match
+        for i in range(len(raw_matches) - 1 , -1 , -1):
+            m = raw_matches[i]
+            if is_meet_ratio(m[0],m[1]):
+                matches.append(m)
         img_out = combine_img(img_target.img,ori_img2)
         hA,wA = img_target.img.shape[:2]
         # draw the line on target image and img1
@@ -287,7 +293,13 @@ if __name__ == "__main__":
         kps2,des_2 = compute_SIFT_des(ori_img2,img2.kps,img_target.rect,predict_motion)
         # match
         matcher = cv2.DescriptorMatcher_create("BruteForce")
-        matches = matcher.knnMatch(des_t,des_2,2)
+        raw_matches = matcher.knnMatch(des_t,des_2,2)
+        matches = []
+        # the ratio test of match
+        for i in range(len(raw_matches) - 1 , -1 , -1):
+            m = raw_matches[i]
+            if is_meet_ratio(m[0],m[1]):
+                matches.append(m)
         img_out = combine_img(pre_target_img,ori_img2)
         hA,wA = pre_target_img.shape[:2]
         # draw the line on target image and img1
