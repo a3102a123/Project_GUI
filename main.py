@@ -306,6 +306,31 @@ if __name__ == "__main__":
         draw_match_line(matches,img_out,wA,kp_t,kps2)
         return kps2,matches,img_out,kp_t
     
+    def kl_filter_init(kl):
+        y_center = (img_target.rect[3] - img_target.rect[1] / 2) + img_target.rect[1]
+        kl.x = np.array([y_center, 0])
+        kl.F = np.array([[1.,1.],[0.,1.]])
+        kl.H = np.array([[1.,0.]])
+        kl.P = np.array([[1000., 0.],[ 0., 1000.] ])
+        kl.R = np.array([[5.]])
+        kl.Q = Q_discrete_white_noise(dim=2, dt=0.1, var=0.13)
+
+    def kl_init(kl):
+        kl.measurementMatrix = np.array([[1,0],[0,1]],np.float32)
+        kl.transitionMatrix = np.array([[1,0],[0,1]], np.float32)
+        kl.processNoiseCov = np.array([[1,0],[0,1]], np.float32) * 1e-3
+        kl.measurementNoiseCov = np.array([[1,0],[0,1]], np.float32) * 0.01
+        y_center = (img_target.pre_rect[3] - img_target.pre_rect[1] / 2) + img_target.pre_rect[1]
+        x_center = (img_target.pre_rect[2] - img_target.pre_rect[0] / 2) + img_target.pre_rect[0]
+        kl.statePre =  np.array([x_center,y_center],np.float32)
+
+    kl_y = KalmanFilter (dim_x=2, dim_z=1)
+    kl_filter_init(kl_y)
+    kl = cv2.KalmanFilter(2,2)
+    kl_init_f = False
+    y1_arr = []
+    y2_arr = []
+    
     # count motion
     def motion():
         new_motion = [0,0]
@@ -317,6 +342,25 @@ if __name__ == "__main__":
             new_motion[1] = (img_target.rect[1] - img_target.pre_rect[1] + img_target.rect[3] - img_target.pre_rect[3]) / 2 
         img_target.motion[0] = new_motion[0]
         img_target.motion[1] = new_motion[1]
+        y_center = (img_target.rect[3] - img_target.rect[1] / 2) + img_target.rect[1]
+        x_center = (img_target.rect[2] - img_target.rect[0] / 2) + img_target.rect[0]
+        z = np.array(y_center)
+        x = np.array([[np.float32(x_center)],[np.float32(y_center)]])
+        global kl_init_f
+        if not kl_init_f:
+            kl_init(kl)
+            kl_init_f = True
+        kl.correct(x)
+        current_pre = kl.predict()
+        y1_arr.append(y_center)
+        y2_arr.append(current_pre[1])
+        x_arr = range(len(y1_arr))
+        plt.plot(x_arr,y1_arr,marker='o',label = "Detected Y")
+        plt.plot(x_arr,y2_arr,marker='o',label = "Kalman predict Y")
+        plt.legend()
+        plt.show()
+        # kl_y.predict()
+        # kl_y.update(z)
         print("motion:" + str(img_target.motion[0]) + " " +  str(img_target.motion[1]))
 
     def predict_next(mask):

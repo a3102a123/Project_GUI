@@ -6,12 +6,15 @@ import _pickle as cPickle
 import sys
 import os
 import time
+import matplotlib.pyplot as plt
 
 from enum import Enum,IntEnum
 from PyQt5.QtWidgets import QWidget, QApplication, QLabel
 from PyQt5.QtCore import QRect, Qt
 from PyQt5.QtGui import QImage, QPixmap, QPainter, QPen, QGuiApplication
 from munkres import Munkres, print_matrix
+from filterpy.kalman import KalmanFilter
+from filterpy.common import Q_discrete_white_noise
 
 # return the number of image load from folder
 def image_num():
