@@ -316,20 +316,31 @@ if __name__ == "__main__":
         kl.Q = Q_discrete_white_noise(dim=2, dt=0.1, var=0.13)
 
     def kl_init(kl):
-        kl.measurementMatrix = np.array([[1,0],[0,1]],np.float32)
-        kl.transitionMatrix = np.array([[1,0],[0,1]], np.float32)
-        kl.processNoiseCov = np.array([[1,0],[0,1]], np.float32) * 1e-3
-        kl.measurementNoiseCov = np.array([[1,0],[0,1]], np.float32) * 0.01
+        # kl.measurementMatrix = np.array([[1,0],[0,1]],np.float32)
+        # kl.transitionMatrix = np.array([[1,0],[0,1]], np.float32)
+        # kl.processNoiseCov = np.array([[1,0],[0,1]], np.float32) * 1e-3
+        # kl.measurementNoiseCov = np.array([[1,0],[0,1]], np.float32) * 0.01
+        kl.measurementMatrix = np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]],np.float32)
+        kl.transitionMatrix = np.array([[1,0,1,0],[0,1,0,1],[0,0,1,0],[0,0,0,1]], np.float32)
+        kl.processNoiseCov = np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]], np.float32) * 0.003
+        kl.measurementNoiseCov = np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]], np.float32) * 1
         y_center = (img_target.pre_rect[3] - img_target.pre_rect[1] / 2) + img_target.pre_rect[1]
         x_center = (img_target.pre_rect[2] - img_target.pre_rect[0] / 2) + img_target.pre_rect[0]
-        kl.statePre =  np.array([x_center,y_center],np.float32)
+        kl.statePre =  np.array([x_center,y_center,img_target.motion[0],img_target.motion[1]],np.float32)
+        # kl.statePre =  np.array([x_center,y_center],np.float32)
 
     kl_y = KalmanFilter (dim_x=2, dim_z=1)
     kl_filter_init(kl_y)
-    kl = cv2.KalmanFilter(2,2)
+    kl = cv2.KalmanFilter(4,2)
     kl_init_f = False
+    x1_arr = []
+    x2_arr = []
     y1_arr = []
     y2_arr = []
+    x_arr = []
+    y_arr = []
+    xv_arr = []
+    yv_arr = []
     
     # count motion
     def motion():
@@ -342,21 +353,55 @@ if __name__ == "__main__":
             new_motion[1] = (img_target.rect[1] - img_target.pre_rect[1] + img_target.rect[3] - img_target.pre_rect[3]) / 2 
         img_target.motion[0] = new_motion[0]
         img_target.motion[1] = new_motion[1]
+        # kalman filter
         y_center = (img_target.rect[3] - img_target.rect[1] / 2) + img_target.rect[1]
         x_center = (img_target.rect[2] - img_target.rect[0] / 2) + img_target.rect[0]
         z = np.array(y_center)
-        x = np.array([[np.float32(x_center)],[np.float32(y_center)]])
+        x = np.array([x_center,y_center,new_motion[0],new_motion[1]],np.float32)
         global kl_init_f
         if not kl_init_f:
             kl_init(kl)
             kl_init_f = True
         kl.correct(x)
         current_pre = kl.predict()
-        y1_arr.append(y_center)
-        y2_arr.append(current_pre[1])
-        x_arr = range(len(y1_arr))
-        plt.plot(x_arr,y1_arr,marker='o',label = "Detected Y")
-        plt.plot(x_arr,y2_arr,marker='o',label = "Kalman predict Y")
+        # draw 2D plot
+        # x1_arr.append(x_center)
+        # x2_arr.append(current_pre[0])
+        # y1_arr.append(y_center)
+        # y2_arr.append(current_pre[1])
+        # idx_arr = range(len(y1_arr))
+        # plt.figure()
+        # plt.plot(idx_arr,x1_arr,marker='o',label = "Detected X")
+        # plt.plot(idx_arr,x2_arr,marker='o',label = "Kalman X")
+        # plt.plot(idx_arr,y1_arr,marker='o',label = "Detected Y")
+        # plt.plot(idx_arr,y2_arr,marker='o',label = "Kalman Y")
+        # plt.legend()
+        # plt.figure()
+        # plt.plot(x1_arr,y1_arr,marker='o',label = "Detecte")
+        # plt.plot(x2_arr,y2_arr,marker='o',label = "Kalman")
+        # plt.legend()
+        # plt.show()
+        # draw 4D plot
+        x1_arr.append(current_pre[0])
+        x2_arr.append(current_pre[2])
+        y1_arr.append(current_pre[1])
+        y2_arr.append(current_pre[3])
+        x_arr.append(x_center)
+        xv_arr.append(img_target.motion[0])
+        y_arr.append(y_center)
+        yv_arr.append(img_target.motion[1])
+        idx_arr = range(len(y1_arr))
+        plt.figure()
+        plt.plot(idx_arr,x_arr,marker='o',label = "Detected X")
+        plt.plot(idx_arr,x1_arr,marker='o',label = "Kalman X")
+        plt.plot(idx_arr,y_arr,marker='o',label = "Detected Y")
+        plt.plot(idx_arr,y1_arr,marker='o',label = "Kalman Y")
+        plt.legend()
+        plt.figure()
+        plt.plot(idx_arr,xv_arr,marker='o',label = "Detected X velocity")
+        plt.plot(idx_arr,x2_arr,marker='o',label = "Kalman X velocity")
+        plt.plot(idx_arr,yv_arr,marker='o',label = "Detected Y velocity")
+        plt.plot(idx_arr,y2_arr,marker='o',label = "Kalman Y velocity")
         plt.legend()
         plt.show()
         # kl_y.predict()
