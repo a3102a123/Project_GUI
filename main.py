@@ -320,12 +320,12 @@ if __name__ == "__main__":
         # kl.transitionMatrix = np.array([[1,0],[0,1]], np.float32)
         # kl.processNoiseCov = np.array([[1,0],[0,1]], np.float32) * 1e-3
         # kl.measurementNoiseCov = np.array([[1,0],[0,1]], np.float32) * 0.01
-        kl.measurementMatrix = np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]],np.float32)
+        kl.measurementMatrix = np.array([[1,0,0,0],[0,1,0,0]],np.float32)
         kl.transitionMatrix = np.array([[1,0,1,0],[0,1,0,1],[0,0,1,0],[0,0,0,1]], np.float32)
         kl.processNoiseCov = np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]], np.float32) * 0.003
-        kl.measurementNoiseCov = np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]], np.float32) * 1
-        y_center = (img_target.pre_rect[3] - img_target.pre_rect[1] / 2) + img_target.pre_rect[1]
-        x_center = (img_target.pre_rect[2] - img_target.pre_rect[0] / 2) + img_target.pre_rect[0]
+        kl.measurementNoiseCov = np.array([[1,0],[0,1]], np.float32) * 1
+        x_center = ((img_target.pre_rect[2] - img_target.pre_rect[0]) / 2) + img_target.pre_rect[0]
+        y_center = ((img_target.pre_rect[3] - img_target.pre_rect[1]) / 2) + img_target.pre_rect[1]
         kl.statePre =  np.array([x_center,y_center,img_target.motion[0],img_target.motion[1]],np.float32)
         # kl.statePre =  np.array([x_center,y_center],np.float32)
 
@@ -354,16 +354,24 @@ if __name__ == "__main__":
         img_target.motion[0] = new_motion[0]
         img_target.motion[1] = new_motion[1]
         # kalman filter
-        y_center = (img_target.rect[3] - img_target.rect[1] / 2) + img_target.rect[1]
-        x_center = (img_target.rect[2] - img_target.rect[0] / 2) + img_target.rect[0]
+        x_center = ((img_target.rect[2] - img_target.rect[0]) / 2) + img_target.rect[0]
+        y_center = ((img_target.rect[3] - img_target.rect[1]) / 2) + img_target.rect[1]
         z = np.array(y_center)
-        x = np.array([x_center,y_center,new_motion[0],new_motion[1]],np.float32)
+        x = np.array([x_center,y_center],np.float32)
         global kl_init_f
         if not kl_init_f:
             kl_init(kl)
             kl_init_f = True
         kl.correct(x)
+        print("kalman input : ",x,img_target.rect)
         current_pre = kl.predict()
+        # draw the motion vector on image
+        motion_img = copy.deepcopy(img_arr[img1.idx])
+        pt1 = (int(current_pre[0]), int(current_pre[1]))
+        pt2 = (int(current_pre[0] + current_pre[2]), int(current_pre[1] + current_pre[3]))
+        cv2.arrowedLine(motion_img, pt1,pt2,[0,0,255],2,8,0,0.5)
+        print("kalman vector: ",pt1,pt2)
+        show_im("motion vector",motion_img)
         # draw 2D plot
         # x1_arr.append(x_center)
         # x2_arr.append(current_pre[0])
@@ -403,6 +411,7 @@ if __name__ == "__main__":
         plt.plot(idx_arr,yv_arr,marker='o',label = "Detected Y velocity")
         plt.plot(idx_arr,y2_arr,marker='o',label = "Kalman Y velocity")
         plt.legend()
+        # display the chart
         plt.show()
         # kl_y.predict()
         # kl_y.update(z)
@@ -571,7 +580,7 @@ if __name__ == "__main__":
         img_out = np.hstack((img_out,cv2.cvtColor( out_mask, cv2.COLOR_GRAY2RGB),cv2.cvtColor( mask, cv2.COLOR_GRAY2RGB)))
         # show Result
         if is_show:
-            show_im("Detect Result",img_out)
+            cv2.imshow("Detect Result",img_out)
         line_x = abs((next_rect[2] - next_rect[0]) / (img_target.rect[2] - img_target.rect[0]))
         line_y = abs((next_rect[3] - next_rect[1]) / (img_target.rect[3] - img_target.rect[1]))
         if (line_x > 2 or line_y > 2):
