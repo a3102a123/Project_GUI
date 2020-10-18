@@ -24,6 +24,20 @@ if __name__ == "__main__":
     erode_num = 3
     dilate_num = 5
     saved_result_arr = []
+
+    # the record list of kalman filter
+    kl = cv2.KalmanFilter(4,2)
+    kl_init_f = False
+    x1_arr = []
+    x2_arr = []
+    y1_arr = []
+    y2_arr = []
+    x_arr = []
+    y_arr = []
+    xv_arr = []
+    yv_arr = []
+    xv_new_arr = []
+    yv_new_arr = []
     # function
     ###########################################
 
@@ -240,6 +254,7 @@ if __name__ == "__main__":
             return
         if is_init:
             img_target.clear()
+            kl_record_list_init()
         temp = [img_target.rect[0],img_target.rect[1],img_target.rect[2],img_target.rect[3]]
         img_target.set_rect(temp)
         width = int(abs(img_target.rect[0] - img_target.rect[2]))
@@ -305,99 +320,47 @@ if __name__ == "__main__":
         # draw the line on target image and img1
         draw_match_line(matches,img_out,wA,kp_t,kps2)
         return kps2,matches,img_out,kp_t
-    
-    def kl_filter_init(kl):
-        y_center = (img_target.rect[3] - img_target.rect[1] / 2) + img_target.rect[1]
-        kl.x = np.array([y_center, 0])
-        kl.F = np.array([[1.,1.],[0.,1.]])
-        kl.H = np.array([[1.,0.]])
-        kl.P = np.array([[1000., 0.],[ 0., 1000.] ])
-        kl.R = np.array([[5.]])
-        kl.Q = Q_discrete_white_noise(dim=2, dt=0.1, var=0.13)
 
-    def kl_init(kl):
-        # kl.measurementMatrix = np.array([[1,0],[0,1]],np.float32)
-        # kl.transitionMatrix = np.array([[1,0],[0,1]], np.float32)
-        # kl.processNoiseCov = np.array([[1,0],[0,1]], np.float32) * 1e-3
-        # kl.measurementNoiseCov = np.array([[1,0],[0,1]], np.float32) * 0.01
+    def det_motion_type():
+        select_motion = ui.Motion_Type.currentText()
+        if select_motion == "Kalman":
+            return Motion_Type.KALMAN
+        elif select_motion == "Complex":
+            return Motion_Type.COMPLEX
+        # default compute motion with our simple way
+        else:
+            return Motion_Type.ORIGIN
+            
+
+    def kl_init(new_motion):
+        global kl
+        kl = cv2.KalmanFilter(4,2)
         kl.measurementMatrix = np.array([[1,0,0,0],[0,1,0,0]],np.float32)
         kl.transitionMatrix = np.array([[1,0,1,0],[0,1,0,1],[0,0,1,0],[0,0,0,1]], np.float32)
         kl.processNoiseCov = np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]], np.float32) * 0.003
         kl.measurementNoiseCov = np.array([[1,0],[0,1]], np.float32) * 1
         x_center = ((img_target.pre_rect[2] - img_target.pre_rect[0]) / 2) + img_target.pre_rect[0]
         y_center = ((img_target.pre_rect[3] - img_target.pre_rect[1]) / 2) + img_target.pre_rect[1]
-        kl.statePre =  np.array([x_center,y_center,img_target.motion[0],img_target.motion[1]],np.float32)
-        # kl.statePre =  np.array([x_center,y_center],np.float32)
-
-    kl_y = KalmanFilter (dim_x=2, dim_z=1)
-    kl_filter_init(kl_y)
-    kl = cv2.KalmanFilter(4,2)
-    kl_init_f = False
-    x1_arr = []
-    x2_arr = []
-    y1_arr = []
-    y2_arr = []
-    x_arr = []
-    y_arr = []
-    xv_arr = []
-    yv_arr = []
+        kl.statePre =  np.array([x_center,y_center,new_motion[0],new_motion[1]],np.float32)
     
-    # count motion
-    def motion():
-        new_motion = [0,0]
-        if img_target.is_predict:
-            new_motion[0] = (img_target.rect[0] - img_target.predict_pre_rect[0] + img_target.rect[2] - img_target.predict_pre_rect[2]) / 2 
-            new_motion[1] = (img_target.rect[1] - img_target.predict_pre_rect[1] + img_target.rect[3] - img_target.predict_pre_rect[3]) / 2 
-        else:
-            new_motion[0] = (img_target.rect[0] - img_target.pre_rect[0] + img_target.rect[2] - img_target.pre_rect[2]) / 2 
-            new_motion[1] = (img_target.rect[1] - img_target.pre_rect[1] + img_target.rect[3] - img_target.pre_rect[3]) / 2 
-        img_target.motion[0] = new_motion[0]
-        img_target.motion[1] = new_motion[1]
-        # kalman filter
-        x_center = ((img_target.rect[2] - img_target.rect[0]) / 2) + img_target.rect[0]
-        y_center = ((img_target.rect[3] - img_target.rect[1]) / 2) + img_target.rect[1]
-        z = np.array(y_center)
-        x = np.array([x_center,y_center],np.float32)
+    def kl_record_list_init():
         global kl_init_f
-        if not kl_init_f:
-            kl_init(kl)
-            kl_init_f = True
-        kl.correct(x)
-        print("kalman input : ",x,img_target.rect)
-        current_pre = kl.predict()
-        # draw the motion vector on image
-        motion_img = copy.deepcopy(img_arr[img1.idx])
-        pt1 = (int(current_pre[0]), int(current_pre[1]))
-        pt2 = (int(current_pre[0] + current_pre[2]), int(current_pre[1] + current_pre[3]))
-        cv2.arrowedLine(motion_img, pt1,pt2,[0,0,255],2,8,0,0.5)
-        print("kalman vector: ",pt1,pt2)
-        show_im("motion vector",motion_img)
-        # draw 2D plot
-        # x1_arr.append(x_center)
-        # x2_arr.append(current_pre[0])
-        # y1_arr.append(y_center)
-        # y2_arr.append(current_pre[1])
-        # idx_arr = range(len(y1_arr))
-        # plt.figure()
-        # plt.plot(idx_arr,x1_arr,marker='o',label = "Detected X")
-        # plt.plot(idx_arr,x2_arr,marker='o',label = "Kalman X")
-        # plt.plot(idx_arr,y1_arr,marker='o',label = "Detected Y")
-        # plt.plot(idx_arr,y2_arr,marker='o',label = "Kalman Y")
-        # plt.legend()
-        # plt.figure()
-        # plt.plot(x1_arr,y1_arr,marker='o',label = "Detecte")
-        # plt.plot(x2_arr,y2_arr,marker='o',label = "Kalman")
-        # plt.legend()
-        # plt.show()
-        # draw 4D plot
-        x1_arr.append(current_pre[0])
-        x2_arr.append(current_pre[2])
-        y1_arr.append(current_pre[1])
-        y2_arr.append(current_pre[3])
-        x_arr.append(x_center)
-        xv_arr.append(img_target.motion[0])
-        y_arr.append(y_center)
-        yv_arr.append(img_target.motion[1])
+        kl_init_f = False
+        x1_arr.clear()
+        x2_arr.clear()
+        y1_arr.clear()
+        y2_arr.clear()
+        x_arr.clear()
+        y_arr.clear()
+        xv_arr.clear()
+        yv_arr.clear()
+        xv_new_arr.clear()
+        yv_new_arr.clear()
+    
+    # show the plot of kalman info
+    def show_kl_chart():
+        if(len(y1_arr) == 0) or not ui.KL_Chart_Button.isChecked():
+            return
         idx_arr = range(len(y1_arr))
         plt.figure()
         plt.plot(idx_arr,x_arr,marker='o',label = "Detected X")
@@ -408,14 +371,65 @@ if __name__ == "__main__":
         plt.figure()
         plt.plot(idx_arr,xv_arr,marker='o',label = "Detected X velocity")
         plt.plot(idx_arr,x2_arr,marker='o',label = "Kalman X velocity")
+        plt.plot(idx_arr,xv_new_arr,marker='o',label = "New X velocity")
         plt.plot(idx_arr,yv_arr,marker='o',label = "Detected Y velocity")
         plt.plot(idx_arr,y2_arr,marker='o',label = "Kalman Y velocity")
+        plt.plot(idx_arr,yv_new_arr,marker='o',label = "New Y velocity")
         plt.legend()
-        # display the chart
+        # display the chart,if the kl showing option is checked
         plt.show()
-        # kl_y.predict()
-        # kl_y.update(z)
-        print("motion:" + str(img_target.motion[0]) + " " +  str(img_target.motion[1]))
+
+    # count motion
+    def motion():
+        new_motion = [0,0]
+        if img_target.is_predict:
+            new_motion[0] = (img_target.rect[0] - img_target.predict_pre_rect[0] + img_target.rect[2] - img_target.predict_pre_rect[2]) / 2 
+            new_motion[1] = (img_target.rect[1] - img_target.predict_pre_rect[1] + img_target.rect[3] - img_target.predict_pre_rect[3]) / 2 
+        else:
+            new_motion[0] = (img_target.rect[0] - img_target.pre_rect[0] + img_target.rect[2] - img_target.pre_rect[2]) / 2 
+            new_motion[1] = (img_target.rect[1] - img_target.pre_rect[1] + img_target.rect[3] - img_target.pre_rect[3]) / 2 
+        # kalman filter
+        x_center = ((img_target.rect[2] - img_target.rect[0]) / 2) + img_target.rect[0]
+        y_center = ((img_target.rect[3] - img_target.rect[1]) / 2) + img_target.rect[1]
+        z = np.array(y_center)
+        x = np.array([x_center,y_center],np.float32)
+        global kl_init_f
+        if not kl_init_f:
+            kl_init(new_motion)
+            kl_init_f = True
+        kl.correct(x)
+        # predict the xy coordinate & velocity ([x,y,xv,yv])
+        kl_pre = kl.predict()
+        # compute new motion of target
+        motion_type = det_motion_type()
+        if motion_type == Motion_Type.ORIGIN:
+            img_target.motion[0] = new_motion[0]
+            img_target.motion[1] = new_motion[1]
+        elif motion_type == Motion_Type.KALMAN:
+            img_target.motion[0] = kl_pre[2]
+            img_target.motion[1] = kl_pre[3]
+        elif motion_type == Motion_Type.COMPLEX:
+            img_target.motion[0] = (new_motion[0] + kl_pre[2]) / 2
+            img_target.motion[1] = (new_motion[1] + kl_pre[3]) / 2
+        # draw the motion vector on image
+        motion_img = copy.deepcopy(img_arr[img1.idx])
+        pt1 = (int(kl_pre[0]), int(kl_pre[1]))
+        pt2 = (int(kl_pre[0] + kl_pre[2]), int(kl_pre[1] + kl_pre[3]))
+        cv2.arrowedLine(motion_img, pt1,pt2,[0,0,255],2,8,0,0.5)
+        show_im("motion vector",motion_img)
+        # store kalman data into record list
+        x1_arr.append(kl_pre[0])
+        x2_arr.append(kl_pre[2])
+        y1_arr.append(kl_pre[1])
+        y2_arr.append(kl_pre[3])
+        x_arr.append(x_center)
+        xv_arr.append(new_motion[0])
+        xv_new_arr.append(img_target.motion[0])
+        y_arr.append(y_center)
+        yv_arr.append(new_motion[1])
+        yv_new_arr.append(img_target.motion[1])
+        # draw the chart of kalman info
+        show_kl_chart()
 
     def predict_next(mask):
         result = copy.deepcopy(img_target.rect)
@@ -751,6 +765,7 @@ if __name__ == "__main__":
         ui.Result_Left_Button.clicked.connect(lambda: change_image_with_result(-1))
         ui.Result_Right_Button.clicked.connect(lambda: change_image_with_result(1))
         ui.Image_Selector.valueChanged.connect(select_image)
+        ui.KL_Chart_Button.clicked.connect(show_kl_chart)
 
     # overwrite mouse trigger function of label
     def Qlabel_fun():

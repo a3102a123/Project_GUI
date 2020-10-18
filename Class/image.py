@@ -213,7 +213,6 @@ class Target_Image(Image):
             target_rect[1] += (self.motion[1] * time)
         return target_rect
 
-
 # The enum of result file type
 class File_Type(IntEnum):
     BUS = 1
@@ -221,6 +220,12 @@ class File_Type(IntEnum):
     CAR2 = 3
     AUTOBIKE = 4
     AUTOBIKE2 = 5
+
+# The enum of motion type
+class Motion_Type(IntEnum):
+    ORIGIN = 1
+    KALMAN = 2
+    COMPLEX = 3
 
 # 需手動更換GUI_template.py中的QLabel和import image.py
 class MyLabel(QLabel):
