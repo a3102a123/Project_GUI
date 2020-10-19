@@ -745,6 +745,19 @@ p, li { white-space: pre-wrap; }
     <string>Show kalman chart</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="Load_Yolo_Button">
+   <property name="geometry">
+    <rect>
+     <x>630</x>
+     <y>760</y>
+     <width>81</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Load yolo</string>
+   </property>
+  </widget>
   <zorder>FileName</zorder>
   <zorder>SaveFileButton</zorder>
   <zorder>layoutWidget</zorder>
@@ -778,6 +791,7 @@ p, li { white-space: pre-wrap; }
   <zorder>textBrowser_6</zorder>
   <zorder>textBrowser_7</zorder>
   <zorder>KL_Chart_Button</zorder>
+  <zorder>Load_Yolo_Button</zorder>
  </widget>
  <resources/>
  <connections/>

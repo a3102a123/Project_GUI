@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from enum import Enum,IntEnum
 from PyQt5.QtWidgets import QWidget, QApplication, QLabel
 from PyQt5.QtCore import QRect, Qt
-from PyQt5.QtGui import QImage, QPixmap, QPainter, QPen, QGuiApplication
+from PyQt5.QtGui import QImage, QPixmap, QPainter, QPen, QGuiApplication, qRed, qGreen, qBlue
 from munkres import Munkres, print_matrix
 from filterpy.kalman import KalmanFilter
 from filterpy.common import Q_discrete_white_noise
@@ -127,24 +127,30 @@ class Image():
     def __init__(self,img,i):
         self.idx = i
         self.img = copy.deepcopy(img)
+        self.drew_img = copy.deepcopy(img)
         self.kps = []
         self.qImg = convImg(img)
     
     def set_img(self,img_arr,i,kp_arr):
         self.idx = i
         self.img = copy.deepcopy(img_arr[i])
+        self.drew_img = copy.deepcopy(img_arr[i])
         self.kps = kp_arr[i]
         self.qImg = convImg(self.img)
     
     def draw_img(self,img):
         self.img = copy.deepcopy(img)
+        self.drew_img = copy.deepcopy(img)
         self.qImg = convImg(img)
 
     # draw the rectangle on image
     # is_img_coor determine whether the input rectangle is in image's coordinate
-    # default assume input rect is in label's coordinate
-    def draw_rect(self,rect,im_w,im_h,lb_w,lb_h,color,is_img_coor = False):
-        img = copy.deepcopy(self.img)
+    # is_new flag determine whether the rectangle is drew on new image(default is drew on new image)
+    def draw_rect(self,rect,im_w,im_h,lb_w,lb_h,color,is_img_coor = False,is_new = True):
+        if is_new:
+            img = copy.deepcopy(self.img)
+        else :
+            img = self.drew_img
         if not is_img_coor:
             w_ratio = im_w/lb_w
             h_ratio = im_h/lb_h
@@ -172,6 +178,12 @@ class Target_Image(Image):
         self.pre_idx = i
         self.predict_pre_rect = [0,0,0,0]   #可能不可靠
         self.is_predict = False #means current target image ism't trustable
+        # kalman filter
+        self.kl = cv2.KalmanFilter(4,2)
+        self.kl_init_f = False
+        # using for GMM to eliminate spot noise
+        self.erode_num = 0
+        self.dilate_num = 0
 
     def set_rect(self,new_rect):
         x1 = min(new_rect[0],new_rect[2])
@@ -200,6 +212,7 @@ class Target_Image(Image):
         self.pre_idx = -1
         self.is_predict = False
         self.predict_pre_rect = [0,0,0,0]
+        self.kl_init_f = False
 
     def check_range(self,time):
         target_rect = copy.deepcopy(self.rect)
@@ -212,6 +225,17 @@ class Target_Image(Image):
         else:
             target_rect[1] += (self.motion[1] * time)
         return target_rect
+    # initial the kalman filter
+    def kl_init(self,new_motion):
+        self.kl = cv2.KalmanFilter(4,2)
+        self.kl.measurementMatrix = np.array([[1,0,0,0],[0,1,0,0]],np.float32)
+        self.kl.transitionMatrix = np.array([[1,0,1,0],[0,1,0,1],[0,0,1,0],[0,0,0,1]], np.float32)
+        self.kl.processNoiseCov = np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]], np.float32) * 0.003
+        self.kl.measurementNoiseCov = np.array([[1,0],[0,1]], np.float32) * 1
+        x_center = ((self.pre_rect[2] - self.pre_rect[0]) / 2) + self.pre_rect[0]
+        y_center = ((self.pre_rect[3] - self.pre_rect[1]) / 2) + self.pre_rect[1]
+        self.kl.statePre =  np.array([x_center,y_center,new_motion[0],new_motion[1]],np.float32)
+        self.kl_init_f = True
 
 # The enum of result file type
 class File_Type(IntEnum):

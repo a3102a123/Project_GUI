@@ -254,6 +254,9 @@ class Ui_Dialog(object):
         font.setPointSize(14)
         self.KL_Chart_Button.setFont(font)
         self.KL_Chart_Button.setObjectName("KL_Chart_Button")
+        self.Load_Yolo_Button = QtWidgets.QPushButton(Dialog)
+        self.Load_Yolo_Button.setGeometry(QtCore.QRect(630, 760, 81, 31))
+        self.Load_Yolo_Button.setObjectName("Load_Yolo_Button")
         self.FileName.raise_()
         self.SaveFileButton.raise_()
         self.layoutWidget.raise_()
@@ -287,6 +290,7 @@ class Ui_Dialog(object):
         self.textBrowser_6.raise_()
         self.textBrowser_7.raise_()
         self.KL_Chart_Button.raise_()
+        self.Load_Yolo_Button.raise_()
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
@@ -368,6 +372,7 @@ class Ui_Dialog(object):
 "</style></head><body style=\" font-family:\'PMingLiU\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
 "<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:14pt;\">Show Info option</span></p></body></html>"))
         self.KL_Chart_Button.setText(_translate("Dialog", "Show kalman chart"))
+        self.Load_Yolo_Button.setText(_translate("Dialog", "Load yolo"))
 
 
 if __name__ == "__main__":

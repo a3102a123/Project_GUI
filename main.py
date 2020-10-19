@@ -12,6 +12,7 @@ if __name__ == "__main__":
     sub_ui = subwindow.Ui_Dialog()
     img1 = Image(cv2.imread("im0/out_0.jpg"),0)
     img2 = Image(cv2.imread("im0/out_1.jpg"),1)
+    img_target_arr = []
     img_target = Target_Image(mk_empty_img(img1.img),-1)
     img_dir_path = "im0/"
     img_name_arr = []
@@ -21,14 +22,10 @@ if __name__ == "__main__":
     img_arr = []
     img_num = 0
     draing_flag = False
-    erode_num = 3
-    dilate_num = 5
     saved_result_arr = []
     yolo_data_arr = []
 
     # the record list of kalman filter
-    kl = cv2.KalmanFilter(4,2)
-    kl_init_f = False
     x1_arr = []
     x2_arr = []
     y1_arr = []
@@ -73,12 +70,13 @@ if __name__ == "__main__":
     def change_image(direction):
         img1_idx = (img1.idx + direction) % img_num
         img2_idx = (img2.idx + direction) % img_num
-        if ui.Optical_Flow_Button.isChecked():
-            img1.set_img(img_optical_flow_arr , img1_idx , img_kp_arr)
-            img2.set_img(img_optical_flow_arr, img2_idx , img_kp_arr)
-        else:
-            img1.set_img(img_arr , img1_idx , img_kp_arr)
-            img2.set_img(img_arr, img2_idx , img_kp_arr)
+        if direction:
+            if ui.Optical_Flow_Button.isChecked():
+                img1.set_img(img_optical_flow_arr , img1_idx , img_kp_arr)
+                img2.set_img(img_optical_flow_arr, img2_idx , img_kp_arr)
+            else:
+                img1.set_img(img_arr , img1_idx , img_kp_arr)
+                img2.set_img(img_arr, img2_idx , img_kp_arr)
         if ui.SIFT_Button.isChecked():
             draw_SIFT_kp()
         if ui.BF_Flow_Button.isChecked():
@@ -192,8 +190,8 @@ if __name__ == "__main__":
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))
         fgbg_gmm.apply(img_GMM1)
         fgmask = fgbg_gmm.apply(img_GMM2)
-        fgmask = cv2.erode(fgmask,kernel,iterations = erode_num)
-        fgmask = cv2.dilate(fgmask,kernel,iterations = dilate_num)
+        fgmask = cv2.erode(fgmask,kernel,iterations = img_target.erode_num)
+        fgmask = cv2.dilate(fgmask,kernel,iterations = img_target.dilate_num)
         return fgmask
     
     # using the mask and SIFT key point match to find the target's contour on img2
@@ -260,20 +258,42 @@ if __name__ == "__main__":
         img_target.set_rect(temp)
         width = int(abs(img_target.rect[0] - img_target.rect[2]))
         height = int(abs(img_target.rect[1] - img_target.rect[3]))
-        global erode_num
-        global dilate_num
         if(width*height < 15000):
-            erode_num = 2
-            dilate_num = 3
+            img_target.erode_num = 2
+            img_target.dilate_num = 3
         else:
-            erode_num = 4
-            dilate_num = 8
+            img_target.erode_num = 4
+            img_target.dilate_num = 8
         temp_img = get_rect_img(img1.img,img_target.rect)
         img_target.draw_img(np.copy(temp_img))
         SIFT_target_img()
         ui.target_label.setPixmap(QPixmap.fromImage(img_target.qImg))
         ui.target_label.setFixedSize(width*2,height*2)
 
+    # draw all target in img_target_arr on img1
+    def draw_target_arr():
+        for i in range(len(img_target_arr)):
+            im_h,im_w,c = img1.img.shape
+            lb_w = ui.img_label1.width()
+            lb_h = ui.img_label1.height()
+            img1.draw_rect(img_target_arr[i].rect,im_w,im_h,lb_w,lb_h,(0,255,0),is_img_coor = True,is_new = False)
+        dis_img()
+
+    # set up all the yolo labeled target to image target type
+    def set_yolo_target():
+        img_target_arr.clear()
+        yolo_data = yolo_data_arr[img1.idx]
+        for rect in yolo_data:
+            temp = Target_Image(mk_empty_img(img1.img),-1)
+            temp.set_rect([rect[0],rect[2],rect[1],rect[3]])
+            img_target_arr.append(temp)
+        global img_target
+        temp = img_target
+        for i in range(len(img_target_arr)):
+            img_target = img_target_arr[i]
+            find_next_target(0,img_target.rect)
+        img_target = temp
+        dis_img()
 
     # BF match target image with img2
     def BF_target_match():
@@ -331,22 +351,8 @@ if __name__ == "__main__":
         # default compute motion with our simple way
         else:
             return Motion_Type.ORIGIN
-            
-
-    def kl_init(new_motion):
-        global kl
-        kl = cv2.KalmanFilter(4,2)
-        kl.measurementMatrix = np.array([[1,0,0,0],[0,1,0,0]],np.float32)
-        kl.transitionMatrix = np.array([[1,0,1,0],[0,1,0,1],[0,0,1,0],[0,0,0,1]], np.float32)
-        kl.processNoiseCov = np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]], np.float32) * 0.003
-        kl.measurementNoiseCov = np.array([[1,0],[0,1]], np.float32) * 1
-        x_center = ((img_target.pre_rect[2] - img_target.pre_rect[0]) / 2) + img_target.pre_rect[0]
-        y_center = ((img_target.pre_rect[3] - img_target.pre_rect[1]) / 2) + img_target.pre_rect[1]
-        kl.statePre =  np.array([x_center,y_center,new_motion[0],new_motion[1]],np.float32)
     
     def kl_record_list_init():
-        global kl_init_f
-        kl_init_f = False
         x1_arr.clear()
         x2_arr.clear()
         y1_arr.clear()
@@ -392,15 +398,12 @@ if __name__ == "__main__":
         # kalman filter
         x_center = ((img_target.rect[2] - img_target.rect[0]) / 2) + img_target.rect[0]
         y_center = ((img_target.rect[3] - img_target.rect[1]) / 2) + img_target.rect[1]
-        z = np.array(y_center)
         x = np.array([x_center,y_center],np.float32)
-        global kl_init_f
-        if not kl_init_f:
-            kl_init(new_motion)
-            kl_init_f = True
-        kl.correct(x)
+        if not img_target.kl_init_f:
+            img_target.kl_init(new_motion)
+        img_target.kl.correct(x)
         # predict the xy coordinate & velocity ([x,y,xv,yv])
-        kl_pre = kl.predict()
+        kl_pre = img_target.kl.predict()
         # compute new motion of target
         motion_type = det_motion_type()
         if motion_type == Motion_Type.ORIGIN:
@@ -414,8 +417,8 @@ if __name__ == "__main__":
             img_target.motion[1] = (new_motion[1] + kl_pre[3]) / 2
         # draw the motion vector on image
         motion_img = copy.deepcopy(img_arr[img1.idx])
-        pt1 = (int(kl_pre[0]), int(kl_pre[1]))
-        pt2 = (int(kl_pre[0] + kl_pre[2]), int(kl_pre[1] + kl_pre[3]))
+        pt1 = (int(x_center), int(y_center))
+        pt2 = (int(x_center + img_target.motion[0]), int(y_center + img_target.motion[1]))
         cv2.arrowedLine(motion_img, pt1,pt2,[0,0,255],2,8,0,0.5)
         show_im("motion vector",motion_img)
         # store kalman data into record list
@@ -547,22 +550,37 @@ if __name__ == "__main__":
         im_h,im_w,c = img1.img.shape
         lb_w = ui.img_label1.width()
         lb_h = ui.img_label1.height()
-        img1.draw_rect(img_target.rect,im_w,im_h,lb_w,lb_h,(0,255,0),True)
+        img1.draw_rect(img_target.rect,im_w,im_h,lb_w,lb_h,(0,255,0),is_img_coor = True,is_new = False)
         # set the rectangle highlight part of img1 as the next target image
         set_target_img()
     
+    # Dector enter point
+    def detector(mode,dir,is_show):
+        if len(img_target_arr):
+            global img_target
+            temp = img_target
+            for i in range(len(img_target_arr)):
+                img_target = img_target_arr[i]
+                show_detect_result(mode,0,is_show)
+            img_target = temp
+        # if ui.target_label.pixmap() == None:
+        if not sum(img_target.rect):
+            print("No target image.")
+            change_image(1)
+            draw_target_arr()
+            return
+        show_detect_result(mode,dir,is_show)
+        draw_target_arr()
     # Dector main function
     # display the match result in subwindows and detect result on next image
     # mode determine which match algorithm to use
+    # dir is the control of direction for muitiple target
     # is_show flag determine whether the process is showed 
-    def show_detect_result(mode,is_show):
+    def show_detect_result(mode,dir,is_show):
         # store the two kind of match result and used key point
         kps2_arr = []
         kps_t_arr = []
         matches_arr = []
-        if ui.target_label.pixmap() == None:
-            print("No target image.")
-            return
         # current target image is trustable
         if not img_target.is_predict:
             # mode 0 use BF match
@@ -606,7 +624,7 @@ if __name__ == "__main__":
         else:
             img_target.is_predict = False
         # update the next target's coordinate of rectangle
-        find_next_target(1,next_rect)
+        find_next_target(dir,next_rect)
         motion()
         dis_img()
         return next_rect
@@ -633,7 +651,7 @@ if __name__ == "__main__":
         # run detect to find target on all image
         result_rect_arr = [img_target.rect]
         for i in range(len(img_arr) - 1):
-            result_rect = show_detect_result(0,False)
+            result_rect = show_detect_result(0,1,False)
             result_rect_arr.append(result_rect)
         # store the result
         f = open(data_dir + "/" + filename,"wb")
@@ -758,8 +776,8 @@ if __name__ == "__main__":
         ui.Distance_Limit.valueChanged.connect(change_limit_distance)
         ui.Ratio_Test.valueChanged.connect(change_ratio_test)
         ui.Target_Button.clicked.connect(lambda: set_target_img(True))
-        ui.Target_BF_Button.clicked.connect(lambda: show_detect_result(0,True))
-        ui.Target_Hungarian_Button.clicked.connect(lambda: show_detect_result(1,True))
+        ui.Target_BF_Button.clicked.connect(lambda: detector(0,1,True))
+        ui.Target_Hungarian_Button.clicked.connect(lambda: detector(1,1,True))
         ui.Optical_Flow_Button.clicked.connect(lambda: change_image(0))
         ui.SaveFileButton.clicked.connect(save_detect_result)
         ui.Dispaly_Button.clicked.connect(display_select_result)
@@ -767,6 +785,7 @@ if __name__ == "__main__":
         ui.Result_Right_Button.clicked.connect(lambda: change_image_with_result(1))
         ui.Image_Selector.valueChanged.connect(select_image)
         ui.KL_Chart_Button.clicked.connect(show_kl_chart)
+        ui.Load_Yolo_Button.clicked.connect(set_yolo_target)
 
     # overwrite mouse trigger function of label
     def Qlabel_fun():
