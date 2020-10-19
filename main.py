@@ -24,6 +24,7 @@ if __name__ == "__main__":
     erode_num = 3
     dilate_num = 5
     saved_result_arr = []
+    yolo_data_arr = []
 
     # the record list of kalman filter
     kl = cv2.KalmanFilter(4,2)
@@ -831,6 +832,23 @@ if __name__ == "__main__":
         data = cPickle.loads(f.read())
         for img in data:
             img_optical_flow_arr.append(img)
+        f.close()
+    
+    # load yolo result data
+    def load_yolo():
+        data_path = "data/info.txt"
+        f = open(data_path,"r")
+        i = -1
+        for data in f:
+            temp = data.split(":")
+            if len(temp) == 1 :
+                i += 1
+                yolo_data_arr.append([])
+                continue
+            temp = temp[1].split()
+            temp = list(map(int,temp))
+            yolo_data_arr[i].append(temp)
+        f.close()
     
     # load data
     def load_data(img_kp_arr):
@@ -838,6 +856,7 @@ if __name__ == "__main__":
         load_SIFT_kp()
         load_BF_match()
         load_optical_flow()
+        load_yolo()
     
     # init image entity
     def init():

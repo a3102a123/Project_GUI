@@ -1,5 +1,6 @@
 im0/*
 *__pycache__
 data/*.txt
+!data/info.txt
 temp/*
 test.py
