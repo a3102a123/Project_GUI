@@ -2,5 +2,6 @@ im0/*
 *__pycache__
 data/*.txt
 !data/info.txt
+!data/info_simple.txt
 temp/*
 test.py

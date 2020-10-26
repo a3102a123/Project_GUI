@@ -70,13 +70,12 @@ if __name__ == "__main__":
     def change_image(direction):
         img1_idx = (img1.idx + direction) % img_num
         img2_idx = (img2.idx + direction) % img_num
-        if direction:
-            if ui.Optical_Flow_Button.isChecked():
-                img1.set_img(img_optical_flow_arr , img1_idx , img_kp_arr)
-                img2.set_img(img_optical_flow_arr, img2_idx , img_kp_arr)
-            else:
-                img1.set_img(img_arr , img1_idx , img_kp_arr)
-                img2.set_img(img_arr, img2_idx , img_kp_arr)
+        if ui.Optical_Flow_Button.isChecked():
+            img1.set_img(img_optical_flow_arr , img1_idx , img_kp_arr)
+            img2.set_img(img_optical_flow_arr, img2_idx , img_kp_arr)
+        else:
+            img1.set_img(img_arr , img1_idx , img_kp_arr)
+            img2.set_img(img_arr, img2_idx , img_kp_arr)
         if ui.SIFT_Button.isChecked():
             draw_SIFT_kp()
         if ui.BF_Flow_Button.isChecked():
@@ -106,8 +105,8 @@ if __name__ == "__main__":
 
     # display SIFT key points on image
     def draw_SIFT_kp():
-        img1_out = copy.deepcopy(img1.img)
-        img2_out = copy.deepcopy(img2.img)
+        img1_out = copy.deepcopy(img1.drew_img)
+        img2_out = copy.deepcopy(img2.drew_img)
         cv2.drawKeypoints(img1.img,img1.kps,img1_out)
         cv2.drawKeypoints(img2.img,img2.kps,img2_out)
         img1.draw_img(img1_out)
@@ -115,8 +114,8 @@ if __name__ == "__main__":
     
     # draw the flow of BF match
     def draw_BF_match_flow():
-        img1_out = copy.deepcopy(img1.img)
-        img2_out = copy.deepcopy(img2.img)
+        img1_out = copy.deepcopy(img1.drew_img)
+        img2_out = copy.deepcopy(img2.drew_img)
         matches = BF_match_arr[img1.idx]
         for m in matches:
             kp1 = img1.kps[m[0].queryIdx]
@@ -155,7 +154,7 @@ if __name__ == "__main__":
     # draw the line of BF match on two images
     def draw_BF_match_line():
         # prepare combined image
-        img_out = combine_img(img1.img,img2.img)
+        img_out = combine_img(img1.drew_img,img2.drew_img)
         raw_matches = BF_match_arr[img1.idx]
         matches = []
         hA, wA = img1.img.shape[:2]
@@ -265,7 +264,7 @@ if __name__ == "__main__":
             img_target.erode_num = 4
             img_target.dilate_num = 8
         temp_img = get_rect_img(img1.img,img_target.rect)
-        img_target.draw_img(np.copy(temp_img))
+        img_target.draw_img(np.copy(temp_img),is_set = True)
         SIFT_target_img()
         ui.target_label.setPixmap(QPixmap.fromImage(img_target.qImg))
         ui.target_label.setFixedSize(width*2,height*2)
@@ -282,6 +281,7 @@ if __name__ == "__main__":
     # set up all the yolo labeled target to image target type
     def set_yolo_target():
         img_target_arr.clear()
+        img1.reset_drew_img()
         yolo_data = yolo_data_arr[img1.idx]
         for rect in yolo_data:
             temp = Target_Image(mk_empty_img(img1.img),-1)
@@ -749,7 +749,7 @@ if __name__ == "__main__":
         img_target.rect[1] = 0
         img_target.rect[2] = 0
         img_target.rect[3] = 0
-        img1.draw_img(img1.img)
+        img1.reset_drew_img()
         dis_img()
     
     def bind_img_lable1_func(obj):

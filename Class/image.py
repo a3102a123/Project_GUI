@@ -77,6 +77,9 @@ def get_rect_img(img,rect):
 def compute_SIFT_des(img,kps,rect=[0,0,0,0],dis=[0,0]):
     sift = cv2.xfeatures2d.SIFT_create()
     new_kp,des = sift.compute(img,kps)
+    # if the target image too small return nothing
+    if(not isinstance(des,np.ndarray)):
+        return
     # RootSIFT descriptor
     eps = 1e-7
     des /= (des.sum(axis=1, keepdims=True) + eps)
@@ -138,10 +141,16 @@ class Image():
         self.kps = kp_arr[i]
         self.qImg = convImg(self.img)
     
-    def draw_img(self,img):
-        self.img = copy.deepcopy(img)
+    # is_set flag to determine whether set img to object img
+    def draw_img(self,img,is_set = False):
+        if is_set:
+            self.img = copy.deepcopy(img)
         self.drew_img = copy.deepcopy(img)
         self.qImg = convImg(img)
+
+    def reset_drew_img(self):
+        self.drew_img = copy.deepcopy(self.img)
+        self.qImg = convImg(self.img)
 
     # draw the rectangle on image
     # is_img_coor determine whether the input rectangle is in image's coordinate
@@ -164,6 +173,12 @@ class Image():
 
     def show_img(self):
         cv2.imshow("temp",self.img)
+        # press any key to close the window
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+    
+    def show_drew_img(self):
+        cv2.imshow("temp",self.drew_img)
         # press any key to close the window
         cv2.waitKey(0)
         cv2.destroyAllWindows()
