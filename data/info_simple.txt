@@ -1,0 +1,16 @@
+out_0
+class bus,box: 136 275 35 163
+class car,box: 286 303 42 58
+out_1
+class bus,box: 136 272 43 175
+class car,box: 283 302 42 60
+out_2
+class bus,box: 119 266 41 184
+class car,box: 282 301 42 61
+class car,box: 316 326 26 34
+out_3
+class car,box: 279 300 44 64
+class car,box: 315 326 26 35
+out_4
+class car,box: 277 297 45 64
+class car,box: 314 326 26 35
