@@ -10,8 +10,6 @@ if __name__ == "__main__":
     # create ui object
     ui = GUI.Ui_Dialog()
     sub_ui = subwindow.Ui_Dialog()
-    # argument handler
-    parser = argparse.ArgumentParser()
     img1 = Image(cv2.imread("im0/out_0.jpg"),0)
     img2 = Image(cv2.imread("im0/out_1.jpg"),1)
     img_target_arr = []
@@ -892,13 +890,25 @@ if __name__ == "__main__":
         img1.set_img(img_arr,0,img_kp_arr)
         img2.set_img(img_arr,1,img_kp_arr)
 
+    def help_msg():
+        print ("-h --help : get help information!")
+        print("-d --debug : run GUI in more fast debug mode!")
+
     def parse_arg():
-        parser.add_argument("-d","--debug",action="store_true", help="Run GUI in more fast debug way")
-        args = parser.parse_args()
-        if args.debug:
-            return 20
-        else :
-            return image_num()
+        argv = sys.argv[1:]
+        try:
+            opts, args = getopt.getopt(argv,"hd",["help","debug"])
+        except getopt.GetoptError:
+            help_msg()
+            sys.exit(2)
+        for opt, arg in opts:
+            if opt in ("-h","--help"):
+                help_msg()
+                sys.exit(1)
+            elif opt in("-d","--debug"):
+                print("Run GUI in debug mode!")
+                return 20
+        return image_num()
     
     # main
     ###########################################

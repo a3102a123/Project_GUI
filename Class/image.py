@@ -4,9 +4,9 @@ import cv2
 import copy
 import _pickle as cPickle
 import sys
+import getopt
 import os
 import time
-import argparse
 import matplotlib.pyplot as plt
 
 from enum import Enum,IntEnum
