@@ -2,7 +2,7 @@ from PyQt5 import QtWidgets
 import GUI_template as GUI
 import GUI_subwindow as subwindow
 from Class.image import *
-
+from skimage.measure import compare_ssim
 if __name__ == "__main__":
     # global variable
     ###########################################
@@ -221,7 +221,7 @@ if __name__ == "__main__":
         for i in range(0,len(contours)):
             if count_arr[i] > 0:
                 x,y,w,h = cv2.boundingRect(contours[i])
-                cv2.rectangle(img2.img,(x,y),(x+w,y+h),(0,255,0),2)
+                #cv2.rectangle(img2.img,(x,y),(x+w,y+h),(0,255,0),2)
                 count = 1
                 print("current contour rectangle:",x,y,x+w,y+h)
                 if((test_range[0]<=(x+w/2)<=test_range[2])&(test_range[1]<=(y+h/2)<=test_range[3])):
@@ -571,6 +571,33 @@ if __name__ == "__main__":
             return
         show_detect_result(mode,dir,is_show)
         draw_target_arr()
+
+    # 如果圖片突然變大,可能是抓到兩輛車的前景,那我們從抓到的圖片找有沒有和原本圖相似的部分
+    # 輸出為目標在原圖上的[x1 y1 x2 y2]
+    def find_item_InBigImage(simg, bimg, next):
+        print("InBigImage\n")
+        maxy = bimg.shape[0] - simg.shape[0]
+        maxx = bimg.shape[1] - simg.shape[1]
+        h = simg.shape[0]
+        w = simg.shape[1]
+        result = [0.0]*5
+        for i in range(maxy):
+            for j in range(maxx):
+                s1 = bimg[ i : i + h , j : j + w ]
+                if( result[4] < compare_ssim(s1, simg, multichannel = True)):
+                    result = [ (next[0] + j), (next[1] + i), (next[0] + j + w), (next[1] + i + h), compare_ssim(s1, simg, multichannel = True)]
+                j += 3
+            i += 3
+        '''result[0] = (result[0]*2 + next[0]) / 3
+        result[1] = (result[1]*2 + next[1]) / 3
+        result[2] = (result[2]*2 + next[2]) / 3
+        result[3] = (result[3]*2 + next[3]) / 3'''
+        p1 = (int(result[0]), int(result[1]))
+        p2 = (int(result[2]), int(result[3]))
+        InBigImageShow = img2.img
+        cv2.rectangle(InBigImageShow,p1,p2,(0,0,255), 2)
+        cv2.imshow("find_item_InBigImage", InBigImageShow)
+        return result[0:4]
     # Dector main function
     # display the match result in subwindows and detect result on next image
     # mode determine which match algorithm to use
@@ -601,7 +628,7 @@ if __name__ == "__main__":
             kps2_arr.append(kps2)
             kps_t_arr.append(kps_t)
             matches_arr.append(matches)
-            show_im("match result",img_out)
+        show_im("match result",img_out)
         # find the GMM mask contour of target
         mask = GMM(img1.img,img2.img)
         # use mask and match restult to find the target in next image
@@ -614,14 +641,26 @@ if __name__ == "__main__":
         # show Result
         if is_show:
             cv2.imshow("Detect Result",img_out)
+
         line_x = abs((next_rect[2] - next_rect[0]) / (img_target.rect[2] - img_target.rect[0]))
         line_y = abs((next_rect[3] - next_rect[1]) / (img_target.rect[3] - img_target.rect[1]))
-        if (line_x > 2 or line_y > 2):
+        
+        width = int(abs(img_target.rect[0] - img_target.rect[2]))
+        height = int(abs(img_target.rect[1] - img_target.rect[3]))
+        InBig_Check = 1.75
+        if(width*height < 8500):
+            print("InBig_Check change")
+            InBig_Check = 1.3
+        if ((next_rect[0] == 512.)&(next_rect[1] == 512.)&(next_rect[2] == 0.)&(next_rect[3] == 0.)):
             print("use motion to predict target rectangle...:", line_x*line_y)
             print_bar()
             img_target.is_predict = True
             next_rect = predict_next(mask)
-        else:
+        elif (line_x*line_y > InBig_Check):
+            print("InBig_Check:" , InBig_Check)
+            img_big = img2.img[int(next_rect[1]):int(next_rect[3]),int(next_rect[0]):int(next_rect[2])]
+            next_rect = find_item_InBigImage(img_target.img, img_big, next_rect)
+
             img_target.is_predict = False
         # update the next target's coordinate of rectangle
         find_next_target(dir,next_rect)
