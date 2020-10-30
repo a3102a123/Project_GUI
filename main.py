@@ -10,6 +10,8 @@ if __name__ == "__main__":
     # create ui object
     ui = GUI.Ui_Dialog()
     sub_ui = subwindow.Ui_Dialog()
+    # argument handler
+    parser = argparse.ArgumentParser()
     img1 = Image(cv2.imread("im0/out_0.jpg"),0)
     img2 = Image(cv2.imread("im0/out_1.jpg"),1)
     img_target_arr = []
@@ -802,7 +804,7 @@ if __name__ == "__main__":
             img_arr.append(img)
             i += 1
             #speed up for debug
-            if i >= image_num():
+            if i >= img_num:
                 break
         return i
     
@@ -821,13 +823,15 @@ if __name__ == "__main__":
         data_path = "data/SIFT_kp.txt"
         f = open(data_path,"rb")
         data = cPickle.loads(f.read())
-        for kp_arr in data:
+        for i,kp_arr in enumerate(data):
             temp_arr = []
             for point in kp_arr:
                 temp = cv2.KeyPoint(x=point[0][0],y=point[0][1],_size=point[1], _angle=point[2], 
                                 _response=point[3], _octave=point[4], _class_id=point[5])
                 temp_arr.append(temp)
             img_kp_arr.append(temp_arr)
+            if i >= img_num:
+                break
         f.close()
     
     # load BF match data
@@ -835,13 +839,15 @@ if __name__ == "__main__":
         data_path = "data/SIFT_BF_match.txt"
         f = open(data_path,"rb")
         data = cPickle.loads(f.read())
-        for match_arr in data:
+        for i,match_arr in enumerate(data):
             temp_arr = []
             for m in match_arr:
                 m1 = cv2.DMatch(m[0][0],m[0][1],m[0][2])
                 m2 = cv2.DMatch(m[1][0],m[1][1],m[1][2])
                 temp_arr.append((m1,m2))
             BF_match_arr.append(temp_arr)
+            if i >= img_num:
+                break
         f.close()
     
     # load optical flow data
@@ -849,8 +855,10 @@ if __name__ == "__main__":
         data_path = "data/optical_flow.txt"
         f = open(data_path,"rb")
         data = cPickle.loads(f.read())
-        for img in data:
+        for i,img in enumerate(data):
             img_optical_flow_arr.append(img)
+            if i >= img_num:
+                break
         f.close()
     
     # load yolo result data
@@ -867,6 +875,8 @@ if __name__ == "__main__":
             temp = temp[1].split()
             temp = list(map(int,temp))
             yolo_data_arr[i].append(temp)
+            if i >= img_num:
+                break
         f.close()
     
     # load data
@@ -881,6 +891,14 @@ if __name__ == "__main__":
     def init():
         img1.set_img(img_arr,0,img_kp_arr)
         img2.set_img(img_arr,1,img_kp_arr)
+
+    def parse_arg():
+        parser.add_argument("-d","--debug",action="store_true", help="Run GUI in more fast debug way")
+        args = parser.parse_args()
+        if args.debug:
+            return 20
+        else :
+            return image_num()
     
     # main
     ###########################################
@@ -892,7 +910,8 @@ if __name__ == "__main__":
     Dialog2 = QtWidgets.QDialog()
     sub_ui.setupUi(Dialog2)
     # init
-    img_num = load_img(img_name_arr)
+    img_num = parse_arg()
+    load_img(img_name_arr)
     load_data(img_kp_arr)
     init()
     button_fun()
