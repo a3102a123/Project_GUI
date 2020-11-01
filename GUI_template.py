@@ -358,8 +358,8 @@ class Ui_Dialog(object):
         self.SaveFileButton.setText(_translate("Dialog", "Save"))
         self.Result_Right_Button.setText(_translate("Dialog", ">"))
         self.Result_Left_Button.setText(_translate("Dialog", "<"))
-        self.Motion_Type.setItemText(0, _translate("Dialog", "Origin"))
-        self.Motion_Type.setItemText(1, _translate("Dialog", "Kalman"))
+        self.Motion_Type.setItemText(0, _translate("Dialog", "Kalman"))
+        self.Motion_Type.setItemText(1, _translate("Dialog", "Origin"))
         self.Motion_Type.setItemText(2, _translate("Dialog", "Complex"))
         self.textBrowser_6.setHtml(_translate("Dialog", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
