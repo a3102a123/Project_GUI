@@ -7,6 +7,7 @@ import sys
 import getopt
 import os
 import time
+import math
 import matplotlib.pyplot as plt
 
 from enum import Enum,IntEnum
@@ -16,6 +17,7 @@ from PyQt5.QtGui import QImage, QPixmap, QPainter, QPen, QGuiApplication, qRed, 
 from munkres import Munkres, print_matrix
 from filterpy.kalman import KalmanFilter
 from filterpy.common import Q_discrete_white_noise
+from skimage.measure import compare_ssim
 
 # return the number of image load from folder
 def image_num():
@@ -125,6 +127,16 @@ def convImg(img):
 def print_bar():
     print("======================================\n")
 
+def arrange_rect(rect):
+    x1 = min(rect[0],rect[2])
+    y1 = min(rect[1],rect[3])
+    x2 = max(rect[0],rect[2])
+    y2 = max(rect[1],rect[3])
+    return [x1,y1,x2,y2]
+
+def print_rect(img,rect,color):
+    cv2.rectangle(img,(int(min(rect[0],rect[2])),int(min(rect[1],rect[3]))),(int(max(rect[0],rect[2])),int(max(rect[1],rect[3]))),color,thickness=1)
+
 # the class to maintain QLabel image's infomation
 class Image():
     
@@ -202,25 +214,13 @@ class Target_Image(Image):
         self.dilate_num = 0
 
     def set_rect(self,new_rect):
-        x1 = min(new_rect[0],new_rect[2])
-        y1 = min(new_rect[1],new_rect[3])
-        x2 = max(new_rect[0],new_rect[2])
-        y2 = max(new_rect[1],new_rect[3])
-        self.rect = [x1,y1,x2,y2]
+        self.rect = arrange_rect(new_rect)
 
     def set_pre_rect(self,new_rect):
-        x1 = min(new_rect[0],new_rect[2])
-        y1 = min(new_rect[1],new_rect[3])
-        x2 = max(new_rect[0],new_rect[2])
-        y2 = max(new_rect[1],new_rect[3])
-        self.pre_rect = [x1,y1,x2,y2]
+        self.pre_rect = arrange_rect(new_rect)
     
     def set_predict_pre_rect(self,new_rect):
-        x1 = min(new_rect[0],new_rect[2])
-        y1 = min(new_rect[1],new_rect[3])
-        x2 = max(new_rect[0],new_rect[2])
-        y2 = max(new_rect[1],new_rect[3])
-        self.predict_pre_rect = [x1,y1,x2,y2]
+        self.predict_pre_rect = arrange_rect(new_rect)
     
     def clear(self):
         self.motion = [30,30]
@@ -252,6 +252,37 @@ class Target_Image(Image):
         y_center = ((self.pre_rect[3] - self.pre_rect[1]) / 2) + self.pre_rect[1]
         self.kl.statePre =  np.array([x_center,y_center,new_motion[0],new_motion[1]],np.float32)
         self.kl_init_f = True
+    
+    def get_legal_region(self):
+        # target image in first detect
+        if self.pre_idx == -1:
+            x1 = self.rect[0] - abs(self.motion[0])
+            x2 = self.rect[2] + abs(self.motion[0])
+            y1 = self.rect[1] - abs(self.motion[1])
+            y2 = self.rect[3] + abs(self.motion[1])
+        else : 
+            if self.motion[0] > 0:
+                x1 = self.rect[0]
+                x2 = self.rect[2] + self.motion[0]
+            else :
+                x1 = self.rect[0] + self.motion[0]
+                x2 = self.rect[2]
+            if self.motion[1] > 0:
+                y1 = self.rect[1]
+                y2 = self.rect[3] + self.motion[1]
+            else:
+                y1 = self.rect[1] + self.motion[1]
+                y2 = self.rect[3]
+        return [x1,y1,x2,y2]
+    
+    def check_in_legal_region(self,rect):
+        x = (rect[0] + rect[2]) / 2
+        y = (rect[1] + rect[3]) / 2
+        region = self.get_legal_region()
+        if(region[0] <= x <= region[2]) and (region[1] <= y <= region[3]):
+            return True
+        else:
+            return False
 
 # The enum of result file type
 class File_Type(IntEnum):
