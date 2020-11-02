@@ -656,7 +656,7 @@ if __name__ == "__main__":
             print_bar()
             img_target.is_predict = True
             next_rect = predict_next(mask)
-        elif (line_x*line_y > InBig_Check):
+        elif ((line_x*line_y > InBig_Check)&(width*height > 1000)):
             print("InBig_Check:" , InBig_Check)
             img_big = img2.img[int(next_rect[1]):int(next_rect[3]),int(next_rect[0]):int(next_rect[2])]
             next_rect = find_item_InBigImage(img_target.img, img_big, next_rect)
@@ -946,7 +946,7 @@ if __name__ == "__main__":
                 sys.exit(1)
             elif opt in("-d","--debug"):
                 print("Run GUI in debug mode!")
-                return 20
+                return 100
         return image_num()
     
     # main
