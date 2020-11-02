@@ -285,7 +285,7 @@ if __name__ == "__main__":
         yolo_data = yolo_data_arr[img1.idx]
         for rect in yolo_data:
             temp = Target_Image(mk_empty_img(img1.img),-1)
-            temp.set_rect([rect[0],rect[2],rect[1],rect[3]])
+            temp.set_rect(rect)
             img_target_arr.append(temp)
         global img_target
         temp = img_target
@@ -293,7 +293,7 @@ if __name__ == "__main__":
             img_target = img_target_arr[i]
             find_next_target(0,img_target.rect)
         img_target = temp
-        dis_img()
+        draw_target_arr()
 
     # BF match target image with img2
     def BF_target_match():
@@ -554,6 +554,76 @@ if __name__ == "__main__":
         # set the rectangle highlight part of img1 as the next target image
         set_target_img()
     
+    def yolo_match(kps_t_arr,kps2_arr,matches_arr):
+        yolo_data = yolo_data_arr[img2.idx]
+        yolo_img_arr = []
+        temp = copy.deepcopy(img2.img)
+        for i,kps_t in enumerate(kps_t_arr):
+            kps_t = kps_t_arr[i]
+            kps2 = kps2_arr[i]
+            matches = matches_arr[i]
+            for d in yolo_data:
+                out_img = get_rect_img(img2.img,arrange_rect(d))
+                yolo_img_arr.append(copy.deepcopy(out_img))
+                print_rect(temp,arrange_rect(d),(0,0,255))
+            if img_target.is_predict:
+                pre_img = img_arr[img_target.pre_idx]
+                target_img = get_rect_img(pre_img,img_target.pre_rect)
+            else :
+                target_img = img_target.img
+            count_arr = [0 for i in range(len(yolo_data))] 
+            # determine which contour is pointed by key point
+            for m in matches:
+                kp1,kp2 = get_match_kp(m,kps_t,kps2)
+                pt = kp2.pt
+                cv2.circle(temp,(int(pt[0]),int(pt[1])),1,(0,0,255),4)
+                for i,d in enumerate(yolo_data):
+                    d = arrange_rect(d)
+                    if (d[0] <= pt[0] <= d[2]) and (d[1] <= pt[1] <= d[3]):
+                        count_arr[i] += 1
+            print_rect(temp,img_target.get_legal_region(),(0,255,0))
+            show_im("Yolo match used data",temp)
+            max_c = 0
+            max_idx = -1
+            for i,count in enumerate(count_arr):
+                if count > max_c:
+                    max_c = count
+                    max_idx = i
+            if max_idx == -1:
+                return [0,0,0,0]
+            match_num_thrs = int(len(matches) / 2)
+            print("Yolo match Threshould : ",match_num_thrs)
+            print("max match number : ",max_c)
+            if max_c >= match_num_thrs:
+                rect = yolo_data[max_idx]
+                if(img_target.check_in_legal_region(rect)):
+                    print("Using yolo data as detect result!")
+                    return rect
+                else :
+                    return [0,0,0,0]
+            else:
+                return [0,0,0,0]
+            # compute target descriptors & key points
+            # sift = cv2.xfeatures2d.SIFT_create()
+            # matcher = cv2.DescriptorMatcher_create("BruteForce")
+            # des_t = compute_SIFT_des(target_img,kps_t)
+            # for img in yolo_img_arr:
+            #     img_out = combine_img(img,target_img)
+            #     hA, wA = img.shape[:2]
+            #     kps,des = sift.detectAndCompute(img,None)
+            #     raw_matches = matcher.knnMatch(des,des_t,2)
+            #     draw_match_line(raw_matches,img_out,wA,kps,kps_t)
+            #     show_im("Yolo Data Image",img_out)
+            # using compare ssim
+            # for img in yolo_img_arr:
+            #     w1,h1,c1 = target_img.shape
+            #     w2,h2,c2 = img.shape
+            #     r_target_img = cv2.resize(target_img, (max(h1,h2),max(w1,w2)) , interpolation=cv2.INTER_CUBIC)
+            #     r_img = cv2.resize(img, (max(h1,h2),max(w1,w2)) , interpolation=cv2.INTER_CUBIC)
+            #     show_im("Temp",np.hstack((r_target_img,r_img)))
+            #     s = compare_ssim(r_target_img, r_img,multichannel=True)
+            #     print(s)
+
     # Dector enter point
     def detector(mode,dir,is_show):
         if len(img_target_arr):
@@ -631,36 +701,41 @@ if __name__ == "__main__":
         show_im("match result",img_out)
         # find the GMM mask contour of target
         mask = GMM(img1.img,img2.img)
-        # use mask and match restult to find the target in next image
-        out_mask,next_rect = find_target_contour(kps_t_arr,kps2_arr,matches_arr,mask)
-        # draw the finding result on match result image
-        _,target_width,_ = img_target.img.shape
-        cv2.rectangle(img_out,(int(next_rect[0] + target_width),int(next_rect[1])),(int(next_rect[2] + target_width),int(next_rect[3])),(0,255,0),thickness=1)
-        # combine the match result and final GMM mask
-        img_out = np.hstack((img_out,cv2.cvtColor( out_mask, cv2.COLOR_GRAY2RGB),cv2.cvtColor( mask, cv2.COLOR_GRAY2RGB)))
-        # show Result
-        if is_show:
-            cv2.imshow("Detect Result",img_out)
 
-        line_x = abs((next_rect[2] - next_rect[0]) / (img_target.rect[2] - img_target.rect[0]))
-        line_y = abs((next_rect[3] - next_rect[1]) / (img_target.rect[3] - img_target.rect[1]))
-        
-        width = int(abs(img_target.rect[0] - img_target.rect[2]))
-        height = int(abs(img_target.rect[1] - img_target.rect[3]))
-        InBig_Check = 1.75
-        if(width*height < 8500):
-            print("InBig_Check change")
-            InBig_Check = 1.3
-        if ((next_rect[0] == 512.)&(next_rect[1] == 512.)&(next_rect[2] == 0.)&(next_rect[3] == 0.)):
-            print("use motion to predict target rectangle...:", line_x*line_y)
-            print_bar()
-            img_target.is_predict = True
-            next_rect = predict_next(mask)
-        elif ((line_x*line_y > InBig_Check)&(width*height > 1000)):
-            print("InBig_Check:" , InBig_Check)
-            img_big = img2.img[int(next_rect[1]):int(next_rect[3]),int(next_rect[0]):int(next_rect[2])]
-            next_rect = find_item_InBigImage(img_target.img, img_big, next_rect)
-
+        # using yolo detector data to find target
+        next_rect = yolo_match(kps_t_arr,kps2_arr,matches_arr)
+        # if no yolo reasonal data using tracker 
+        if not sum(next_rect):
+            # use mask and match restult to find the target in next image
+            out_mask,next_rect = find_target_contour(kps_t_arr,kps2_arr,matches_arr,mask)
+            # draw the finding result on match result image
+            _,target_width,_ = img_target.img.shape
+            cv2.rectangle(img_out,(int(next_rect[0] + target_width),int(next_rect[1])),(int(next_rect[2] + target_width),int(next_rect[3])),(0,255,0),thickness=1)
+            # combine the match result and final GMM mask
+            img_out = np.hstack((img_out,cv2.cvtColor( out_mask, cv2.COLOR_GRAY2RGB),cv2.cvtColor( mask, cv2.COLOR_GRAY2RGB)))
+            # show Result
+            if is_show:
+                cv2.imshow("Detect Result",img_out)
+            line_x = abs((next_rect[2] - next_rect[0]) / (img_target.rect[2] - img_target.rect[0]))
+            line_y = abs((next_rect[3] - next_rect[1]) / (img_target.rect[3] - img_target.rect[1]))
+            width = int(abs(img_target.rect[0] - img_target.rect[2]))
+            height = int(abs(img_target.rect[1] - img_target.rect[3]))
+            InBig_Check = 1.75
+            if(width*height < 8500):
+                print("InBig_Check change")
+                InBig_Check = 1.3
+            # The size of result doesn't meet the target using predict
+            if ((next_rect[0] == 512.)&(next_rect[1] == 512.)&(next_rect[2] == 0.)&(next_rect[3] == 0.)):
+                print("use motion to predict target rectangle...:", line_x*line_y)
+                print_bar()
+                img_target.is_predict = True
+                next_rect = predict_next(mask)
+            elif ((line_x*line_y > InBig_Check)&(width*height > 1000)):
+                print("InBig_Check:" , InBig_Check)
+                img_big = img2.img[int(next_rect[1]):int(next_rect[3]),int(next_rect[0]):int(next_rect[2])]
+                next_rect = find_item_InBigImage(img_target.img, img_big, next_rect)
+                img_target.is_predict = False
+        else:
             img_target.is_predict = False
         # update the next target's coordinate of rectangle
         find_next_target(dir,next_rect)
@@ -911,7 +986,7 @@ if __name__ == "__main__":
                 continue
             temp = temp[1].split()
             temp = list(map(int,temp))
-            yolo_data_arr[i].append(temp)
+            yolo_data_arr[i].append([temp[0],temp[2],temp[1],temp[3]])
             if i >= img_num:
                 break
         f.close()

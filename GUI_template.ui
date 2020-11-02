@@ -679,12 +679,12 @@ p, li { white-space: pre-wrap; }
    </property>
    <item>
     <property name="text">
-     <string>Origin</string>
+     <string>Kalman</string>
     </property>
    </item>
    <item>
     <property name="text">
-     <string>Kalman</string>
+     <string>Origin</string>
     </property>
    </item>
    <item>
