@@ -261,18 +261,22 @@ class Target_Image(Image):
             y1 = self.rect[1] - abs(self.motion[1])
             y2 = self.rect[3] + abs(self.motion[1])
         else : 
-            if self.motion[0] > 0:
-                x1 = self.rect[0]
-                x2 = self.rect[2] + self.motion[0]
-            else :
-                x1 = self.rect[0] + self.motion[0]
-                x2 = self.rect[2]
-            if self.motion[1] > 0:
-                y1 = self.rect[1]
-                y2 = self.rect[3] + self.motion[1]
-            else:
-                y1 = self.rect[1] + self.motion[1]
-                y2 = self.rect[3]
+            x1 = self.rect[0] + self.motion[0]
+            x2 = self.rect[2] + self.motion[0]
+            y1 = self.rect[1] + self.motion[1]
+            y2 = self.rect[3] + self.motion[1]
+            # if self.motion[0] > 0:
+            #     x1 = self.rect[0]
+            #     x2 = self.rect[2] + self.motion[0]
+            # else :
+            #     x1 = self.rect[0] + self.motion[0]
+            #     x2 = self.rect[2]
+            # if self.motion[1] > 0:
+            #     y1 = self.rect[1]
+            #     y2 = self.rect[3] + self.motion[1]
+            # else:
+            #     y1 = self.rect[1] + self.motion[1]
+            #     y2 = self.rect[3]
         return [x1,y1,x2,y2]
     
     def check_in_legal_region(self,rect):
