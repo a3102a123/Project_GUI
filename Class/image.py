@@ -137,6 +137,20 @@ def arrange_rect(rect):
 def print_rect(img,rect,color):
     cv2.rectangle(img,(int(min(rect[0],rect[2])),int(min(rect[1],rect[3]))),(int(max(rect[0],rect[2])),int(max(rect[1],rect[3]))),color,thickness=1)
 
+def calc_rect_area(rect):
+    rect = arrange_rect(rect)
+    x = rect[2] - rect[0]
+    y = rect[3] - rect[1]
+    return x*y
+
+# check the rect center is out of the eliminate region
+def check_in_elim_region(rect):
+    x = (rect[2] + rect[0]) / 2
+    y = (rect[3] + rect[1]) / 2
+    if (( x - 2*y - 180 > 0) or (x - 3 * y + 1140 < 0) ):
+        return True
+    return False
+
 # the class to maintain QLabel image's infomation
 class Image():
     
@@ -221,7 +235,7 @@ class Target_Image(Image):
     
     def set_predict_pre_rect(self,new_rect):
         self.predict_pre_rect = arrange_rect(new_rect)
-    
+    # rect attribute need clear by additionally assign [0,0,0,0]
     def clear(self):
         self.motion = [30,30]
         self.pre_rect = [0,0,0,0]
@@ -283,6 +297,16 @@ class Target_Image(Image):
         x = (rect[0] + rect[2]) / 2
         y = (rect[1] + rect[3]) / 2
         region = self.get_legal_region()
+
+        if(region[0] <= x <= region[2]) and (region[1] <= y <= region[3]):
+            return True
+        else:
+            return False
+
+    def check_overlap(self,rect):
+        x = (rect[0] + rect[2]) / 2
+        y = (rect[1] + rect[3]) / 2
+        region = self.rect
         if(region[0] <= x <= region[2]) and (region[1] <= y <= region[3]):
             return True
         else:
