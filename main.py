@@ -291,7 +291,7 @@ if __name__ == "__main__":
         temp = img_target
         for i in range(len(img_target_arr)):
             img_target = img_target_arr[i]
-            find_next_target(0,img_target.rect)
+            set_target_img()
         img_target = temp
         draw_target_arr()
 
@@ -586,7 +586,7 @@ if __name__ == "__main__":
             max_c = 0
             max_idx = -1
             for i,count in enumerate(count_arr):
-                if count > max_c:
+                if count >= max_c:
                     max_c = count
                     max_idx = i
             if max_idx == -1:
@@ -630,6 +630,8 @@ if __name__ == "__main__":
             global img_target
             temp = img_target
             for i in range(len(img_target_arr)):
+                print( "Begining of detecting : " , i)
+                print_bar()
                 img_target = img_target_arr[i]
                 show_detect_result(mode,0,is_show)
             img_target = temp
