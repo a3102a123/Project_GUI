@@ -24,6 +24,7 @@ if __name__ == "__main__":
     draing_flag = False
     saved_result_arr = []
     yolo_data_arr = []
+    yolo_data_mask = []
 
     # the record list of kalman filter
     x1_arr = []
@@ -271,7 +272,10 @@ if __name__ == "__main__":
 
     # draw all target in img_target_arr on img1
     def draw_target_arr():
-        for i in range(len(img_target_arr)):
+        for i in range(len(img_target_arr)- 1 , -1 , -1):
+            if not sum(img_target_arr[i].rect):
+                img_target_arr.pop(i)
+                continue
             im_h,im_w,c = img1.img.shape
             lb_w = ui.img_label1.width()
             lb_h = ui.img_label1.height()
@@ -291,7 +295,7 @@ if __name__ == "__main__":
         temp = img_target
         for i in range(len(img_target_arr)):
             img_target = img_target_arr[i]
-            find_next_target(0,img_target.rect)
+            set_target_img(True)
         img_target = temp
         draw_target_arr()
 
@@ -388,6 +392,8 @@ if __name__ == "__main__":
 
     # count motion
     def motion():
+        if not sum(img_target.rect):
+            return
         new_motion = [0,0]
         if img_target.is_predict:
             new_motion[0] = (img_target.rect[0] - img_target.predict_pre_rect[0] + img_target.rect[2] - img_target.predict_pre_rect[2]) / 2 
@@ -539,6 +545,13 @@ if __name__ == "__main__":
     # (the left top & right bottom point of target rectangle's coordinate)
     # dir is the direction of next image(also can set 0 to let image unchanged)
     def find_next_target(dir,next_rect):
+        # if the result locate in eliminate region destroy it
+        if check_in_elim_region(next_rect):
+            global img_target
+            img_target.clear()
+            img_target.rect = [0,0,0,0]
+            print("destroy img target!!")
+            return
         # draw the rectangle on next image to highlight the target
         if not img_target.is_predict:
             img_target.set_pre_rect(img_target.rect)
@@ -585,8 +598,9 @@ if __name__ == "__main__":
             show_im("Yolo match used data",temp)
             max_c = 0
             max_idx = -1
+            global yolo_data_mask
             for i,count in enumerate(count_arr):
-                if count > max_c:
+                if not yolo_data_mask[i] and count >= max_c:
                     max_c = count
                     max_idx = i
             if max_idx == -1:
@@ -597,6 +611,7 @@ if __name__ == "__main__":
             if max_c >= match_num_thrs:
                 rect = yolo_data[max_idx]
                 if(img_target.check_in_legal_region(rect)):
+                    yolo_data_mask[max_idx] = True
                     print("Using yolo data as detect result!")
                     return rect
                 else :
@@ -624,22 +639,52 @@ if __name__ == "__main__":
             #     s = compare_ssim(r_target_img, r_img,multichannel=True)
             #     print(s)
 
+    def check_yolo_mask():
+        yolo_data = yolo_data_arr[img1.idx]
+        print("The match result of yolo data : ")
+        print_bar()
+        print(yolo_data_mask)
+        global img_target
+        temp = img_target
+        for i in range(len(yolo_data_mask)):
+            if yolo_data_mask[i]:
+                continue
+            rect = yolo_data[i]
+            # check for avoid to overlap
+            if img_target.check_overlap(rect):
+                yolo_data_mask[i] = True
+            for tar in img_target_arr :
+                if tar.check_overlap(rect):
+                    yolo_data_mask[i] = True
+                    break
+            if( not yolo_data_mask[i] and not check_in_elim_region(rect)):
+                img_target = Target_Image(mk_empty_img(img1.img),-1)
+                img_target.set_rect(rect)
+                set_target_img(True)
+                img_target_arr.append(img_target)
+        img_target = temp
+
     # Dector enter point
     def detector(mode,dir,is_show):
+        global yolo_data_mask
+        yolo_data_mask = [False for i in range(len(yolo_data_arr[img2.idx]))]
         if len(img_target_arr):
             global img_target
             temp = img_target
             for i in range(len(img_target_arr)):
+                print( "Begining of detecting : " , i)
+                print_bar()
                 img_target = img_target_arr[i]
                 show_detect_result(mode,0,is_show)
             img_target = temp
-        # if ui.target_label.pixmap() == None:
         if not sum(img_target.rect):
             print("No target image.")
             change_image(1)
             draw_target_arr()
             return
         show_detect_result(mode,dir,is_show)
+        # check yolo data mask to find new target
+        check_yolo_mask()
         draw_target_arr()
 
     # 如果圖片突然變大,可能是抓到兩輛車的前景,那我們從抓到的圖片找有沒有和原本圖相似的部分
@@ -699,8 +744,8 @@ if __name__ == "__main__":
         kps2_arr = []
         kps_t_arr = []
         matches_arr = []
-        # current target image is trustable
-        if not img_target.is_predict:
+        # current target image is trustable or there is not pre-target image
+        if img_target.pre_idx == -1 or  not img_target.is_predict:
             # mode 0 use BF match
             if mode == 0 :
                 kps2,matches,img_out = BF_target_match()
@@ -1025,6 +1070,10 @@ if __name__ == "__main__":
     def init():
         img1.set_img(img_arr,0,img_kp_arr)
         img2.set_img(img_arr,1,img_kp_arr)
+        img = copy.deepcopy(img1.img)
+        # cv2.line(img,(180,0),(500,160),(0,0,255))
+        # cv2.line(img,(0,380),(360,500),(0,0,255))
+        # show_im("eliminate region",img)
 
     def help_msg():
         print ("-h --help : get help information!")
