@@ -215,7 +215,7 @@ if __name__ == "__main__":
                 temp.append(kp2)
         out_mask = mk_empty_img(mask)
         test_range = img_target.check_range(2)
-        print("test rectangle range:" + str(test_range))
+        #print("test rectangle range:" + str(test_range))
         print("motion:" + str(img_target.motion))
         # find the rectangle coordinate of pointed contour
         for i in range(0,len(contours)):
@@ -223,17 +223,17 @@ if __name__ == "__main__":
                 x,y,w,h = cv2.boundingRect(contours[i])
                 #cv2.rectangle(img2.img,(x,y),(x+w,y+h),(0,255,0),2)
                 count = 1
-                print("current contour rectangle:",x,y,x+w,y+h)
+                #print("current contour rectangle:",x,y,x+w,y+h)
                 if((test_range[0]<=(x+w/2)<=test_range[2])&(test_range[1]<=(y+h/2)<=test_range[3])):
                     next_p[0] = min(next_p[0],x)
                     next_p[1] = min(next_p[1],y)
                     next_p[2] = max(next_p[2],x+w)
                     next_p[3] = max(next_p[3],y+h)
                     out_mask[y:y+h, x:x+w] = mask[y:y+h, x:x+w]
-                    print("Adopt!")
+                    #print("Adopt!")
                     #show_im("out"+str(i),out_mask)
-        print("next target's rectangle:",next_p)
-        print_bar()
+        #print("next target's rectangle:",next_p)
+        #print_bar()
         cv2.rectangle(out_mask,(int(next_p[0]),int(next_p[1])),(int(next_p[2]),int(next_p[3])),255,thickness=1)
         # return the target contour of mask and rectangle coordinate
         return out_mask,next_p
@@ -488,11 +488,11 @@ if __name__ == "__main__":
                 out_mask[y:y+h, x:x+w] = mask[y:y+h, x:x+w]
                 #print(x,y,x+w,y+h)
                 #show_im("out"+str(i),out_mask)
-        print("next predicted rectangle:",next_p)
+        #print("next predicted rectangle:",next_p)
         cv2.rectangle(out_mask,(int(next_p[0]),int(next_p[1])),(int(next_p[2]),int(next_p[3])),255,thickness=1)
         #img_target.rect = next_p
-        print("check:", check)
-        print_bar()
+        #print("check:", check)
+        #print_bar()
         if(check == 1): 
             return next_p
         else:
@@ -500,7 +500,7 @@ if __name__ == "__main__":
 
     # create the graph for Hungarian algorithm
     def kp_feature_distance_graph(des1,des2):
-        print(len(des1),len(des2))
+        #print(len(des1),len(des2))
         graph = []
         for i in range(0,len(des1)):
             temp_dict = []
@@ -521,9 +521,9 @@ if __name__ == "__main__":
         graph = kp_feature_distance_graph(des_t, des_2)
         matches = []
         hungarian = Munkres()
-        print("Computing...")
+        #print("Computing...")
         index = hungarian.compute(graph)
-        print("Finish!")
+        #print("Finish!")
         for row,column in index:
             dis = graph[row][column]
             temp = cv2.DMatch(row,column,dis)
@@ -644,30 +644,51 @@ if __name__ == "__main__":
 
     # 如果圖片突然變大,可能是抓到兩輛車的前景,那我們從抓到的圖片找有沒有和原本圖相似的部分
     # 輸出為目標在原圖上的[x1 y1 x2 y2]
-    def find_item_InBigImage(simg, bimg, next):
+    # 將motion加入評分標準
+    def find_item_InBigImage(simg, bimg, next, motion, center):
         print("InBigImage\n")
+        print("InBigImage motion:" ,motion)
         maxy = bimg.shape[0] - simg.shape[0]
         maxx = bimg.shape[1] - simg.shape[1]
         h = simg.shape[0]
         w = simg.shape[1]
         result = [0.0]*5
+        result[4] = -10.0
         for i in range(maxy):
             for j in range(maxx):
                 s1 = bimg[ i : i + h , j : j + w ]
-                if( result[4] < compare_ssim(s1, simg, multichannel = True)):
+                angle_find = angle( [0, 0, (next[0] + j + w / 2 - center[0]), (next[1] + i + h / 2 - center[1])],  [0, 0, motion[0],  motion[1]])
+                if( result[4] < (compare_ssim(s1, simg, multichannel = True) - (angle_find/360))):
+                    print("angle/360: ", (angle_find/360))
+                    print("ssim: ",compare_ssim(s1, simg, multichannel = True))
                     result = [ (next[0] + j), (next[1] + i), (next[0] + j + w), (next[1] + i + h), compare_ssim(s1, simg, multichannel = True)]
                 j += 3
             i += 3
-        '''result[0] = (result[0]*2 + next[0]) / 3
-        result[1] = (result[1]*2 + next[1]) / 3
-        result[2] = (result[2]*2 + next[2]) / 3
-        result[3] = (result[3]*2 + next[3]) / 3'''
         p1 = (int(result[0]), int(result[1]))
         p2 = (int(result[2]), int(result[3]))
         InBigImageShow = img2.img
         cv2.rectangle(InBigImageShow,p1,p2,(0,0,255), 2)
         cv2.imshow("find_item_InBigImage", InBigImageShow)
         return result[0:4]
+    # 算角度
+    def angle(v1, v2):
+        dx1 = v1[2] - v1[0]
+        dy1 = v1[3] - v1[1]
+        dx2 = v2[2] - v2[0]
+        dy2 = v2[3] - v2[1]
+        angle1 = math.atan2(dy1, dx1)
+        angle1 = int(angle1 * 180/math.pi)
+        # print(angle1)
+        angle2 = math.atan2(dy2, dx2)
+        angle2 = int(angle2 * 180/math.pi)
+        # print(angle2)
+        if angle1*angle2 >= 0:
+            included_angle = abs(angle1-angle2)
+        else:
+            included_angle = abs(angle1) + abs(angle2)
+            if included_angle > 180:
+                included_angle = 360 - included_angle
+        return included_angle
     # Dector main function
     # display the match result in subwindows and detect result on next image
     # mode determine which match algorithm to use
@@ -722,18 +743,19 @@ if __name__ == "__main__":
             height = int(abs(img_target.rect[1] - img_target.rect[3]))
             InBig_Check = 1.75
             if(width*height < 8500):
-                print("InBig_Check change")
+                #print("InBig_Check change")
                 InBig_Check = 1.3
             # The size of result doesn't meet the target using predict
             if ((next_rect[0] == 512.)&(next_rect[1] == 512.)&(next_rect[2] == 0.)&(next_rect[3] == 0.)):
-                print("use motion to predict target rectangle...:", line_x*line_y)
-                print_bar()
+                #print("use motion to predict target rectangle...:", line_x*line_y)
+                #print_bar()
                 img_target.is_predict = True
                 next_rect = predict_next(mask)
             elif ((line_x*line_y > InBig_Check)&(width*height > 1000)):
-                print("InBig_Check:" , InBig_Check)
+                #print("InBig_Check:" , InBig_Check)
                 img_big = img2.img[int(next_rect[1]):int(next_rect[3]),int(next_rect[0]):int(next_rect[2])]
-                next_rect = find_item_InBigImage(img_target.img, img_big, next_rect)
+                center = [(img_target.rect[0] + img_target.rect[2])/2, (img_target.rect[1] + img_target.rect[3])/2]
+                next_rect = find_item_InBigImage(img_target.img, img_big, next_rect, img_target.motion, center)
                 img_target.is_predict = False
         else:
             img_target.is_predict = False
