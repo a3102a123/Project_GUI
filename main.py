@@ -83,6 +83,8 @@ if __name__ == "__main__":
             draw_BF_match_flow()
         if ui.BF_Line_Button.isChecked():
             draw_BF_match_line()
+        if ui.Yolo_Result_Button.isChecked():
+            draw_yolo_result()
         dis_img()
         text1 = img_name_arr[img1.idx]
         text2 = img_name_arr[img2.idx]
@@ -132,6 +134,16 @@ if __name__ == "__main__":
         img1.draw_img(img1_out)
         img2.draw_img(img2_out)
     
+    # draw the yolo result on img1
+    def draw_yolo_result():
+        yolo_data = yolo_data_arr[img1.idx]
+        im_h,im_w,c = img1.img.shape
+        lb_w = ui.img_label1.width()
+        lb_h = ui.img_label1.height()
+        for rect in yolo_data:
+            rect = arrange_rect(rect)
+            img1.draw_rect(rect,im_w,im_h,lb_w,lb_h,(255,0,255),is_img_coor = True,is_new = False)
+
     # input a Dmatch and then return the pair of matched key points
     def get_match_kp(match,kps1,kps2):
         if isinstance(match,tuple) or isinstance(match,list):
@@ -607,7 +619,7 @@ if __name__ == "__main__":
                 return [0,0,0,0]
             match_num_thrs = int(len(matches) / 2)
             print("Yolo match Threshould : ",match_num_thrs)
-            print("max match number : ",max_c)
+            print("max match number : ",max_c) 
             if max_c >= match_num_thrs:
                 rect = yolo_data[max_idx]
                 if(img_target.check_in_legal_region(rect)):
@@ -954,6 +966,7 @@ if __name__ == "__main__":
         ui.BF_Flow_Button.clicked.connect(lambda: change_image(0))
         ui.BF_Line_Button.clicked.connect(lambda: change_image(0))
         ui.Limit_Button.clicked.connect(lambda: change_image(0))
+        ui.Yolo_Result_Button.clicked.connect(lambda: change_image(0))
         ui.Distance_Limit.valueChanged.connect(change_limit_distance)
         ui.Ratio_Test.valueChanged.connect(change_ratio_test)
         ui.Target_Button.clicked.connect(lambda: set_target_img(True))
