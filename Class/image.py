@@ -77,7 +77,7 @@ def get_rect_img(img,rect):
 # the dis is the distance out of rectangle
 # which is used to select potential key points for match
 # if dis = 0,0 return all key points' descripter
-def compute_SIFT_des(img,kps,rect=[0,0,0,0],dis=[0,0]):
+def compute_SIFT_des(img,kps,rect=[0,0,0,0],dis=[0,0],is_show = True):
     sift = cv2.xfeatures2d.SIFT_create()
     new_kp,des = sift.compute(img,kps)
     # if the target image too small return nothing
@@ -110,7 +110,8 @@ def compute_SIFT_des(img,kps,rect=[0,0,0,0],dis=[0,0]):
     cv2.drawKeypoints(img,new_kp,img_out)
     cv2.rectangle(img_out,(int(min(rect[0],rect[2])),int(min(rect[1],rect[3]))),(int(max(rect[0],rect[2])),int(max(rect[1],rect[3]))),(0,0,255),thickness=1)
     cv2.rectangle(img_out,(int(min_x),int(min_y)),(int(max_x),int(max_y)),(0,255,0),thickness=1)
-    cv2.imshow("limited_key_points",img_out)
+    if is_show:
+        cv2.imshow("limited_key_points",img_out)
     # press any key to close the window
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
@@ -125,7 +126,7 @@ def convImg(img):
     return qImg
 
 def print_bar():
-    print("======================================\n")
+    print("======================================")
 
 def arrange_rect(rect):
     x1 = min(rect[0],rect[2])

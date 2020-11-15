@@ -266,6 +266,9 @@ class Ui_Dialog(object):
         font.setPointSize(14)
         self.Yolo_Result_Button.setFont(font)
         self.Yolo_Result_Button.setObjectName("Yolo_Result_Button")
+        self.Detect_Button = QtWidgets.QPushButton(Dialog)
+        self.Detect_Button.setGeometry(QtCore.QRect(180, 490, 141, 28))
+        self.Detect_Button.setObjectName("Detect_Button")
         self.FileName.raise_()
         self.SaveFileButton.raise_()
         self.layoutWidget.raise_()
@@ -302,6 +305,7 @@ class Ui_Dialog(object):
         self.Load_Yolo_Button.raise_()
         self.textBrowser_8.raise_()
         self.Yolo_Result_Button.raise_()
+        self.Detect_Button.raise_()
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
@@ -390,6 +394,7 @@ class Ui_Dialog(object):
 "</style></head><body style=\" font-family:\'PMingLiU\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
 "<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:14pt;\">Yolo Result</span></p></body></html>"))
         self.Yolo_Result_Button.setText(_translate("Dialog", "Show Yolo Result"))
+        self.Detect_Button.setText(_translate("Dialog", "Detect without image"))
 
 
 if __name__ == "__main__":
