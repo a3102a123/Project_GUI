@@ -73,10 +73,12 @@ if __name__ == "__main__":
         img2_idx = (img2.idx + direction) % img_num
         if ui.Optical_Flow_Button.isChecked():
             img1.set_img(img_optical_flow_arr , img1_idx , img_kp_arr)
-            img2.set_img(img_optical_flow_arr, img2_idx , img_kp_arr)
+            # img2.set_img(img_optical_flow_arr, img2_idx , img_kp_arr)
+            check_same_img(img_optical_flow_arr, img2_idx)
         else:
             img1.set_img(img_arr , img1_idx , img_kp_arr)
-            img2.set_img(img_arr, img2_idx , img_kp_arr)
+            # img2.set_img(img_arr, img2_idx , img_kp_arr)
+            check_same_img(img_arr, img2_idx)
         if ui.SIFT_Button.isChecked():
             draw_SIFT_kp()
         if ui.BF_Flow_Button.isChecked():
@@ -91,6 +93,21 @@ if __name__ == "__main__":
         ui.img_text1.setText(text1)
         ui.img_text2.setText(text2)
     
+    def check_same_img(arr, idx):
+        img2.set_img(arr, idx, img_kp_arr)
+        print("idx:", idx)
+        for i in range(img_num):
+            mask = GMM(img1.img,img2.img)
+            # cv2.imshow("check",mask)
+            print("change:", np.sum(mask == 127))
+            if(np.sum(mask == 127) < 1000):
+                index = (idx + i) % img_num
+                print("index:", index)
+                img2.set_img(arr, index, img_kp_arr)
+            else:
+                return
+
+
     # select the perticular image to change
     def select_image():
         img_id = ui.Image_Selector.value()
@@ -853,7 +870,7 @@ if __name__ == "__main__":
             show_im("match result",img_out)
         # find the GMM mask contour of target
         mask = GMM(img1.img,img2.img)
-
+        # cv2.imshow("check1",mask)
         # using yolo detector data to find target
         next_rect = yolo_match(kps_t_arr,kps2_arr,matches_arr,is_show)
         # if no yolo reasonal data using tracker 
