@@ -315,7 +315,7 @@ class Target_Image(Image):
 
 # The enum of result file type
 class File_Type(IntEnum):
-    BUS = 1
+    File50 = 1
     CAR = 2
     CAR2 = 3
     AUTOBIKE = 4

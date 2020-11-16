@@ -87,6 +87,8 @@ if __name__ == "__main__":
             draw_BF_match_line()
         if ui.Yolo_Result_Button.isChecked():
             draw_yolo_result()
+        if ui.Detect_Result_Button.isChecked():
+            draw_saved_file_result()
         dis_img()
         text1 = img_name_arr[img1.idx]
         text2 = img_name_arr[img2.idx]
@@ -160,6 +162,22 @@ if __name__ == "__main__":
         for rect in yolo_data:
             rect = arrange_rect(rect)
             img1.draw_rect(rect,im_w,im_h,lb_w,lb_h,(255,0,255),is_img_coor = True,is_new = False)
+
+    # draw the result of saved file
+    def draw_saved_file_result():
+        if len(saved_result_arr) == 0:
+            print("Please load the result file first!")
+            return
+        if img1.idx >= len(saved_result_arr):
+            print("The image index out of saved result!")
+            return
+        result_data = saved_result_arr[img1.idx]
+        im_h,im_w,c = img1.img.shape
+        lb_w = ui.img_label1.width()
+        lb_h = ui.img_label1.height()
+        for rect in result_data:
+            rect = arrange_rect(rect)
+            img1.draw_rect(rect,im_w,im_h,lb_w,lb_h,(255,0,0),is_img_coor = True,is_new = False)
 
     # input a Dmatch and then return the pair of matched key points
     def get_match_kp(match,kps1,kps2):
@@ -347,7 +365,10 @@ if __name__ == "__main__":
         predict_motion = (img_target.motion[0] * 2,img_target.motion[1] * 2)
         kps2,des_2 = compute_SIFT_des(ori_img2,img2.kps,img_target.rect,predict_motion,is_show)
         matcher = cv2.DescriptorMatcher_create("BruteForce")
-        raw_matches = matcher.knnMatch(des_t,des_2,2)
+        raw_matches = []
+        if(isinstance(des_t,np.ndarray) and isinstance(des_t,np.ndarray)):
+            if(len(des_t) != 0 and len(des_2) != 0):
+                raw_matches = matcher.knnMatch(des_t,des_2,2)
         matches = []
         # the ratio test of match
         for i in range(len(raw_matches) - 1 , -1 , -1):
@@ -919,27 +940,33 @@ if __name__ == "__main__":
         if not os.path.isdir(data_dir):
             os.mkdir(data_dir)
         filename = ui.FileName.toPlainText()
-        # check filename isn't empty
-        if filename == "":
-            print("The filename is empty!")
         # check img1 is first image
         if img1.idx != 0 :
             print("The left image is not the first image!")
             return
         set_yolo_target()
-        for i in range(30):
-            detector(0,1,False)
-        return
-        # run detect to find target on all image
-        result_rect_arr = [img_target.rect]
-        for i in range(len(img_arr) - 1):
-            result_rect = show_detect_result(0,1,False)
-            result_rect_arr.append(result_rect)
-        # store the result
-        f = open(data_dir + "/" + filename,"wb")
-        f.write(cPickle.dumps(result_rect_arr))
-        f.close()
-        print("Already save result into the file: " + filename + "!")
+        run_time = 50
+        # check filename isn't empty
+        if filename == "":
+            print("The filename is empty!")
+            for i in range(run_time):
+                detector(0,1,False)
+        else:
+            f = open(data_dir + "/" + filename,"w")
+            f.write("# 0 " + img_name_arr[0] + "\n")
+            for i,tar in enumerate(img_target_arr):
+                for p in tar.rect:
+                    f.write("%s " % p)
+                f.write("\n")
+            for i in range(run_time):
+                detector(0,1,False)
+                f.write("# " + str(i + 1) + " " + img_name_arr[i + 1] + "\n")
+                for j,tar in enumerate(img_target_arr):
+                    for p in tar.rect:
+                        f.write("%s " % p)
+                    f.write("\n")
+            f.close()
+            print("Already save result into the file: " + filename + "!")
     
     # display the detect result file of selected type of vehicle 
     def display_select_result():
@@ -947,8 +974,8 @@ if __name__ == "__main__":
         img1.set_img(img_arr,0,img_kp_arr)
         img2.set_img(img_arr,1,img_kp_arr)
         select_data = ui.Result_Data.currentText()
-        if select_data == "Bus":
-            load_detect_result(File_Type.BUS)
+        if select_data == "File_50":
+            load_detect_result(File_Type.File50)
         elif select_data == "Car1":
             load_detect_result(File_Type.CAR)
         elif select_data == "Car2":
@@ -959,37 +986,52 @@ if __name__ == "__main__":
             load_detect_result(File_Type.AUTOBIKE2)
         if len(saved_result_arr) == 0:
             return
-        for i,rect in enumerate(saved_result_arr):
-            if i == 0:
-                find_next_target(0,rect)
-            else:
-                find_next_target(1,rect)
-            dis_img()
-            time.sleep(.500)
+        # for i,rect in enumerate(saved_result_arr):
+        #     if i == 0:
+        #         find_next_target(0,rect)
+        #     else:
+        #         find_next_target(1,rect)
+        #     dis_img()
+        #     time.sleep(.500)
 
     # load the detect result file and store the detect result data into global array
     def load_detect_result(type):
         dir_path = "result_data"
-        if type == File_Type.BUS:
-            file_path = dir_path + "/" + "bus.txt"
+        if type == File_Type.File50:
+            file_path = dir_path + "/" + "50.txt"
         elif type == File_Type.CAR:
-            file_path = dir_path + "/" + "car.txt"
+            file_path = dir_path + "/" + ""
         elif type == File_Type.CAR2:
-            file_path = dir_path + "/" + "car_left.txt"
+            file_path = dir_path + "/" + ""
         elif type == File_Type.AUTOBIKE:
-            file_path = dir_path + "/" + "moto.txt"
+            file_path = dir_path + "/" + ""
         elif type == File_Type.AUTOBIKE2:
-            file_path = dir_path + "/" + "moto_right.txt"
+            file_path = dir_path + "/" + ""
         else:
             file_path = dir_path + "/" + ""
         if not os.path.isfile(file_path):
             print("The result file doesn't exist!!")
             return
         saved_result_arr.clear()
-        f = open(file_path,"rb")
-        data = cPickle.loads(f.read())
-        for rect_data in data:
-            saved_result_arr.append(rect_data)
+        f = open(file_path,"r")
+        temp_arr = []
+        for f_str in f.readlines():
+            parse_str = f_str.split(" ")
+            temp = []
+            for str in parse_str:
+                if str == "#":
+                    if len(temp_arr) != 0:
+                        saved_result_arr.append(copy.deepcopy(temp_arr))
+                    temp_arr.clear()
+                    break
+                elif str == "\n":
+                    break
+                temp.append(float(str))
+            if len(temp) != 0:
+                temp_arr.append(copy.deepcopy(temp))
+        if len(temp_arr) != 0:
+                saved_result_arr.append(copy.deepcopy(temp_arr))
+        print("Success load the file : ",file_path)
         f.close()
     
     # mouse trigger function
@@ -1056,6 +1098,7 @@ if __name__ == "__main__":
         ui.BF_Line_Button.clicked.connect(lambda: change_image(0))
         ui.Limit_Button.clicked.connect(lambda: change_image(0))
         ui.Yolo_Result_Button.clicked.connect(lambda: change_image(0))
+        ui.Detect_Result_Button.clicked.connect(lambda: change_image(0))
         ui.Distance_Limit.valueChanged.connect(change_limit_distance)
         ui.Ratio_Test.valueChanged.connect(change_ratio_test)
         ui.Target_Button.clicked.connect(lambda: set_target_img(True))

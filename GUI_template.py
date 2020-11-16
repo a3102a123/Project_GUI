@@ -269,6 +269,12 @@ class Ui_Dialog(object):
         self.Detect_Button = QtWidgets.QPushButton(Dialog)
         self.Detect_Button.setGeometry(QtCore.QRect(180, 490, 141, 28))
         self.Detect_Button.setObjectName("Detect_Button")
+        self.Detect_Result_Button = QtWidgets.QCheckBox(Dialog)
+        self.Detect_Result_Button.setGeometry(QtCore.QRect(1610, 790, 201, 21))
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        self.Detect_Result_Button.setFont(font)
+        self.Detect_Result_Button.setObjectName("Detect_Result_Button")
         self.FileName.raise_()
         self.SaveFileButton.raise_()
         self.layoutWidget.raise_()
@@ -306,6 +312,7 @@ class Ui_Dialog(object):
         self.textBrowser_8.raise_()
         self.Yolo_Result_Button.raise_()
         self.Detect_Button.raise_()
+        self.Detect_Result_Button.raise_()
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
@@ -364,12 +371,12 @@ class Ui_Dialog(object):
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'PMingLiU\'; font-size:14pt; font-weight:400; font-style:normal;\">\n"
 "<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;\"><span style=\" background-color:#ffffff;\">Display Detect Result Data</span></p></body></html>"))
-        self.Result_Data.setItemText(0, _translate("Dialog", "Bus"))
+        self.Result_Data.setItemText(0, _translate("Dialog", "File_50"))
         self.Result_Data.setItemText(1, _translate("Dialog", "Car1"))
         self.Result_Data.setItemText(2, _translate("Dialog", "Car2"))
         self.Result_Data.setItemText(3, _translate("Dialog", "Autobike1"))
         self.Result_Data.setItemText(4, _translate("Dialog", "Autobike2"))
-        self.Dispaly_Button.setText(_translate("Dialog", "Display"))
+        self.Dispaly_Button.setText(_translate("Dialog", "Load"))
         self.SaveFileButton.setText(_translate("Dialog", "Save"))
         self.Result_Right_Button.setText(_translate("Dialog", ">"))
         self.Result_Left_Button.setText(_translate("Dialog", "<"))
@@ -392,9 +399,10 @@ class Ui_Dialog(object):
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'PMingLiU\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
-"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:14pt;\">Yolo Result</span></p></body></html>"))
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:14pt;\">Result</span></p></body></html>"))
         self.Yolo_Result_Button.setText(_translate("Dialog", "Show Yolo Result"))
         self.Detect_Button.setText(_translate("Dialog", "Detect without image"))
+        self.Detect_Result_Button.setText(_translate("Dialog", "Show Detect Result"))
 
 
 if __name__ == "__main__":
