@@ -377,7 +377,10 @@ if __name__ == "__main__":
         kps2,des_2 = compute_SIFT_des(ori_img2,img2.kps,img_target.rect,predict_motion,is_show)
         # match
         matcher = cv2.DescriptorMatcher_create("BruteForce")
-        raw_matches = matcher.knnMatch(des_t,des_2,2)
+        raw_matches = []
+        if(isinstance(des_t,np.ndarray) and isinstance(des_t,np.ndarray)):
+            if(len(des_t) != 0 and len(des_2) != 0):
+                raw_matches = matcher.knnMatch(des_t,des_2,2)
         matches = []
         # the ratio test of match
         for i in range(len(raw_matches) - 1 , -1 , -1):
