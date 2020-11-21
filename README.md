@@ -1,4 +1,5 @@
 # Project_GUI
+- [data set link](https://drive.google.com/drive/folders/10VRH7mm2EMXI10Yi6VELsfOvRtMJge1V?usp=sharing)
 - 執行前先手動將im0資料夾(包含圖片)放到和main.py同一層的位置
 - 之後執行 python main.py 即可
 - 有設定.gitignore 執行後增加的"__pycache__"資料夾及"im0"資料夾不會被加到git中
