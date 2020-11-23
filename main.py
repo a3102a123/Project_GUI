@@ -73,12 +73,12 @@ if __name__ == "__main__":
         img2_idx = (img2.idx + direction) % img_num
         if ui.Optical_Flow_Button.isChecked():
             img1.set_img(img_optical_flow_arr , img1_idx , img_kp_arr)
-            # img2.set_img(img_optical_flow_arr, img2_idx , img_kp_arr)
-            check_same_img(img_optical_flow_arr, img2_idx)
+            img2.set_img(img_optical_flow_arr, img2_idx , img_kp_arr)
+            #check_same_img(img_optical_flow_arr, img2_idx)
         else:
             img1.set_img(img_arr , img1_idx , img_kp_arr)
-            # img2.set_img(img_arr, img2_idx , img_kp_arr)
-            check_same_img(img_arr, img2_idx)
+            img2.set_img(img_arr, img2_idx , img_kp_arr)
+            #check_same_img(img_arr, img2_idx)
         if ui.SIFT_Button.isChecked():
             draw_SIFT_kp()
         if ui.BF_Flow_Button.isChecked():
@@ -94,21 +94,6 @@ if __name__ == "__main__":
         text2 = img_name_arr[img2.idx]
         ui.img_text1.setText(text1)
         ui.img_text2.setText(text2)
-    
-    def check_same_img(arr, idx):
-        img2.set_img(arr, idx, img_kp_arr)
-        print("idx:", idx)
-        for i in range(img_num):
-            mask = GMM(img1.img,img2.img)
-            # cv2.imshow("check",mask)
-            print("change:", np.sum(mask == 127))
-            if(np.sum(mask == 127) < 1000):
-                index = (idx + i) % img_num
-                print("index:", index)
-                img2.set_img(arr, index, img_kp_arr)
-            else:
-                return
-
 
     # select the perticular image to change
     def select_image():
@@ -264,7 +249,7 @@ if __name__ == "__main__":
         out_mask = mk_empty_img(mask)
         test_range = img_target.check_range(2)
         #print("test rectangle range:" + str(test_range))
-        print("motion:" + str(img_target.motion))
+        # print("motion:" + str(img_target.motion))
         # find the rectangle coordinate of pointed contour
         for i in range(0,len(contours)):
             if count_arr[i] > 0:
@@ -624,6 +609,9 @@ if __name__ == "__main__":
         else:
             img_target.set_predict_pre_rect(img_target.rect)
         change_image(dir)
+        # 確保下一張不是重複的照片
+        while(check_same_img()):
+            change_image(1)
         img_target.set_rect(next_rect)
         im_h,im_w,c = img1.img.shape
         lb_w = ui.img_label1.width()
@@ -836,14 +824,24 @@ if __name__ == "__main__":
         # add new target of yolo data
         add_yolo_target(yolo_data_rect)
         draw_target_arr()
-        print_target_arr()
+        print_target_arr()  
+    
+    def check_same_img():
+        for i in range(img_num):
+            mask = GMM(img1.img,img2.img)
+            # cv2.imshow("check",mask)
+            print("change:", np.sum(mask == 127))
+            if(np.sum(mask == 127) < 1000):
+                return True
+            else:
+                return False
 
     # 如果圖片突然變大,可能是抓到兩輛車的前景,那我們從抓到的圖片找有沒有和原本圖相似的部分
     # 輸出為目標在原圖上的[x1 y1 x2 y2]
     # 將motion加入評分標準
     def find_item_InBigImage(simg, bimg, next, motion, center,is_show):
-        print("InBigImage\n")
-        print("InBigImage motion:" ,motion)
+        # print("InBigImage\n")
+        # print("InBigImage motion:" ,motion)
         maxy = bimg.shape[0] - simg.shape[0]
         maxx = bimg.shape[1] - simg.shape[1]
         h = simg.shape[0]
@@ -855,8 +853,8 @@ if __name__ == "__main__":
                 s1 = bimg[ i : i + h , j : j + w ]
                 angle_find = angle( [0, 0, (next[0] + j + w / 2 - center[0]), (next[1] + i + h / 2 - center[1])],  [0, 0, motion[0],  motion[1]])
                 if( result[4] < (compare_ssim(s1, simg, multichannel = True) - (angle_find/360))):
-                    print("angle/360: ", (angle_find/360))
-                    print("ssim: ",compare_ssim(s1, simg, multichannel = True))
+                    # print("angle/360: ", (angle_find/360))
+                    # print("ssim: ",compare_ssim(s1, simg, multichannel = True))
                     result = [ (next[0] + j), (next[1] + i), (next[0] + j + w), (next[1] + i + h), compare_ssim(s1, simg, multichannel = True)]
                 j += 3
             i += 3
