@@ -394,7 +394,10 @@ if __name__ == "__main__":
         kps2,des_2 = compute_SIFT_des(ori_img2,img2.kps,img_target.rect,predict_motion,is_show)
         # match
         matcher = cv2.DescriptorMatcher_create("BruteForce")
-        raw_matches = matcher.knnMatch(des_t,des_2,2)
+        raw_matches = []
+        if(isinstance(des_t,np.ndarray) and isinstance(des_t,np.ndarray)):
+            if(len(des_t) != 0 and len(des_2) != 0):
+                raw_matches = matcher.knnMatch(des_t,des_2,2)
         matches = []
         # the ratio test of match
         for i in range(len(raw_matches) - 1 , -1 , -1):
@@ -673,39 +676,59 @@ if __name__ == "__main__":
                     max_idx = i
             if max_idx == -1:
                 return [0,0,0,0]
+            # get the key points point to target yolo data for reverse match 
+            new_kp2 = []
+            d = arrange_rect( yolo_data[max_idx])
+            for m in matches:
+                kp1,kp2 = get_match_kp(m,kps_t,kps2)
+                pt = kp2.pt
+                if (d[0] - tolerable_area <= pt[0] <= d[2] + tolerable_area) and (d[1] - tolerable_area <= pt[1] <= d[3] + tolerable_area):
+                    new_kp2.append(kp2)
             # reverse match
             ori_img2 = img_arr[img2.idx]
-            ori_img2 = get_rect_img( ori_img2 , arrange_rect(yolo_data[max_idx]) )
+            ori_img1 = img_arr[img1.idx]
+            rect_region = [30,30]
+            new_kp_t,des_t = compute_SIFT_des(ori_img1,img1.kps,img_target.rect,rect_region,is_show)
             sift = cv2.xfeatures2d.SIFT_create()
-            new_kp_t,des_t = sift.detectAndCompute(target_img,None)
-            new_kp2,des_2 = sift.detectAndCompute(ori_img2,None)
+            new_kp2,des_2 = sift.compute(ori_img2,new_kp2)
+            reverse_matches = []
             if( not isinstance(des_t,type(None)) and not isinstance(des_2,type(None))) :
                 matcher = cv2.DescriptorMatcher_create("BruteForce")
                 raw_matches = matcher.knnMatch(des_2,des_t,2)
-                reverse_matches = []
                 # the ratio test of match
                 for i in range(len(raw_matches) - 1 , -1 , -1):
                     m = raw_matches[i]
                     if(len(m) != 2):
                         continue
-                    if m[0].distance < m[1].distance * 0.8:
+                    if m[0].distance < m[1].distance * 1:
                         reverse_matches.append(m)
-                img_out = combine_img(ori_img2,target_img)
+                img_out = combine_img(ori_img2,ori_img1)
                 hA,wA = ori_img2.shape[:2]
                 # draw the line on target image and img1
                 draw_match_line(reverse_matches,img_out,wA,new_kp2,new_kp_t)
                 if is_show:
                     show_im("Reverse_match",img_out)
             
+            # checking whether the reverse match is locate in target image
+            temp = copy.deepcopy(img1.img)
+            d = arrange_rect( img_target.rect)
+            for m in reverse_matches:
+                kp1,kp2 = get_match_kp(m,new_kp2,new_kp_t)
+                pt = kp2.pt
+                cv2.circle(temp,(int(pt[0]),int(pt[1])),1,(0,0,255),4)
+                if not (d[0] <= pt[0] <= d[2]) and (d[1] <= pt[1] <= d[3]):
+                    max_c -= 1
+            print_rect(temp,img_target.rect,(0,255,0))
+            if is_show:
+                show_im("Yolo Reverse match",temp)
+            print("Reverse result : ",count_arr[max_idx],max_c)
             # check the matched points threshold
             match_num_thrs = int(len(matches) / 2)
-            # similarity(SIFT match) of yolo matched result and target
-            similarity = len(reverse_matches)
             print("Yolo match Threshould : ",match_num_thrs)
             print("max match number : ",max_c) 
             if max_c >= match_num_thrs:
                 rect = yolo_data[max_idx]
-                if(img_target.check_in_legal_region(rect) and similarity != 0):
+                if(img_target.check_in_legal_region(rect)):
                     yolo_data_mask[max_idx] = True
                     print("Using yolo data as detect result!")
                     return rect
@@ -748,12 +771,18 @@ if __name__ == "__main__":
             if img_target.check_overlap(rect):
                 print("Overlap!!")
                 yolo_data_mask[i] = True
+                if img_target.is_predict:
+                    img_target.is_predict = False
+                    img_target.set_rect(img_target.predict_pre_rect)
                 find_next_target(0,rect)
             for tar in img_target_arr :
                 if tar.check_overlap(rect):
                     print("Overlap!!")
                     yolo_data_mask[i] = True
                     img_target = tar
+                    if img_target.is_predict:
+                        img_target.is_predict = False
+                        img_target.set_rect(img_target.predict_pre_rect)
                     find_next_target(0,rect)
                     img_target = temp
                     break

@@ -1,4 +1,6 @@
 # Project_GUI
+- 專題 : 魚眼鏡頭照片的車輛偵測及追蹤，使用python opencv為主，GUI介面使用pyqt呈現。
+- [data set link](https://drive.google.com/drive/folders/10VRH7mm2EMXI10Yi6VELsfOvRtMJge1V?usp=sharing)
 - 執行前先手動將im0資料夾(包含圖片)放到和main.py同一層的位置
 - 之後執行 python main.py 即可
 - 有設定.gitignore 執行後增加的"__pycache__"資料夾及"im0"資料夾不會被加到git中
