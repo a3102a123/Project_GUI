@@ -293,9 +293,11 @@ if __name__ == "__main__":
         if(width*height < 15000):
             img_target.erode_num = 2
             img_target.dilate_num = 3
+            img_target.mul = 3
         else:
             img_target.erode_num = 4
             img_target.dilate_num = 8
+            img_target.mul = 1
         temp_img = get_rect_img(img1.img,img_target.rect)
         img_target.draw_img(np.copy(temp_img),is_set = True)
         SIFT_target_img()
@@ -609,9 +611,6 @@ if __name__ == "__main__":
         else:
             img_target.set_predict_pre_rect(img_target.rect)
         change_image(dir)
-        # 確保下一張不是重複的照片
-        while(check_same_img()):
-            change_image(1)
         img_target.set_rect(next_rect)
         im_h,im_w,c = img1.img.shape
         lb_w = ui.img_label1.width()
@@ -756,7 +755,7 @@ if __name__ == "__main__":
                 continue
             rect = yolo_data[i]
             # check for avoid to overlap & using yolo data as next target img
-            if img_target.check_overlap(rect):
+            if img_target.check_overlap(rect,0):
                 print("Overlap!!")
                 yolo_data_mask[i] = True
                 if img_target.is_predict:
@@ -764,7 +763,7 @@ if __name__ == "__main__":
                     img_target.set_rect(img_target.predict_pre_rect)
                 find_next_target(0,rect)
             for tar in img_target_arr :
-                if tar.check_overlap(rect):
+                if tar.check_overlap(rect,0):
                     print("Overlap!!")
                     yolo_data_mask[i] = True
                     img_target = tar
@@ -774,6 +773,18 @@ if __name__ == "__main__":
                     find_next_target(0,rect)
                     img_target = temp
                     break
+                # if the yolo data is near to target candidate assume the yolo data is target
+                elif tar.check_overlap(rect,tar.mul):
+                    print("Near Overlap!!")
+                    yolo_data_mask[i] = True
+                    img_target = tar
+                    if img_target.is_predict:
+                        img_target.is_predict = False
+                        img_target.set_rect(img_target.predict_pre_rect)
+                    find_next_target(0,rect)
+                    img_target = temp
+                    break
+
     
     # add the new yolo target which isn't matched and locate in detecting area
     def add_yolo_target(yolo_data):
@@ -799,6 +810,14 @@ if __name__ == "__main__":
         yolo_data_rect = yolo_data_arr[img2.idx]
         global img_target
         temp = img_target
+        # 確保下一張不是重複的照片
+        if(check_same_img()):
+            print_bar()
+            print("Same image ignore it!")
+            print_bar()
+            change_image(1)
+            draw_target_arr()
+            return
         if len(img_target_arr):
             for i in range(len(img_target_arr)):
                 print( "Begining of detecting : " , i)

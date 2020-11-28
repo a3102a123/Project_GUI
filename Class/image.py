@@ -148,7 +148,7 @@ def calc_rect_area(rect):
 def check_in_elim_region(rect):
     x = (rect[2] + rect[0]) / 2
     y = (rect[3] + rect[1]) / 2
-    if (( x - 2*y - 180 > 0) or (x - 3 * y + 1140 < 0) ):
+    if (( x - 2*y - 180 > 0) or (2 * x - 5 * y + 1500 < 0) ):
         return True
     return False
 
@@ -227,6 +227,8 @@ class Target_Image(Image):
         # using for GMM to eliminate spot noise
         self.erode_num = 0
         self.dilate_num = 0
+        # using for determine object size & motion calculation
+        self.mul = 0
 
     def set_rect(self,new_rect):
         self.rect = arrange_rect(new_rect)
@@ -304,11 +306,13 @@ class Target_Image(Image):
         else:
             return False
 
-    def check_overlap(self,rect):
+    def check_overlap(self,rect,motion_mul):
         x = (rect[0] + rect[2]) / 2
         y = (rect[1] + rect[3]) / 2
+        motion_x = self.motion[0] * motion_mul
+        motion_y = self.motion[1] * motion_mul
         region = self.rect
-        if(region[0] <= x <= region[2]) and (region[1] <= y <= region[3]):
+        if(region[0] - motion_x <= x <= region[2] + motion_x) and (region[1] - motion_y <= y <= region[3] + motion_y):
             return True
         else:
             return False
