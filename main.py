@@ -297,7 +297,7 @@ if __name__ == "__main__":
         else:
             img_target.erode_num = 4
             img_target.dilate_num = 8
-            img_target.mul = 1
+            img_target.mul = 0
         temp_img = get_rect_img(img1.img,img_target.rect)
         img_target.draw_img(np.copy(temp_img),is_set = True)
         SIFT_target_img()
@@ -600,7 +600,7 @@ if __name__ == "__main__":
         # if the result locate in eliminate region destroy it
         if check_in_elim_region(next_rect):
             global img_target
-            print("destroy img target!!",img_target.rect," motion : ",img_target.motion)
+            print("destroy img target!!",img_target.rect," motion : ",img_target.motion," next rect : ",next_rect)
             img_target.clear()
             img_target.rect = [0,0,0,0]
             return
@@ -624,6 +624,7 @@ if __name__ == "__main__":
         yolo_img_arr = []
         temp = copy.deepcopy(img2.img)
         tolerable_area = 0
+        img_target.is_yolo = False
         for i,kps_t in enumerate(kps_t_arr):
             kps2 = kps2_arr[i]
             matches = matches_arr[i]
@@ -718,6 +719,7 @@ if __name__ == "__main__":
                 if(img_target.check_in_legal_region(rect)):
                     yolo_data_mask[max_idx] = True
                     print("Using yolo data as detect result!")
+                    img_target.is_yolo = True
                     return rect
                 else :
                     return [0,0,0,0]
@@ -754,6 +756,8 @@ if __name__ == "__main__":
             if yolo_data_mask[i]:
                 continue
             rect = yolo_data[i]
+            if check_in_elim_region(rect):
+                continue
             # check for avoid to overlap & using yolo data as next target img
             if img_target.check_overlap(rect,0):
                 print("Overlap!!")
@@ -763,6 +767,8 @@ if __name__ == "__main__":
                     img_target.set_rect(img_target.predict_pre_rect)
                 find_next_target(0,rect)
             for tar in img_target_arr :
+                if tar.is_yolo:
+                    continue
                 if tar.check_overlap(rect,0):
                     print("Overlap!!")
                     yolo_data_mask[i] = True
@@ -991,7 +997,7 @@ if __name__ == "__main__":
             print("The left image is not the first image!")
             return
         set_yolo_target()
-        run_time = 50
+        run_time = 40
         # check filename isn't empty
         if filename == "":
             print("The filename is empty!")

@@ -229,6 +229,8 @@ class Target_Image(Image):
         self.dilate_num = 0
         # using for determine object size & motion calculation
         self.mul = 0
+        # the flag to determine whether the target image comes from yolo
+        self.is_yolo = False
 
     def set_rect(self,new_rect):
         self.rect = arrange_rect(new_rect)
@@ -312,7 +314,7 @@ class Target_Image(Image):
         motion_x = self.motion[0] * motion_mul
         motion_y = self.motion[1] * motion_mul
         region = self.rect
-        if(region[0] - motion_x <= x <= region[2] + motion_x) and (region[1] - motion_y <= y <= region[3] + motion_y):
+        if((region[0] - motion_x) <= x <= (region[2] + motion_x)) and ((region[1] - motion_y) <= y <= (region[3] + motion_y)):
             return True
         else:
             return False
