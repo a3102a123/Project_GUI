@@ -49,7 +49,6 @@ class car,box: 359 379 74 96
 out_15
 class car,box: 238 271 67 97
 class car,box: 359 378 73 94
-class car,box: 108 130 143 157
 out_16
 class car,box: 233 270 69 100
 out_17

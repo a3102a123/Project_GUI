@@ -8,6 +8,7 @@ if __name__ == "__main__":
     ###########################################
 
     # create ui object
+    fgbg_gmm = cv2.createBackgroundSubtractorMOG2(detectShadows=True,history=1000,varThreshold=28)
     ui = GUI.Ui_Dialog()
     sub_ui = subwindow.Ui_Dialog()
     img1 = Image(cv2.imread("im0/out_0.jpg"),0)
@@ -215,13 +216,16 @@ if __name__ == "__main__":
         ui.Ratio_Test_Display.display(value / max_value)
         change_image(0)
     
-    # create GMM foreground mask of img2
-    def GMM(img_GMM1,img_GMM2):
-        fgbg_gmm = cv2.createBackgroundSubtractorMOG2(detectShadows=True)
+    # create GMM foreground mask using img1 and img2
+    def foreground(img_GMM1,img_GMM2):
+        temp_gmm = cv2.createBackgroundSubtractorMOG2(detectShadows=True,history=1000,varThreshold=28)
+        temp_gmm.apply(img_GMM1)
+        fgmask = temp_gmm.apply(img_GMM2)
+        return fgmask
+    # adjust the GMM mask
+    def GMM(fgmask):
         #the kernel for morphologyEx
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))
-        fgbg_gmm.apply(img_GMM1)
-        fgmask = fgbg_gmm.apply(img_GMM2)
         fgmask = cv2.erode(fgmask,kernel,iterations = img_target.erode_num)
         fgmask = cv2.dilate(fgmask,kernel,iterations = img_target.dilate_num)
         return fgmask
@@ -824,19 +828,22 @@ if __name__ == "__main__":
             change_image(1)
             draw_target_arr()
             return
+        fgmask = fgbg_gmm.apply(img_arr[img2.idx])
+        # eliminate shadow of mask
+        fgmask[fgmask < 200] = 0
         if len(img_target_arr):
             for i in range(len(img_target_arr)):
                 print( "Begining of detecting : " , i)
                 print_bar()
                 img_target = img_target_arr[i]
-                show_detect_result(mode,0,is_show)
+                show_detect_result(mode,0,fgmask,is_show)
             img_target = temp
         if not sum(img_target.rect):
             print("No target image.")
             change_image(1)
             draw_target_arr()
         else:
-            show_detect_result(mode,dir,is_show)
+            show_detect_result(mode,dir,fgmask,is_show)
         # check yolo data mask to find new target
         check_yolo_mask(yolo_data_rect)
         # compute the new motion
@@ -853,7 +860,7 @@ if __name__ == "__main__":
     
     def check_same_img():
         for i in range(img_num):
-            mask = GMM(img1.img,img2.img)
+            mask = foreground(img1.img,img2.img)
             # cv2.imshow("check",mask)
             print("change:", np.sum(mask == 127))
             if(np.sum(mask == 127) < 1000):
@@ -914,7 +921,7 @@ if __name__ == "__main__":
     # mode determine which match algorithm to use
     # dir is the control of direction for muitiple target
     # is_show flag determine whether the process is showed 
-    def show_detect_result(mode,dir,is_show):
+    def show_detect_result(mode,dir,fgmask,is_show):
         # store the two kind of match result and used key point
         kps2_arr = []
         kps_t_arr = []
@@ -942,7 +949,7 @@ if __name__ == "__main__":
         if is_show:
             show_im("match result",img_out)
         # find the GMM mask contour of target
-        mask = GMM(img1.img,img2.img)
+        mask = GMM(fgmask)
         # cv2.imshow("check1",mask)
         # using yolo detector data to find target
         next_rect = yolo_match(kps_t_arr,kps2_arr,matches_arr,is_show)
@@ -997,7 +1004,7 @@ if __name__ == "__main__":
             print("The left image is not the first image!")
             return
         set_yolo_target()
-        run_time = 40
+        run_time = 39
         # check filename isn't empty
         if filename == "":
             print("The filename is empty!")
@@ -1263,12 +1270,20 @@ if __name__ == "__main__":
         load_BF_match()
         load_optical_flow()
         load_yolo()
+
+    def pre_train_GMM():
+        directory = os.listdir(img_dir_path)
+        directory.sort(key = len)
+        for filename in directory :
+            img = cv2.imread(img_dir_path + filename)
+            fgbg_gmm.apply(img)
     
     # init image entity
     def init():
         img1.set_img(img_arr,0,img_kp_arr)
         img2.set_img(img_arr,1,img_kp_arr)
         img = copy.deepcopy(img1.img)
+        pre_train_GMM()
         # cv2.line(img,(180,0),(500,160),(0,0,255))
         # cv2.line(img,(0,380),(360,500),(0,0,255))
         # show_im("eliminate region",img)
