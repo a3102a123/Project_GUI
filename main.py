@@ -303,8 +303,8 @@ if __name__ == "__main__":
             img_target.dilate_num = 3
             img_target.mul = 3
         else:
-            img_target.erode_num = 1
-            img_target.dilate_num = 3
+            img_target.erode_num = 4
+            img_target.dilate_num = 8
             img_target.mul = 0
         temp_img = get_rect_img(img1.img,img_target.rect)
         img_target.draw_img(np.copy(temp_img),is_set = True)
@@ -398,7 +398,7 @@ if __name__ == "__main__":
         # the ratio test of match
         for i in range(len(raw_matches) - 1 , -1 , -1):
             m = raw_matches[i]
-            if is_meet_ratio(m[0],m[1]):
+            if len(m) == 2 and is_meet_ratio(m[0],m[1]):
                 matches.append(m)
         img_out = combine_img(pre_target_img,ori_img2)
         hA,wA = pre_target_img.shape[:2]
@@ -1017,7 +1017,7 @@ if __name__ == "__main__":
             print("The left image is not the first image!")
             return
         set_yolo_target()
-        run_time = 100
+        run_time = 112
         # check filename isn't empty
         if filename == "":
             print("The filename is empty!")
@@ -1318,7 +1318,7 @@ if __name__ == "__main__":
                 sys.exit(1)
             elif opt in("-d","--debug"):
                 print("Run GUI in debug mode!")
-                return 100
+                return 150
         return image_num()
     
     # main
