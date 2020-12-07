@@ -269,6 +269,7 @@ class Target_Image(Image):
         self.kl.measurementNoiseCov = np.array([[1,0],[0,1]], np.float32) * 1
         x_center = ((self.pre_rect[2] - self.pre_rect[0]) / 2) + self.pre_rect[0]
         y_center = ((self.pre_rect[3] - self.pre_rect[1]) / 2) + self.pre_rect[1]
+        # print("Initial kalman filter [",x_center,",",y_center,"] motion : ",new_motion)
         self.kl.statePre =  np.array([x_center,y_center,new_motion[0],new_motion[1]],np.float32)
         self.kl_init_f = True
     
@@ -311,8 +312,8 @@ class Target_Image(Image):
     def check_overlap(self,rect,motion_mul):
         x = (rect[0] + rect[2]) / 2
         y = (rect[1] + rect[3]) / 2
-        motion_x = self.motion[0] * motion_mul
-        motion_y = self.motion[1] * motion_mul
+        motion_x = abs(self.motion[0] * motion_mul)
+        motion_y = abs(self.motion[1] * motion_mul)
         region = self.rect
         if((region[0] - motion_x) <= x <= (region[2] + motion_x)) and ((region[1] - motion_y) <= y <= (region[3] + motion_y)):
             return True

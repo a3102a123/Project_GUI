@@ -251,7 +251,7 @@ if __name__ == "__main__":
                         count_arr[i] += 1
                 temp.append(kp2)
         out_mask = mk_empty_img(mask)
-        test_range = img_target.check_range(2)
+        test_range = img_target.check_range(img_target.mul)
         #print("test rectangle range:" + str(test_range))
         # print("motion:" + str(img_target.motion))
         # find the rectangle coordinate of pointed contour
@@ -294,8 +294,12 @@ if __name__ == "__main__":
         img_target.set_rect(temp)
         width = int(abs(img_target.rect[0] - img_target.rect[2]))
         height = int(abs(img_target.rect[1] - img_target.rect[3]))
-        if(width*height < 15000):
+        if(width*height < 500):
             img_target.erode_num = 1
+            img_target.dilate_num = 3
+            img_target.mul = 4
+        elif(width*height < 15000):
+            img_target.erode_num = 2
             img_target.dilate_num = 3
             img_target.mul = 3
         else:
@@ -326,10 +330,11 @@ if __name__ == "__main__":
         print("\n\nImage ",img1.idx," detect result : ")
         print_bar()
         if(sum(img_target.rect) != 0):
-            print("Image Target ",img_target.rect," motion : ",img_target.motion)
+            print("Image Target ",img_target.rect," motion : ",img_target.motion,"erode : ",img_target.erode_num,"dilate : ",img_target.dilate_num,"multiple : ",img_target.mul)
         for i,tar in enumerate(img_target_arr):
-            print("Target ",i," ",tar.rect," motion : ",tar.motion)
-
+            width = int(abs(tar.rect[0] - tar.rect[2]))
+            height = int(abs(tar.rect[1] - tar.rect[3]))
+            print("Target ",i," ",tar.rect," motion : ",tar.motion,"Area : ",width*height,"erode : ",tar.erode_num,"dilate : ",tar.dilate_num,"multiple : ",tar.mul)
     # set up all the yolo labeled target to image target type
     def set_yolo_target():
         img_target_arr.clear()
@@ -699,7 +704,7 @@ if __name__ == "__main__":
                 # draw the line on target image and img1
                 draw_match_line(reverse_matches,img_out,wA,new_kp2,new_kp_t)
                 if is_show:
-                    show_im("Reverse_match",img_out)
+                    cv2.imshow("Reverse_match",img_out)
             
             # checking whether the reverse match is locate in target image
             temp = copy.deepcopy(img1.img)
@@ -769,6 +774,8 @@ if __name__ == "__main__":
                 if img_target.is_predict:
                     img_target.is_predict = False
                     img_target.set_rect(img_target.predict_pre_rect)
+                else :
+                    img_target.set_rect(img_target.pre_rect)
                 find_next_target(0,rect)
             for tar in img_target_arr :
                 if tar.is_yolo:
@@ -780,6 +787,8 @@ if __name__ == "__main__":
                     if img_target.is_predict:
                         img_target.is_predict = False
                         img_target.set_rect(img_target.predict_pre_rect)
+                    else :
+                        img_target.set_rect(img_target.pre_rect)
                     find_next_target(0,rect)
                     img_target = temp
                     break
@@ -791,6 +800,8 @@ if __name__ == "__main__":
                     if img_target.is_predict:
                         img_target.is_predict = False
                         img_target.set_rect(img_target.predict_pre_rect)
+                    else :
+                        img_target.set_rect(img_target.pre_rect)
                     find_next_target(0,rect)
                     img_target = temp
                     break
@@ -831,6 +842,8 @@ if __name__ == "__main__":
         fgmask = fgbg_gmm.apply(img_arr[img2.idx])
         # eliminate shadow of mask
         fgmask[fgmask < 200] = 0
+        if is_show:
+            cv2.imshow("mask",fgmask)
         if len(img_target_arr):
             for i in range(len(img_target_arr)):
                 print( "Begining of detecting : " , i)
@@ -947,7 +960,7 @@ if __name__ == "__main__":
             kps_t_arr.append(kps_t)
             matches_arr.append(matches)
         if is_show:
-            show_im("match result",img_out)
+            cv2.imshow("match result",img_out)
         # find the GMM mask contour of target
         mask = GMM(fgmask)
         # cv2.imshow("check1",mask)
@@ -964,7 +977,7 @@ if __name__ == "__main__":
             img_out = np.hstack((img_out,cv2.cvtColor( out_mask, cv2.COLOR_GRAY2RGB),cv2.cvtColor( mask, cv2.COLOR_GRAY2RGB)))
             # show Result
             if is_show:
-                cv2.imshow("Detect Result",img_out)
+                show_im("Detect Result",img_out)
             line_x = abs((next_rect[2] - next_rect[0]) / (img_target.rect[2] - img_target.rect[0]))
             line_y = abs((next_rect[3] - next_rect[1]) / (img_target.rect[3] - img_target.rect[1]))
             width = int(abs(img_target.rect[0] - img_target.rect[2]))
