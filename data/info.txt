@@ -2973,3 +2973,297 @@ class car,box: 116 156 73 103
 out_1058
 class car,box: 157 215 115 192
 class car,box: 117 156 73 103
+out_1059
+class car,box: 157 215 115 192
+class car,box: 117 156 73 103
+out_1060
+class car,box: 145 210 128 209
+class car,box: 117 160 74 103
+out_1061
+class car,box: 139 207 134 218
+class car,box: 118 162 74 103
+out_1062
+class car,box: 136 199 138 223
+class car,box: 119 163 74 103
+out_1063
+class car,box: 136 199 138 223
+class car,box: 119 163 74 103
+out_1064
+class car,box: 130 185 152 239
+class car,box: 122 167 74 105
+out_1065
+class car,box: 126 183 159 252
+class car,box: 123 167 74 104
+out_1066
+class car,box: 123 179 164 257
+class car,box: 122 168 74 105
+out_1067
+class car,box: 123 179 164 257
+class car,box: 122 168 73 105
+out_1068
+class car,box: 117 170 177 272
+class car,box: 126 174 73 104
+out_1069
+class car,box: 127 174 73 104
+class car,box: 113 165 190 286
+out_1070
+class car,box: 127 175 73 104
+out_1071
+class car,box: 128 176 74 105
+out_1072
+class car,box: 128 176 74 105
+out_1073
+class car,box: 129 177 74 105
+out_1074
+class car,box: 131 178 74 107
+out_1075
+class car,box: 132 180 74 107
+out_1076
+class car,box: 132 180 74 107
+out_1077
+class car,box: 133 182 75 108
+out_1078
+class car,box: 135 183 75 109
+out_1079
+class truck,box: 138 186 76 109
+class car,box: 132 186 78 111
+out_1080
+class truck,box: 136 183 75 109
+out_1081
+class car,box: 137 190 78 111
+out_1082
+class car,box: 137 191 79 111
+out_1083
+class car,box: 138 191 79 112
+out_1084
+class car,box: 138 191 79 112
+out_1085
+class car,box: 139 191 79 113
+out_1086
+class car,box: 141 190 79 114
+out_1087
+class truck,box: 141 189 79 114
+out_1088
+class truck,box: 141 189 79 114
+out_1089
+class truck,box: 143 189 80 115
+out_1090
+class truck,box: 144 189 80 116
+out_1091
+class truck,box: 144 189 80 117
+out_1092
+class truck,box: 144 189 80 117
+out_1093
+out_1094
+out_1095
+out_1096
+out_1097
+out_1098
+class bus,box: 150 189 82 126
+out_1099
+out_1100
+out_1101
+out_1102
+out_1103
+out_1104
+class bus,box: 152 187 86 137
+out_1105
+class bus,box: 152 187 86 137
+out_1106
+class bus,box: 151 187 87 139
+out_1107
+class bus,box: 152 186 86 144
+out_1108
+out_1109
+class truck,box: 151 186 88 146
+out_1110
+out_1111
+class bus,box: 149 187 91 154
+out_1112
+class truck,box: 148 185 93 155
+out_1113
+class truck,box: 148 185 93 155
+out_1114
+class car,box: 146 187 92 163
+out_1115
+class car,box: 145 186 93 167
+out_1116
+class car,box: 145 183 99 171
+class car,box: 71 99 200 225
+out_1117
+class car,box: 145 183 99 171
+class car,box: 71 99 200 225
+out_1118
+class car,box: 310 325 40 56
+class car,box: 141 184 101 175
+out_1119
+class car,box: 140 185 103 180
+class car,box: 310 325 41 56
+out_1120
+class car,box: 139 185 104 183
+class car,box: 310 325 41 58
+out_1121
+class car,box: 131 180 109 194
+class car,box: 72 99 200 225
+out_1122
+class car,box: 131 180 109 194
+class car,box: 72 99 200 224
+out_1123
+class car,box: 129 180 111 201
+out_1124
+class car,box: 126 180 117 207
+out_1125
+class car,box: 303 320 46 65
+class car,box: 124 179 120 213
+out_1126
+class car,box: 303 320 46 65
+class car,box: 125 179 120 213
+out_1127
+class car,box: 303 320 47 65
+class car,box: 122 179 122 221
+out_1128
+class car,box: 299 318 48 68
+out_1129
+class car,box: 299 317 49 68
+out_1130
+class car,box: 299 317 50 68
+out_1131
+class car,box: 299 315 52 71
+out_1132
+class car,box: 295 316 52 73
+out_1133
+class car,box: 294 316 50 76
+out_1134
+class car,box: 294 316 51 76
+class car,box: 328 339 26 36
+out_1135
+class car,box: 293 316 51 77
+class car,box: 328 339 25 35
+out_1136
+class car,box: 290 311 58 81
+out_1137
+class car,box: 288 312 56 83
+out_1138
+class car,box: 288 312 56 83
+out_1139
+class car,box: 287 312 56 86
+out_1140
+class car,box: 283 312 55 90
+out_1141
+class car,box: 282 312 57 93
+out_1142
+class car,box: 282 312 57 93
+out_1143
+class car,box: 277 307 62 96
+out_1144
+class car,box: 274 305 62 97
+out_1145
+class car,box: 271 303 67 102
+out_1146
+class car,box: 271 303 67 102
+out_1147
+class car,box: 264 302 70 110
+out_1148
+class truck,box: 261 299 73 117
+class car,box: 262 298 71 113
+out_1149
+class car,box: 259 299 71 115
+out_1150
+class car,box: 251 293 80 128
+out_1151
+class car,box: 251 293 80 128
+out_1152
+class car,box: 248 292 80 132
+out_1153
+class car,box: 243 288 88 139
+out_1154
+class car,box: 234 284 94 154
+out_1155
+class car,box: 235 284 91 155
+out_1156
+class car,box: 230 282 98 160
+out_1157
+class bus,box: 216 275 108 176
+out_1158
+out_1159
+class bus,box: 195 257 139 218
+out_1160
+class bus,box: 187 251 147 234
+out_1161
+class bus,box: 188 251 147 234
+out_1162
+class bus,box: 180 247 160 248
+out_1163
+class car,box: 313 329 34 48
+out_1164
+class car,box: 314 327 37 49
+out_1165
+class car,box: 314 327 37 49
+out_1166
+class car,box: 313 325 39 50
+out_1167
+class car,box: 312 325 39 51
+out_1168
+class car,box: 311 324 39 51
+out_1169
+class car,box: 311 324 39 51
+out_1170
+class car,box: 307 323 41 54
+out_1171
+class car,box: 308 322 43 55
+out_1172
+class car,box: 306 322 42 56
+out_1173
+class car,box: 305 321 42 58
+out_1174
+class car,box: 306 321 42 58
+out_1175
+class car,box: 305 321 43 59
+out_1176
+class car,box: 303 320 44 60
+out_1177
+class car,box: 301 319 47 62
+out_1178
+class car,box: 302 319 47 62
+out_1179
+class car,box: 301 317 47 63
+out_1180
+class car,box: 298 316 49 67
+out_1181
+class car,box: 296 315 49 68
+out_1182
+class car,box: 296 315 49 68
+out_1183
+class car,box: 295 315 49 69
+out_1184
+class car,box: 292 310 53 73
+out_1185
+class car,box: 291 311 53 74
+out_1186
+class car,box: 291 311 53 74
+out_1187
+class car,box: 289 310 54 76
+out_1188
+class car,box: 286 308 58 81
+out_1189
+class car,box: 285 306 59 83
+out_1190
+class car,box: 285 306 59 83
+out_1191
+class car,box: 280 305 60 86
+out_1192
+class car,box: 278 303 64 89
+out_1193
+class car,box: 276 301 65 93
+out_1194
+class car,box: 276 301 65 93
+out_1195
+class car,box: 271 299 69 98
+out_1196
+class car,box: 269 298 71 100
+out_1197
+class car,box: 262 298 72 107
+out_1198
+class car,box: 256 292 79 114
+out_1199
+class car,box: 256 293 80 114
