@@ -353,6 +353,9 @@ if __name__ == "__main__":
         img_target = temp
         draw_target_arr()
 
+
+
+
     # BF match target image with img2
     def BF_target_match(is_show):
         ori_img2 = img_arr[img2.idx]
@@ -824,6 +827,47 @@ if __name__ == "__main__":
                 set_target_img(True)
                 img_target_arr.append(img_target)
         img_target = temp
+
+
+    #刪除相似度過高的物體
+    def delete_same_item():
+        global img_target_arr
+        for i in range(len(img_target_arr)- 1 , -1 , -1):
+            if(i == 0):
+                break
+            del_index = i
+            while(del_index > 0):
+                del_index -= 1
+                print(i, del_index)
+                print(img_target_arr[i].rect, img_target_arr[del_index].rect)
+                if(check_area(img_target_arr[i].rect, img_target_arr[del_index].rect)):
+                    print("delete it")
+                    img_target_arr.pop(i)
+                    break
+
+    def check_area(rect1, rect2):
+        if(rect1[0] > rect2[2]):
+            return 0
+        if(rect2[0] > rect1[2]):
+            return 0
+        if(rect1[1] > rect2[3]):
+            return 0
+        if(rect2[1] > rect1[3]):
+            return 0
+        x1 = max(rect1[0], rect2[0])
+        x2 = min(rect1[2], rect2[2])
+        y1 = max(rect1[1], rect2[1])
+        y2 = min(rect1[3], rect2[3])
+        print(x1, y1, x2, y2)
+        area = (x2-x1)*(y2-y1)
+        area1 = area / (rect1[2] - rect1[0]) / (rect1[3] - rect1[1])
+        area2 = area / (rect2[2] - rect2[0]) / (rect2[3] - rect2[1])
+        if((area1 > 0.7)&(area2 > 0.7)):
+            return 1
+        else:
+            return 0
+
+
     # Dector enter point
     def detector(mode,dir,is_show):
         global yolo_data_mask
@@ -868,6 +912,7 @@ if __name__ == "__main__":
             motion(is_show)
         # add new target of yolo data
         add_yolo_target(yolo_data_rect)
+        delete_same_item()
         draw_target_arr()
         print_target_arr()  
     
@@ -1017,7 +1062,7 @@ if __name__ == "__main__":
             print("The left image is not the first image!")
             return
         set_yolo_target()
-        run_time = 112
+        run_time = 120
         # check filename isn't empty
         if filename == "":
             print("The filename is empty!")
