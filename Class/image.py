@@ -196,7 +196,7 @@ class Image():
             h_ratio = 1
         p1 = (int(rect[0] * w_ratio),int(rect[1] * h_ratio))
         p2 = (int(rect[2] * w_ratio),int(rect[3] * h_ratio))
-        cv2.rectangle(img,p1,p2,color)
+        cv2.rectangle(img,p1,p2,color,thickness=2)
         self.qImg = convImg(img)
 
     def show_img(self):

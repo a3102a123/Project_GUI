@@ -147,7 +147,7 @@ if __name__ == "__main__":
         lb_h = ui.img_label1.height()
         for rect in yolo_data:
             rect = arrange_rect(rect)
-            img1.draw_rect(rect,im_w,im_h,lb_w,lb_h,(255,0,255),is_img_coor = True,is_new = False)
+            img1.draw_rect(rect,im_w,im_h,lb_w,lb_h,(0,0,255),is_img_coor = True,is_new = False)
 
     # draw the result of saved file
     def draw_saved_file_result():
